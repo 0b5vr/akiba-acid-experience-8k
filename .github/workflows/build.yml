@@ -1,0 +1,49 @@
+name: Build
+
+on: push
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  SHADER_MINIFIER_VERSION: 1.6.0
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v6
+
+      - name: init stuff
+        uses: ./.github/actions/init
+
+      - name: build shader-minifier
+        uses: ./.github/actions/build-shader-minifier
+        with:
+          version: ${{ env.SHADER_MINIFIER_VERSION }}
+          output: shader-minifier-dist
+
+      - name: install shader-minifier binary
+        run: |
+          cp shader-minifier-dist/ShaderMinifier bin/shader_minifier
+          chmod +x bin/shader_minifier
+          echo "$GITHUB_WORKSPACE/bin" >> "$GITHUB_PATH"
+
+      - name: build
+        run: pnpm build
+
+      - name: report build size
+        run: |
+          {
+            echo "- \`postprocessed.js\`: $(node -e "console.log(($(stat -c%s dist/postprocessed.js)).toLocaleString('en-US'))") bytes"
+            echo "- \`compeko.html\`: $(node -e "console.log(($(stat -c%s dist/compeko.html)).toLocaleString('en-US'))") bytes"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: ./dist
