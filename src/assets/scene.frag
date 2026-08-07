@@ -59,5 +59,5 @@ void main() {
     outColor = vec4(texture(f, v + 0.1 * t));
   }
 
-  outColor *= smoothstep(0.0, 1.0, t) * smoothstep(0.0, 1.0, 60.0 - t);
+  outColor *= smoothstep(0.0, 1.0, t);
 }

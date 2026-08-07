@@ -52,6 +52,10 @@ export function render(): void {
   gl.activeTexture(GL_TEXTURE0);
   gl.bindTexture(GL_TEXTURE_2D, textureScene);
 
+  gl.uniform1f(
+    gl.getUniformLocation(programPostHot, 't'),
+    time,
+  );
   gl.uniform1i(
     gl.getUniformLocation(programPostHot, 'f'),
     0,
