@@ -21,10 +21,17 @@ sequences.zoom = [
   [32, () => 0.1],
 ];
 
+sequences.kaleidoscope = [
+  [0, () => 0.0],
+  [48, () => 6.0],
+  [64, () => 0.0],
+];
+
 // -- hot ------------------------------------------------------------------------------------------
 if (import.meta.hot) {
   validateSequence(sequences.scene);
   validateSequence(sequences.zoom);
+  validateSequence(sequences.kaleidoscope);
 
   import.meta.hot.accept();
 }

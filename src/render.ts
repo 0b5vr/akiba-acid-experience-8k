@@ -71,6 +71,10 @@ export function render(): void {
     gl.getUniformLocation(programPost, 'zoom'),
     evalSequence(sequences.zoom, beat)!,
   );
+  gl.uniform1f(
+    gl.getUniformLocation(programPost, 'kaleidoscope'),
+    evalSequence(sequences.kaleidoscope, beat)!,
+  );
 
   gl.bindFramebuffer(GL_FRAMEBUFFER, null);
   gl.viewport(0, 0, WIDTH, HEIGHT);

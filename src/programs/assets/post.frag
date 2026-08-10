@@ -9,12 +9,15 @@ precision highp float;
 const int SAMPLES = 20;
 const float SAMPLES_F = float(SAMPLES);
 
+const float PI = acos(-1.0);
+
 in vec2 v;
 
 uniform float t;
 uniform sampler2D f;
 
 uniform float zoom;
+uniform float kaleidoscope;
 
 out vec4 outColor;
 
@@ -46,6 +49,12 @@ vec3 calctint(float t) {
 void main() {
   vec2 p = v;
   p.x *= 16.0 / 9.0;
+
+  if (kaleidoscope > 0.0) {
+    float a = atan(p.y, p.x);
+    a = abs(mod(a / PI + 1.0 / kaleidoscope, 2.0 / kaleidoscope) - 1.0 / kaleidoscope) * PI;
+    p = length(p) * vec2(cos(a), sin(a));
+  }
 
   float dither = hash3f(vec3(p, t)).x;
 
