@@ -2,7 +2,9 @@ import { GL_COLOR_ATTACHMENT0, GL_FLOAT, GL_FRAMEBUFFER, GL_RG, GL_RG32F, GL_TEX
 import { ENABLE_SEEKING, INTRO_LENGTH, MUSIC_BUFFER_SIZE_SQRT, MUSIC_SAMPLE_RATE, START_DELAY } from './config';
 import { audio } from './audio';
 import { gl } from './gl';
-import { programMusic } from './programMusic';
+import { programs } from './programs/programs';
+
+import './programs/loading';
 
 // -- texture --------------------------------------------------------------------------------------
 const texture = gl.createTexture()!;
@@ -22,10 +24,9 @@ gl.framebufferTexture2D(
   0,
 );
 
-// -- program --------------------------------------------------------------------------------------
-gl.useProgram(programMusic);
-
 // -- render ---------------------------------------------------------------------------------------
+gl.useProgram(programs.music);
+
 gl.viewport(0, 0, MUSIC_BUFFER_SIZE_SQRT, MUSIC_BUFFER_SIZE_SQRT);
 gl.drawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
@@ -106,14 +107,18 @@ if (ENABLE_SEEKING) {
 
 // -- hot ------------------------------------------------------------------------------------------
 if (import.meta.hot) {
-  import.meta.hot.accept('./programMusic', (mod) => {
-    if (mod == null) { return; }
-    const { programMusic } = mod;
+  /**
+   * The program that is used to render the music into {@link buffer} last time.
+   */
+  let currentProgram = programs.music;
 
-    // -- program ----------------------------------------------------------------------------------
-    gl.useProgram(programMusic);
+  import.meta.hot.on('vite:afterUpdate', () => {
+    if (currentProgram === programs.music) { return; }
+    currentProgram = programs.music;
 
     // -- render -----------------------------------------------------------------------------------
+    gl.useProgram(programs.music);
+
     gl.bindFramebuffer(GL_FRAMEBUFFER, framebuffer);
     gl.viewport(0, 0, MUSIC_BUFFER_SIZE_SQRT, MUSIC_BUFFER_SIZE_SQRT);
     gl.drawArrays(GL_TRIANGLE_STRIP, 0, 4);

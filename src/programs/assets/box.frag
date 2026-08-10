@@ -12,7 +12,7 @@ uniform sampler2D f;
 out vec4 outColor;
 
 const float PI = acos(-1.0);
-const float BPS = 128.0 / 60.0;
+const float BPS = 140.0 / 60.0;
 
 mat2 r2d(float t) {
   return mat2(cos(t), sin(t), -sin(t), cos(t));
@@ -58,6 +58,4 @@ void main() {
   } else {
     outColor = vec4(texture(f, v + 0.1 * t));
   }
-
-  outColor *= smoothstep(0.0, 1.0, t);
 }
