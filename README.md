@@ -41,7 +41,7 @@ To add a new scene:
 
 - Place a `.frag` under `/src/programs/assets`.
 - Add a type definition entry to `/src/programs/programs.ts`
-- Add an import and a compilation entry in `/src/programs/loading.ts`
+- Add an import and a compilation entry in `/src/programs/loadPrograms.ts`
 
 ## License
 

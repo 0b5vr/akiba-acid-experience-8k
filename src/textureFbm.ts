@@ -2,7 +2,7 @@ import { GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER, GL_R32F, GL_TEXTURE_2D, GL_TRIANG
 import { gl } from './gl';
 import { programs } from './programs/programs';
 
-import './programs/loading';
+import './programs/loadPrograms';
 
 // -- texture --------------------------------------------------------------------------------------
 const SIZE = 1024;

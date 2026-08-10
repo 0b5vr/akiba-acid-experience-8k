@@ -14,6 +14,8 @@ in vec2 v;
 uniform float t;
 uniform sampler2D f;
 
+uniform float zoom;
+
 out vec4 outColor;
 
 uvec3 hash3u(uvec3 v) {
@@ -51,7 +53,7 @@ void main() {
   for (int i = 0; i < SAMPLES; i++) {
     float phase = (float(i) + dither) / SAMPLES_F;
 
-    vec2 pt = p * (1.0 - 0.1 * phase);
+    vec2 pt = p * (1.0 - zoom * phase);
 
     vec2 uvt = pt;
     uvt.x *= 9.0 / 16.0;
@@ -65,8 +67,7 @@ void main() {
 
   sum /= SAMPLES_F;
 
-  float vignette = 1.0 - 0.5 * dot(v, v);
-  sum *= vignette;
+  sum *= 1.0 - 0.5 * dot(v, v);
 
   outColor = vec4(sum, 1.0);
 }

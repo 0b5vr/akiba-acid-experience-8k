@@ -4,7 +4,7 @@ import { audio } from './audio';
 import { gl } from './gl';
 import { programs } from './programs/programs';
 
-import './programs/loading';
+import './programs/loadPrograms';
 
 // -- texture --------------------------------------------------------------------------------------
 const texture = gl.createTexture()!;

@@ -7,8 +7,11 @@ import { framebufferScene, textureScene } from './textureScene';
 import { gl } from './gl';
 import { seekBeginTime } from './music';
 import { programs } from './programs/programs';
+import { sequences } from './sequence/sequences';
+import { evalSequence } from './sequence/evalSequence';
 
-import './programs/loading';
+import './programs/loadPrograms';
+import './sequence/buildSequences';
 
 /**
  * Renders the main scene.
@@ -25,8 +28,10 @@ export function render(): void {
     if (time > INTRO_LENGTH) { return; }
   }
 
-  // -- scene pass -------------------------------------------------------------------------------------
-  const programScene = (time * BPM / 60.0) % 2.0 < 1.0 ? programs.box : programs.lattice;
+  const beat = time * BPM / 60.0;
+
+  // -- scene pass ---------------------------------------------------------------------------------
+  const programScene = evalSequence(sequences.scene, beat)!;
 
   gl.useProgram(programScene);
 
@@ -46,7 +51,7 @@ export function render(): void {
   gl.viewport(0, 0, WIDTH, HEIGHT);
   gl.drawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-  // -- post process pass ----------------------------------------------------------------------------
+  // -- post process pass --------------------------------------------------------------------------
   const programPost = programs.post;
 
   gl.useProgram(programPost);
@@ -61,6 +66,10 @@ export function render(): void {
   gl.uniform1i(
     gl.getUniformLocation(programPost, 'f'),
     0,
+  );
+  gl.uniform1f(
+    gl.getUniformLocation(programPost, 'zoom'),
+    evalSequence(sequences.zoom, beat)!,
   );
 
   gl.bindFramebuffer(GL_FRAMEBUFFER, null);
