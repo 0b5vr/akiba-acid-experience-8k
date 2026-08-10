@@ -1,4 +1,4 @@
-import { GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER, GL_R32F, GL_TEXTURE_2D, GL_TRIANGLE_STRIP } from './gl-constants';
+import { GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER, GL_RGBA32F, GL_TEXTURE_2D, GL_TRIANGLE_STRIP } from './gl-constants';
 import { gl } from './gl';
 import { programs } from './programs/programs';
 
@@ -13,7 +13,7 @@ const SIZE = 1024;
 export const textureFbm = gl.createTexture()!;
 
 gl.bindTexture(GL_TEXTURE_2D, textureFbm);
-gl.texStorage2D(GL_TEXTURE_2D, 1, GL_R32F, SIZE, SIZE);
+gl.texStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, SIZE, SIZE);
 
 // -- framebuffer ----------------------------------------------------------------------------------
 const framebuffer = gl.createFramebuffer()!;

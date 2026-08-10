@@ -6,63 +6,63 @@ precision highp float;
 
 in vec2 v;
 
-out float outColor;
+out vec4 outColor;
 
 const float PI = acos(-1.0);
 const float TAU = 2.0 * PI;
 
-uint pcg2d(uvec2 x) {
-  x = x * 1145141u + 919810u;
-
-  x.xy += x.yx * 1145141919u;
-
-  x ^= x >> 16u;
-
-  x.xy += x.yx * 1145141919u;
-
-  return x.x;
+// Ref: https://www.shadertoy.com/view/XlXcW4
+vec3 hash3f(vec3 s) {
+  uvec3 r = floatBitsToUint(s);
+  r = ((r >> 16u) ^ r.yzx) * 1111111111u;
+  r = ((r >> 16u) ^ r.yzx) * 1111111111u;
+  r = ((r >> 16u) ^ r.yzx) * 1111111111u;
+  return vec3(r) / float(-1u);
 }
 
-vec2 getDir(uvec2 p) {
-  float t = TAU * float(pcg2d(p)) / float(0xffffffffu);
+vec2 cis(float t) {
   return vec2(cos(t), sin(t));
 }
 
-float perlin2d(vec2 p, float m) {
-  uint um = uint(m);
-  p *= m;
-
+vec3 perlin23(vec2 p, float m) {
   vec2 cell = floor(p);
-  vec2 t = p - cell;
-  uvec2 cellIndex = uvec2(cell);
+  vec2 t = fract(p);
+  vec2 ts = (t * t * t * (t * (t * 6.0 - 15.0) + 10.0));
 
-  vec2 tSmooth = (t * t * t * (t * (t * 6.0 - 15.0) + 10.0));
+  vec2 v;
+  vec3 dice;
+  vec3 sum = vec3(0);
+  int i = 0;
 
-  return mix(
-    mix(
-      dot(getDir((cellIndex + uvec2(0, 0)) % um), t - vec2(0, 0)),
-      dot(getDir((cellIndex + uvec2(1, 0)) % um), t - vec2(1, 0)),
-      tSmooth.x
-    ),
-    mix(
-      dot(getDir((cellIndex + uvec2(0, 1)) % um), t - vec2(0, 1)),
-      dot(getDir((cellIndex + uvec2(1, 1)) % um), t - vec2(1, 1)),
-      tSmooth.x
-    ),
-    tSmooth.y
-  ) / m * 4.0;
+  v = vec2(ivec2(i++) >> ivec2(0, 1) & 1);
+  dice = TAU * hash3f(mod((cell + v).xxy, m));
+  sum += mix(1.0 - ts, ts, v).x * mix(1.0 - ts, ts, v).y * (t - v).xxy * mat3(vec3(0, cis(dice.x)), vec3(0, cis(dice.y)), vec3(0, cis(dice.z)));
+  v = vec2(ivec2(i++) >> ivec2(0, 1) & 1);
+  dice = TAU * hash3f(mod((cell + v).xxy, m));
+  sum += mix(1.0 - ts, ts, v).x * mix(1.0 - ts, ts, v).y * (t - v).xxy * mat3(vec3(0, cis(dice.x)), vec3(0, cis(dice.y)), vec3(0, cis(dice.z)));
+  v = vec2(ivec2(i++) >> ivec2(0, 1) & 1);
+  dice = TAU * hash3f(mod((cell + v).xxy, m));
+  sum += mix(1.0 - ts, ts, v).x * mix(1.0 - ts, ts, v).y * (t - v).xxy * mat3(vec3(0, cis(dice.x)), vec3(0, cis(dice.y)), vec3(0, cis(dice.z)));
+  v = vec2(ivec2(i++) >> ivec2(0, 1) & 1);
+  dice = TAU * hash3f(mod((cell + v).xxy, m));
+  sum += mix(1.0 - ts, ts, v).x * mix(1.0 - ts, ts, v).y * (t - v).xxy * mat3(vec3(0, cis(dice.x)), vec3(0, cis(dice.y)), vec3(0, cis(dice.z)));
+
+  return sum * 8.0 / m;
 }
 
 void main() {
   vec2 p = 0.5 + 0.5 * v;
-  float m = 8.0;
 
-  outColor += perlin2d(p, m);
+  vec3 sum = vec3(0);
+
+  float m = 8.0;
+  sum += perlin23(p * m, m);
   m *= 2.0;
-  outColor += perlin2d(p, m);
+  sum += perlin23(p * m, m);
   m *= 2.0;
-  outColor += perlin2d(p, m);
+  sum += perlin23(p * m, m);
   m *= 2.0;
-  outColor += perlin2d(p, m);
-  m *= 2.0;
+  sum += perlin23(p * m, m);
+
+  outColor = vec4(sum, 1.0);
 }
