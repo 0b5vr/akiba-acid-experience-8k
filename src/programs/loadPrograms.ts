@@ -4,6 +4,7 @@ import postFrag from './assets/post.frag?shader';
 import fbmFrag from './assets/fbm.frag?shader';
 import boxFrag from './assets/box.frag?shader';
 import latticeFrag from './assets/lattice.frag?shader';
+import boxarrayFrag from './assets/boxarray.frag?shader';
 import { programs } from './programs';
 
 // -- programs -------------------------------------------------------------------------------------
@@ -15,6 +16,7 @@ programs.post = lazyQuadProgram(postFrag);
 programs.fbm = lazyQuadProgram(fbmFrag);
 programs.box = lazyQuadProgram(boxFrag);
 programs.lattice = lazyQuadProgram(latticeFrag);
+programs.boxarray = lazyQuadProgram(boxarrayFrag);
 
 // -- hot ------------------------------------------------------------------------------------------
 if (import.meta.hot) {

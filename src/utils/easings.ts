@@ -1,7 +1,7 @@
 import { saturate } from '@0b5vr/experimental';
 
 export function easeInSharp(x: number, k: number): number {
-  return saturate(x ** k);
+  return saturate(x) ** k;
 }
 
 export function easeOutSharp(x: number, k: number): number {

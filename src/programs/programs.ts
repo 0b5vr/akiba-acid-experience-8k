@@ -7,4 +7,5 @@ export const programs = {} as {
   fbm: WebGLProgram;
   box: WebGLProgram;
   lattice: WebGLProgram;
+  boxarray: WebGLProgram;
 };
