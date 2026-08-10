@@ -10,6 +10,7 @@ const int SAMPLES = 20;
 const float SAMPLES_F = float(SAMPLES);
 
 const float PI = acos(-1.0);
+const vec3 LUMA = vec3(0.2126, 0.7152, 0.0722);
 
 in vec2 v;
 
@@ -18,6 +19,7 @@ uniform sampler2D f;
 
 uniform float zoom;
 uniform float kaleidoscope;
+uniform float codercolor;
 
 out vec4 outColor;
 
@@ -76,7 +78,12 @@ void main() {
 
   sum /= SAMPLES_F;
 
+  // vignette
   sum *= 1.0 - 0.5 * dot(v, v);
+
+  // codercolor
+  float luma = dot(sum, LUMA);
+  sum = mix(sum, 0.5 + 0.5 * cos(12.0 * luma + vec3(0, 2, 4) + 5.0 * t), codercolor);
 
   outColor = vec4(sum, 1.0);
 }
