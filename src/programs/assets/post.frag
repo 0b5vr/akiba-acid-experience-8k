@@ -18,6 +18,7 @@ uniform float t;
 uniform sampler2D f;
 
 uniform float zoom;
+uniform float tile;
 uniform float kaleidoscope;
 uniform float codercolor;
 
@@ -50,6 +51,7 @@ vec3 calctint(float t) {
 
 void main() {
   vec2 p = v;
+  p = mod((p + 1.0) * tile, 2.0) - 1.0;
   p.x *= 16.0 / 9.0;
 
   if (kaleidoscope > 0.0) {
@@ -79,7 +81,7 @@ void main() {
   sum /= SAMPLES_F;
 
   // vignette
-  sum *= 1.0 - 0.5 * dot(v, v);
+  sum *= 1.0 - 0.2 * dot(p, p);
 
   // codercolor
   float luma = dot(sum, LUMA);

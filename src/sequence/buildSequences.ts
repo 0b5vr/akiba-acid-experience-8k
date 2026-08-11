@@ -33,6 +33,11 @@ sequences.zoom = [
   [16, (b) => 0.5 - 0.4 * easeOutSharp(b / 4.0, 4.0)],
 ];
 
+sequences.tile = [
+  [0, () => 1.0],
+  [96, () => 4.0],
+];
+
 sequences.kaleidoscope = [
   [0, () => 0.0],
   [12, () => 6.0],
@@ -50,6 +55,7 @@ if (import.meta.hot) {
   validateSequence(sequences.scene);
   validateSequence(sequences.overlay);
   validateSequence(sequences.zoom);
+  validateSequence(sequences.tile);
   validateSequence(sequences.kaleidoscope);
   validateSequence(sequences.codercolor);
 

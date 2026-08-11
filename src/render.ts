@@ -98,6 +98,10 @@ export function render(): void {
     evalSequence(sequences.zoom, beat)!,
   );
   gl.uniform1f(
+    gl.getUniformLocation(program, 'tile'),
+    evalSequence(sequences.tile, beat)!,
+  );
+  gl.uniform1f(
     gl.getUniformLocation(program, 'kaleidoscope'),
     evalSequence(sequences.kaleidoscope, beat)!,
   );
