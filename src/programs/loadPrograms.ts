@@ -1,6 +1,7 @@
 import { lazyQuadProgram } from './lazyQuadProgram';
 import boxFrag from './assets/box.frag?shader';
 import boxarrayFrag from './assets/boxarray.frag?shader';
+import checkerskyFrag from './assets/checkersky.frag?shader';
 import fbmFrag from './assets/fbm.frag?shader';
 import latticeFrag from './assets/lattice.frag?shader';
 import musicFrag from './assets/music.frag?shader';
@@ -17,6 +18,7 @@ import { programs } from './programs';
 
 programs.box = lazyQuadProgram(boxFrag);
 programs.boxarray = lazyQuadProgram(boxarrayFrag);
+programs.checkersky = lazyQuadProgram(checkerskyFrag);
 programs.fbm = lazyQuadProgram(fbmFrag);
 programs.lattice = lazyQuadProgram(latticeFrag);
 programs.music = lazyQuadProgram(musicFrag);

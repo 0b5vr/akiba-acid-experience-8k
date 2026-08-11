@@ -7,6 +7,7 @@ import { easeOutSharp } from '../utils/easings';
 
 const box = () => programs.box;
 const boxarray = () => programs.boxarray;
+const checkersky = () => programs.checkersky;
 const lattice = () => programs.lattice;
 const noiseaura = () => programs.noiseaura;
 const nop = () => programs.nop;
@@ -16,7 +17,7 @@ const text = () => programs.text;
 sequences.scene = [
   [0, box],
   [4, lattice],
-  [8, box],
+  [8, checkersky],
   [12, lattice],
   [16, boxarray],
   [128, lattice],
