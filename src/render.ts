@@ -109,6 +109,10 @@ export function render(): void {
     gl.getUniformLocation(program, 'codercolor'),
     evalSequence(sequences.codercolor, beat)!,
   );
+  gl.uniform1f(
+    gl.getUniformLocation(program, 'chougouyoku'),
+    evalSequence(sequences.chougouyoku, beat)!,
+  );
 
   gl.bindFramebuffer(GL_FRAMEBUFFER, null);
   gl.viewport(0, 0, WIDTH, HEIGHT);

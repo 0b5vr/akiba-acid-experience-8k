@@ -21,6 +21,7 @@ uniform float zoom;
 uniform float tile;
 uniform float kaleidoscope;
 uniform float codercolor;
+uniform float chougouyoku;
 
 out vec4 outColor;
 
@@ -51,9 +52,16 @@ vec3 calctint(float t) {
 
 void main() {
   vec2 p = v;
+
+  // tile
   p = mod((p + 1.0) * tile, 2.0) - 1.0;
+
   p.x *= 16.0 / 9.0;
 
+  // chougouyoku - zoom
+  p *= 1.0 - 0.1 * mod(floor(t * 30.0), 2.0) * chougouyoku;
+
+  // kaleidoscope
   if (kaleidoscope > 0.0) {
     float a = atan(p.y, p.x);
     a = abs(mod(a / PI + 1.0 / kaleidoscope, 2.0 / kaleidoscope) - 1.0 / kaleidoscope) * PI;
@@ -86,6 +94,9 @@ void main() {
   // codercolor
   float luma = dot(sum, LUMA);
   sum = mix(sum, 0.5 + 0.5 * cos(12.0 * luma + vec3(0, 2, 4) + 5.0 * t), codercolor);
+
+  // chougouyoku - neg
+  sum = mix(sum, 1.0 - sum, mod(floor(t * 15.0), 2.0) * chougouyoku);
 
   outColor = vec4(sum, 1.0);
 }
