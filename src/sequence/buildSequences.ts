@@ -11,6 +11,7 @@ const lattice = () => programs.lattice;
 const noiseaura = () => programs.noiseaura;
 const nop = () => programs.nop;
 const smiley = () => programs.smiley;
+const text = () => programs.text;
 
 sequences.scene = [
   [0, box],
@@ -22,13 +23,21 @@ sequences.scene = [
 ];
 
 sequences.overlay = [
-  [0, nop],
+  [0, text],
+  [32, nop],
   [64, smiley],
   [96, noiseaura],
 ];
 
+sequences.text = [
+  [0, () => 'AKIBA'],
+  [1, () => 'EXECUTABLE'],
+  [2, () => 'PARTY'],
+  [3, () => '2026'],
+];
+
 sequences.zoom = [
-  [0, () => 0.1],
+  [0, () => 0.0],
   [4, (b) => 0.5 - 0.4 * easeOutSharp(b / 4.0, 4.0)],
   [8, (b) => 0.5 - 0.4 * easeOutSharp(b / 4.0, 4.0)],
   [12, (b) => 0.5 - 0.4 * easeOutSharp(b / 4.0, 4.0)],
@@ -61,6 +70,7 @@ sequences.chougouyoku = [
 if (import.meta.hot) {
   validateSequence(sequences.scene);
   validateSequence(sequences.overlay);
+  validateSequence(sequences.text);
   validateSequence(sequences.zoom);
   validateSequence(sequences.tile);
   validateSequence(sequences.kaleidoscope);

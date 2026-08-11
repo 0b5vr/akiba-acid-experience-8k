@@ -3,6 +3,7 @@ import type { Sequence } from './Sequence';
 export const sequences = {} as {
   scene: Sequence<WebGLProgram>;
   overlay: Sequence<WebGLProgram>;
+  text: Sequence<string>;
   zoom: Sequence<number>;
   tile: Sequence<number>;
   kaleidoscope: Sequence<number>;
