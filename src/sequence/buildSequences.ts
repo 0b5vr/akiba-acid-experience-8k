@@ -5,10 +5,11 @@ import '../programs/loadPrograms';
 import { validateSequence } from './validateSequence';
 import { easeOutSharp } from '../utils/easings';
 
-const nop = () => programs.nop;
 const box = () => programs.box;
-const lattice = () => programs.lattice;
 const boxarray = () => programs.boxarray;
+const lattice = () => programs.lattice;
+const noiseaura = () => programs.noiseaura;
+const nop = () => programs.nop;
 const smiley = () => programs.smiley;
 
 sequences.scene = [
@@ -23,6 +24,7 @@ sequences.scene = [
 sequences.overlay = [
   [0, nop],
   [64, smiley],
+  [96, noiseaura],
 ];
 
 sequences.zoom = [
@@ -35,19 +37,24 @@ sequences.zoom = [
 
 sequences.tile = [
   [0, () => 1.0],
-  [96, () => 4.0],
+  [160, () => 4.0],
 ];
 
 sequences.kaleidoscope = [
   [0, () => 0.0],
   [12, () => 6.0],
   [16, () => 0.0],
-  [128, () => 8.0],
+  [160, () => 8.0],
 ];
 
 sequences.codercolor = [
   [0, () => 0.0],
   [128, () => 1.0],
+];
+
+sequences.chougouyoku = [
+  [0, () => 0.0],
+  [160, () => 1.0],
 ];
 
 // -- hot ------------------------------------------------------------------------------------------
@@ -58,6 +65,7 @@ if (import.meta.hot) {
   validateSequence(sequences.tile);
   validateSequence(sequences.kaleidoscope);
   validateSequence(sequences.codercolor);
+  validateSequence(sequences.chougouyoku);
 
   import.meta.hot.accept();
 }
