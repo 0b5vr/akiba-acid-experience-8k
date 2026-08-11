@@ -3,9 +3,14 @@
  */
 export const programs = {} as {
   music: WebGLProgram;
-  post: WebGLProgram;
+
   fbm: WebGLProgram;
+
   box: WebGLProgram;
   lattice: WebGLProgram;
   boxarray: WebGLProgram;
+
+  smiley: WebGLProgram;
+
+  post: WebGLProgram;
 };

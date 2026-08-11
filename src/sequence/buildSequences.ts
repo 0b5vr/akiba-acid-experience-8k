@@ -8,6 +8,7 @@ import { easeOutSharp } from '../utils/easings';
 const box = () => programs.box;
 const lattice = () => programs.lattice;
 const boxarray = () => programs.boxarray;
+const smiley = () => programs.smiley;
 
 sequences.scene = [
   [0, box],
@@ -15,6 +16,7 @@ sequences.scene = [
   [8, box],
   [12, lattice],
   [16, boxarray],
+  [64, smiley],
   [128, lattice],
 ];
 
