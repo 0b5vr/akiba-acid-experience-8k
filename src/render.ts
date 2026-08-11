@@ -1,6 +1,6 @@
-import { GL_BLEND, GL_FRAMEBUFFER, GL_ONE, GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE_2D, GL_TRIANGLE_STRIP } from './gl-constants';
+import { GL_FRAMEBUFFER, GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE_2D, GL_TRIANGLE_STRIP } from './gl-constants';
 import { BPM, HEIGHT, WIDTH } from './constants';
-import { ENABLE_SEEKING, INTRO_LENGTH, STOP_RENDERING_AFTER_END } from './config';
+import { DUMP_SCENES, ENABLE_SEEKING, INTRO_LENGTH, STOP_RENDERING_AFTER_END } from './config';
 import { audio } from './audio';
 import { textureFbm } from './textureFbm';
 import { textureText, updateTextureText } from './textureText';
@@ -10,6 +10,7 @@ import { seekBeginTime } from './music';
 import { programs } from './programs/programs';
 import { sequences } from './sequence/sequences';
 import { evalSequence } from './sequence/evalSequence';
+import { renderDumpScenes } from './renderDumpScenes';
 
 import './programs/loadPrograms';
 import './sequence/buildSequences';
@@ -22,6 +23,11 @@ export function render(): void {
 
   if (ENABLE_SEEKING) {
     time -= seekBeginTime;
+  }
+
+  if (DUMP_SCENES) {
+    renderDumpScenes(time);
+    return;
   }
 
   // prevent using a GPU after the content ends

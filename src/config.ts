@@ -58,6 +58,13 @@ export const ENABLE_SEEKING = import.meta.env.DEV;
  */
 export const FULLSCREEN = !import.meta.env.DEV;
 
+/**
+ * When this is set to `true`, it will render every scene (including overlays) to the screen in grid layout.
+ *
+ * Intended to be used for showcasing the scenes in development.
+ */
+export const DUMP_SCENES = true;
+
 // == the despair zone =============================================================================
 
 /**
