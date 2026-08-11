@@ -1,4 +1,4 @@
-import { GL_FRAMEBUFFER, GL_TEXTURE0, GL_TEXTURE_2D, GL_TRIANGLE_STRIP } from './gl-constants';
+import { GL_BLEND, GL_FRAMEBUFFER, GL_ONE, GL_TEXTURE0, GL_TEXTURE_2D, GL_TRIANGLE_STRIP } from './gl-constants';
 import { BPM, HEIGHT, WIDTH } from './constants';
 import { ENABLE_SEEKING, INTRO_LENGTH, STOP_RENDERING_AFTER_END } from './config';
 import { audio } from './audio';
@@ -31,19 +31,19 @@ export function render(): void {
   const beat = time * BPM / 60.0;
 
   // -- scene pass ---------------------------------------------------------------------------------
-  const programScene = evalSequence(sequences.scene, beat)!;
+  let program = evalSequence(sequences.scene, beat)!;
 
-  gl.useProgram(programScene);
+  gl.useProgram(program);
 
   gl.activeTexture(GL_TEXTURE0);
   gl.bindTexture(GL_TEXTURE_2D, textureFbm);
 
   gl.uniform1f(
-    gl.getUniformLocation(programScene, 't'),
+    gl.getUniformLocation(program, 't'),
     time,
   );
   gl.uniform1i(
-    gl.getUniformLocation(programScene, 'f'),
+    gl.getUniformLocation(program, 'f'),
     0,
   );
 
@@ -51,32 +51,58 @@ export function render(): void {
   gl.viewport(0, 0, WIDTH, HEIGHT);
   gl.drawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-  // -- post process pass --------------------------------------------------------------------------
-  const programPost = programs.post;
+  // -- overlay pass ---------------------------------------------------------------------------------
+  gl.enable(GL_BLEND);
+  gl.blendFunc(GL_ONE, GL_ONE);
 
-  gl.useProgram(programPost);
+  program = evalSequence(sequences.overlay, beat)!;
+
+  gl.useProgram(program);
+
+  gl.activeTexture(GL_TEXTURE0);
+  gl.bindTexture(GL_TEXTURE_2D, textureFbm);
+
+  gl.uniform1f(
+    gl.getUniformLocation(program, 't'),
+    time,
+  );
+  gl.uniform1i(
+    gl.getUniformLocation(program, 'f'),
+    0,
+  );
+
+  gl.bindFramebuffer(GL_FRAMEBUFFER, framebufferScene);
+  gl.viewport(0, 0, WIDTH, HEIGHT);
+  gl.drawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+  gl.disable(GL_BLEND);
+
+  // -- post process pass --------------------------------------------------------------------------
+  program = programs.post;
+
+  gl.useProgram(program);
 
   gl.activeTexture(GL_TEXTURE0);
   gl.bindTexture(GL_TEXTURE_2D, textureScene);
 
   gl.uniform1f(
-    gl.getUniformLocation(programPost, 't'),
+    gl.getUniformLocation(program, 't'),
     time,
   );
   gl.uniform1i(
-    gl.getUniformLocation(programPost, 'f'),
+    gl.getUniformLocation(program, 'f'),
     0,
   );
   gl.uniform1f(
-    gl.getUniformLocation(programPost, 'zoom'),
+    gl.getUniformLocation(program, 'zoom'),
     evalSequence(sequences.zoom, beat)!,
   );
   gl.uniform1f(
-    gl.getUniformLocation(programPost, 'kaleidoscope'),
+    gl.getUniformLocation(program, 'kaleidoscope'),
     evalSequence(sequences.kaleidoscope, beat)!,
   );
   gl.uniform1f(
-    gl.getUniformLocation(programPost, 'codercolor'),
+    gl.getUniformLocation(program, 'codercolor'),
     evalSequence(sequences.codercolor, beat)!,
   );
 

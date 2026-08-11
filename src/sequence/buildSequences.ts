@@ -5,6 +5,7 @@ import '../programs/loadPrograms';
 import { validateSequence } from './validateSequence';
 import { easeOutSharp } from '../utils/easings';
 
+const nop = () => programs.nop;
 const box = () => programs.box;
 const lattice = () => programs.lattice;
 const boxarray = () => programs.boxarray;
@@ -16,8 +17,12 @@ sequences.scene = [
   [8, box],
   [12, lattice],
   [16, boxarray],
-  [64, smiley],
   [128, lattice],
+];
+
+sequences.overlay = [
+  [0, nop],
+  [64, smiley],
 ];
 
 sequences.zoom = [
@@ -43,6 +48,7 @@ sequences.codercolor = [
 // -- hot ------------------------------------------------------------------------------------------
 if (import.meta.hot) {
   validateSequence(sequences.scene);
+  validateSequence(sequences.overlay);
   validateSequence(sequences.zoom);
   validateSequence(sequences.kaleidoscope);
   validateSequence(sequences.codercolor);

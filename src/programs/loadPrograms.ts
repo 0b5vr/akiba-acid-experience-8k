@@ -1,4 +1,5 @@
 import { lazyQuadProgram } from './lazyQuadProgram';
+import nopFrag from './assets/nop.frag?shader';
 import musicFrag from './assets/music.frag?shader';
 import fbmFrag from './assets/fbm.frag?shader';
 import boxFrag from './assets/box.frag?shader';
@@ -11,6 +12,8 @@ import { programs } from './programs';
 // -- programs -------------------------------------------------------------------------------------
 // Compiles every shader in the intro.
 // This is where the programs come from in the prod build as well, not just on a dev build HMR.
+
+programs.nop = lazyQuadProgram(nopFrag);
 
 programs.music = lazyQuadProgram(musicFrag);
 
