@@ -31,6 +31,9 @@ export function render(): void {
 
   const beat = time * BPM / 60.0;
 
+  // -- update text texture ------------------------------------------------------------------------
+  updateTextureText(evalSequence(sequences.text, beat)!);
+
   // -- scene pass ---------------------------------------------------------------------------------
   let program = evalSequence(sequences.scene, beat)!;
 
@@ -60,11 +63,6 @@ export function render(): void {
   gl.drawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
   // -- overlay pass ---------------------------------------------------------------------------------
-  updateTextureText(evalSequence(sequences.text, beat)!);
-
-  gl.enable(GL_BLEND);
-  gl.blendFunc(GL_ONE, GL_ONE);
-
   program = evalSequence(sequences.overlay, beat)!;
 
   gl.useProgram(program);
@@ -91,8 +89,6 @@ export function render(): void {
   gl.bindFramebuffer(GL_FRAMEBUFFER, framebufferScene);
   gl.viewport(0, 0, WIDTH, HEIGHT);
   gl.drawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-  gl.disable(GL_BLEND);
 
   // -- post process pass --------------------------------------------------------------------------
   program = programs.post;

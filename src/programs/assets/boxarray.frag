@@ -63,6 +63,7 @@ void main() {
     ro += rd * isect.x;
   }
 
+  outColor = vec4(0.0, 0.0, 0.0, 1.0);
   if (isect.x < 0.01) {
     vec3 N = nMap(ro);
     const vec3 L = normalize(vec3(1, 3, 2));

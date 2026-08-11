@@ -24,5 +24,5 @@ void main() {
   d = min(d, length(p) - 0.08);
 
   float shape = max(-d * 540.0, 0.0);
-  outColor = vec4(vec3(shape), 1.0);
+  outColor = shape * vec4(1.0);
 }

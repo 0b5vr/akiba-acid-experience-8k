@@ -53,6 +53,7 @@ void main() {
     rl += dist;
   }
 
+  outColor = vec4(0.0, 0.0, 0.0, 1.0);
   if (dist < 0.01) {
     vec3 N = nMap(ro + rd * rl);
 
@@ -60,7 +61,5 @@ void main() {
     float i_fog = exp(-0.4 * rl);
     // vec3 i_color = 0.5 + 0.5 * cos(vec3(0, 2, 4) + 5.0 * t + rl);
     outColor = vec4(vec3(i_l * i_fog), 1.0);
-  } else {
-    outColor = vec4(0.0, 0.0, 0.0, 1.0);
   }
 }

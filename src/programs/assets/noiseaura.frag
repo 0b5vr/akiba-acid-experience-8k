@@ -41,5 +41,5 @@ void main() {
 
   float noise = smoothstep(0.0, 0.5, cyclic(2.0 * p3, 0.5, 2.0).x);
 
-  outColor = vec4(vec3(noise), 1.0);
+  outColor = noise * vec4(1.0);
 }
