@@ -9,6 +9,7 @@ import noiseauraFrag from './assets/noiseaura.frag?shader';
 import nopFrag from './assets/nop.frag?shader';
 import postFrag from './assets/post.frag?shader';
 import smileyFrag from './assets/smiley.frag?shader';
+import swirlFrag from './assets/swirl.frag?shader';
 import textFrag from './assets/text.frag?shader';
 import { programs } from './programs';
 
@@ -26,6 +27,7 @@ programs.noiseaura = lazyQuadProgram(noiseauraFrag);
 programs.nop = lazyQuadProgram(nopFrag);
 programs.post = lazyQuadProgram(postFrag);
 programs.smiley = lazyQuadProgram(smileyFrag);
+programs.swirl = lazyQuadProgram(swirlFrag);
 programs.text = lazyQuadProgram(textFrag);
 
 // -- hot ------------------------------------------------------------------------------------------
