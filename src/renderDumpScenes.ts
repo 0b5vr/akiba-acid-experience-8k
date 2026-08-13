@@ -11,6 +11,7 @@ const DUMP_SCENE_KEYS = [
   'box',
   'boxarray',
   'checkersky',
+  'cubetunnel',
   'lattice',
   'noiseaura',
   'smiley',
