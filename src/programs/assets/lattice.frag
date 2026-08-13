@@ -7,12 +7,33 @@ precision highp float;
 in vec2 v;
 
 uniform float t;
-uniform sampler2D f;
 
 out vec4 outColor;
 
 mat2 r2d(float t) {
   return mat2(cos(t), sin(t), -sin(t), cos(t));
+}
+
+mat3 orthbas(vec3 z) {
+  z = normalize(z);
+  vec3 up = abs(z.y) < 0.99 ? vec3(0.0, 1.0, 0.0) : vec3(0.0, 0.0, 1.0);
+  vec3 x = normalize(cross(up, z));
+  return mat3(x, cross(z, x), z);
+}
+
+vec3 cyclic(vec3 p, float pers, float lacu) {
+  vec4 sum = vec4(0);
+  mat3 rot = orthbas(vec3(2, -3, 1));
+
+  for (int i = 0; i < 5; i++) {
+    p *= rot;
+    p += sin(p.zxy);
+    sum += vec4(cross(cos(p), sin(p.yzx)), 1);
+    sum /= pers;
+    p *= lacu;
+  }
+
+  return sum.xyz / sum.w;
 }
 
 float sdbox(vec3 p, vec3 s) {
@@ -55,11 +76,13 @@ void main() {
 
   outColor = vec4(0.0, 0.0, 0.0, 1.0);
   if (dist < 0.01) {
-    vec3 N = nMap(ro + rd * rl);
-
-    float i_l = max(0.0, dot(N, vec3(1, -2, 3)));
+    vec3 i_n = nMap(ro + rd * rl);
+    vec3 r = reflect(rd, i_n);
+    r.yz *= r2d(t);
     float i_fog = exp(-0.4 * rl);
-    // vec3 i_color = 0.5 + 0.5 * cos(vec3(0, 2, 4) + 5.0 * t + rl);
-    outColor = vec4(vec3(i_l * i_fog), 1.0);
+
+    float i_rawnoise = cyclic(4.0 * r, 0.5, 2.0).x;
+    float i_noise = 4.0 * pow(0.5 + 0.5 * i_rawnoise, 4.0);
+    outColor = vec4(vec3(i_fog * i_noise), 1.0);
   }
 }

@@ -20,6 +20,7 @@ sequences.scene = [
   [8, checkersky],
   [12, lattice],
   [16, boxarray],
+  [64, lattice],
   [128, lattice],
 ];
 
