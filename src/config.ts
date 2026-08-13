@@ -63,7 +63,7 @@ export const FULLSCREEN = !import.meta.env.DEV;
  *
  * Intended to be used for showcasing the scenes in development.
  */
-export const DUMP_SCENES = true;
+export const DUMP_SCENES = false;
 
 // == the despair zone =============================================================================
 
