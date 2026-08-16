@@ -154,7 +154,7 @@ async function runShaderMinifier(
  *   and get a map from placeholder string to minified output.
  */
 class ShaderPlaceholderBatch {
-  #sourcesByPlaceholder = new Map<string, string>();
+  #placeholderSourceMap = new Map<string, { id: string; src: string }>();
   #placeholderCount = 0;
   #promisePlaceholderMinifiedMap: Promise<Map<string, string>> | null = null;
 
@@ -162,9 +162,9 @@ class ShaderPlaceholderBatch {
    * Registers a shader source and returns the corresponding placeholder string.
    * The shader source will be minified later in a batch when {@link resolveAll} is called.
    */
-  register(src: string): string {
+  register(id: string, src: string): string {
     const placeholder = `__SHADER_MINIFIER_PLACEHOLDER_${this.#placeholderCount}__`;
-    this.#sourcesByPlaceholder.set(placeholder, src);
+    this.#placeholderSourceMap.set(placeholder, { id, src });
     this.#placeholderCount++;
 
     return placeholder;
@@ -182,11 +182,15 @@ class ShaderPlaceholderBatch {
   }
 
   async #runBatch(minifierOptions: ShaderMinifierOptions): Promise<Map<string, string>> {
-    if (this.#sourcesByPlaceholder.size === 0) {
+    if (this.#placeholderSourceMap.size === 0) {
       return new Map();
     }
 
-    return await runShaderMinifier(this.#sourcesByPlaceholder, minifierOptions);
+    // sort by module id so that the order fed into shader_minifier is deterministic
+    const sortedSources = [...this.#placeholderSourceMap].sort(([, a], [, b]) => a.id.localeCompare(b.id));
+    const sources = new Map(sortedSources.map(([placeholder, { src }]) => [placeholder, src]));
+
+    return await runShaderMinifier(sources, minifierOptions);
   }
 }
 
@@ -264,7 +268,7 @@ export const shaderMinifierPlugin: (
         // batch mode: register the shader source and return a placeholder string
         // The actual minification will happen later in `renderChunk` hook,
         // once the whole required shader sources have been collected.
-        const placeholder = shaderBatch.register(src);
+        const placeholder = shaderBatch.register(id, src);
 
         return {
           code: `export default \`${placeholder}\`;`,
