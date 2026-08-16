@@ -1,4 +1,4 @@
-import { GL_COLOR_ATTACHMENT0, GL_FLOAT, GL_FRAMEBUFFER, GL_RG, GL_RG32F, GL_TEXTURE_2D, GL_TRIANGLE_STRIP } from './gl-constants';
+import { GL_COLOR_ATTACHMENT0, GL_COLOR_BUFFER_BIT, GL_FLOAT, GL_FRAMEBUFFER, GL_RG, GL_RG32F, GL_TEXTURE_2D, GL_TRIANGLE_STRIP } from './gl-constants';
 import { ENABLE_SEEKING, EXPORT_WAV, INTRO_LENGTH, MUSIC_BUFFER_SIZE_SQRT, MUSIC_SAMPLE_RATE, START_DELAY } from './config';
 import { audio } from './audio';
 import { exportWav } from './utils/exportWav';
@@ -125,6 +125,10 @@ if (import.meta.hot) {
     gl.useProgram(programs.music);
 
     gl.bindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+    gl.clearColor(0, 0, 0, 0);
+    gl.clear(GL_COLOR_BUFFER_BIT);
+
     gl.viewport(0, 0, MUSIC_BUFFER_SIZE_SQRT, MUSIC_BUFFER_SIZE_SQRT);
     gl.drawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
