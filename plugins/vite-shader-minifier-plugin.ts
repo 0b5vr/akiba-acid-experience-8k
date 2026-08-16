@@ -3,6 +3,7 @@ import { promisify } from 'util';
 import cp from 'child_process';
 import fs from 'fs';
 import path from 'path';
+import { Xorshift } from '@0b5vr/experimental';
 
 const exec = promisify(cp.exec);
 
@@ -84,6 +85,20 @@ function buildMinifierOptionsString(options: ShaderMinifierOptions): string {
   }
 
   return str;
+}
+
+/**
+ * Shuffles an array using Fisher-Yates and the given RNG.
+ */
+function arrayShuffle<T>(array: T[], random: () => number): T[] {
+  const result = [...array];
+
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+
+  return result;
 }
 
 /**
@@ -174,21 +189,33 @@ class ShaderPlaceholderBatch {
    * Minifies every registered shader in one batch and returns a map from placeholder string
    * to minified output map.
    */
-  async resolveAll(minifierOptions: ShaderMinifierOptions): Promise<Map<string, string>> {
+  async resolveAll(
+    minifierOptions: ShaderMinifierOptions,
+    shuffleSeed: number,
+  ): Promise<Map<string, string>> {
     // This might be called multiple times;
     // having a cached promise ensures that we only run the batch once
-    this.#promisePlaceholderMinifiedMap ??= this.#runBatch(minifierOptions);
+    this.#promisePlaceholderMinifiedMap ??= this.#runBatch(minifierOptions, shuffleSeed);
     return this.#promisePlaceholderMinifiedMap;
   }
 
-  async #runBatch(minifierOptions: ShaderMinifierOptions): Promise<Map<string, string>> {
+  async #runBatch(
+    minifierOptions: ShaderMinifierOptions,
+    shuffleSeed: number,
+  ): Promise<Map<string, string>> {
     if (this.#placeholderSourceMap.size === 0) {
       return new Map();
     }
 
-    // sort by module id so that the order fed into shader_minifier is deterministic
-    const sortedSources = [...this.#placeholderSourceMap].sort(([, a], [, b]) => a.id.localeCompare(b.id));
-    const sources = new Map(sortedSources.map(([placeholder, { src }]) => [placeholder, src]));
+    let sortedEntries = [...this.#placeholderSourceMap].sort(([, a], [, b]) => a.id.localeCompare(b.id));
+
+    if (shuffleSeed !== 0) {
+      const xorshift = new Xorshift(shuffleSeed);
+      const gen = () => xorshift.gen();
+      sortedEntries = arrayShuffle(sortedEntries, gen);
+    }
+
+    const sources = new Map(sortedEntries.map(([placeholder, { src }]) => [placeholder, src]));
 
     return await runShaderMinifier(sources, minifierOptions);
   }
@@ -221,11 +248,21 @@ export interface ShaderMinifierPluginOptions {
    * This option does not affect the dev server, which always minifies shaders independently.
    */
   batch: boolean;
+
+  /**
+   * Seed for shuffling the order in which registered shaders are fed into `shader_minifier`
+   * in batch mode.
+   * Shader_minifier's cross-file renaming depends on input order, which can affect
+   * the minified output size, so trying different seeds lets us hunt for a smaller result.
+   *
+   * When the value is `0`, the order is not shuffled.
+   */
+  batchShuffleSeed: number;
 }
 
 export const shaderMinifierPlugin: (
   options: ShaderMinifierPluginOptions,
-) => Plugin = ({ minify, minifierOptions, batch }) => {
+) => Plugin = ({ minify, minifierOptions, batch, batchShuffleSeed }) => {
   /**
    * `true` if the dev server is running.
    * It will be set in the `configResolved` hook.
@@ -280,7 +317,7 @@ export const shaderMinifierPlugin: (
       // In this hook, we minify all registered shader sources in one batch
       // and replace the placeholders in the code with the minified output.
 
-      const resolved = await shaderBatch.resolveAll(minifierOptions);
+      const resolved = await shaderBatch.resolveAll(minifierOptions, batchShuffleSeed);
       if (resolved.size === 0) {
         return null;
       }

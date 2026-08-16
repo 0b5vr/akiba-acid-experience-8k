@@ -36,6 +36,7 @@ export default defineConfig(({ mode }) => {
       shaderMinifierPlugin({
         minify: true, // mode === 'prod',
         batch: true,
+        batchShuffleSeed: 1,
         minifierOptions: {
           preserveExternals: true,
           aggressiveInlining: true,
