@@ -1,6 +1,6 @@
-import { GL_RGBA, GL_RGBA8, GL_TEXTURE_2D, GL_UNPACK_FLIP_Y_WEBGL, GL_UNSIGNED_BYTE } from './gl-constants';
-import { HEIGHT, WIDTH } from './constants';
-import { gl } from './gl';
+import { GL_RGBA, GL_RGBA8, GL_TEXTURE_2D, GL_UNPACK_FLIP_Y_WEBGL, GL_UNSIGNED_BYTE } from '../gl-constants';
+import { HEIGHT, WIDTH } from '../constants';
+import { gl } from '../gl';
 
 // -- canvas -----------------------------------------------------------------------------------------
 /**

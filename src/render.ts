@@ -2,9 +2,9 @@ import { GL_FRAMEBUFFER, GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE_2D, GL_TRIANGLE_ST
 import { BPM, HEIGHT, WIDTH } from './constants';
 import { DUMP_SCENES, ENABLE_SEEKING, INTRO_LENGTH, START_DELAY, STOP_RENDERING_AFTER_END } from './config';
 import { audio } from './audio';
-import { textureFbm } from './textureFbm';
-import { textureText, updateTextureText } from './textureText';
-import { framebufferScene, textureScene } from './textureScene';
+import { textureFbm } from './textures/textureFbm';
+import { textureText, updateTextureText } from './textures/textureText';
+import { framebufferScene, textureScene } from './textures/textureScene';
 import { gl } from './gl';
 import { seekBeginTime } from './music';
 import { programs } from './programs/programs';

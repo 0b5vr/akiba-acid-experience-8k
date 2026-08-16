@@ -1,7 +1,7 @@
 import { GL_COLOR_BUFFER_BIT, GL_FRAMEBUFFER, GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE_2D, GL_TRIANGLE_STRIP } from './gl-constants';
 import { BPM, HEIGHT, WIDTH } from './constants';
-import { textureFbm } from './textureFbm';
-import { textureText, updateTextureText } from './textureText';
+import { textureFbm } from './textures/textureFbm';
+import { textureText, updateTextureText } from './textures/textureText';
 import { gl } from './gl';
 import { programs } from './programs/programs';
 import { sequences } from './sequence/sequences';

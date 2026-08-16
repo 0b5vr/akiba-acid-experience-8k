@@ -1,6 +1,6 @@
-import { GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER, GL_RGBA8, GL_TEXTURE_2D } from './gl-constants';
-import { HEIGHT, WIDTH } from './constants';
-import { gl } from './gl';
+import { GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER, GL_RGBA8, GL_TEXTURE_2D } from '../gl-constants';
+import { HEIGHT, WIDTH } from '../constants';
+import { gl } from '../gl';
 
 // -- texture --------------------------------------------------------------------------------------
 /**

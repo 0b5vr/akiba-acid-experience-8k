@@ -1,8 +1,8 @@
-import { GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER, GL_RGBA32F, GL_TEXTURE_2D, GL_TRIANGLE_STRIP } from './gl-constants';
-import { gl } from './gl';
-import { programs } from './programs/programs';
+import { GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER, GL_RGBA32F, GL_TEXTURE_2D, GL_TRIANGLE_STRIP } from '../gl-constants';
+import { gl } from '../gl';
+import { programs } from '../programs/programs';
 
-import './programs/loadPrograms';
+import '../programs/loadPrograms';
 
 // -- texture --------------------------------------------------------------------------------------
 const SIZE = 1024;
