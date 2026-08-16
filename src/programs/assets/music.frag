@@ -303,10 +303,15 @@ void main() {
 
     float env = exp(-20.0 * max(t - 0.04, 0.0)) * smoothstep(0.0, 0.01, q);
 
-    float noisephase = 600.0 * t;
+    float sinphase = 234.0 * t - 4.0 * exp2(-t * 200.0);
+    float noisephase = 128.0 * t;
     vec2 wave = mix(
-      cis(TAU * (220.0 * t - 4.0 * exp2(-t * 200.0))),
-      cheapnoise(128.0 * t) - cheapnoise(128.0 * t - 0.008),
+      mix(
+        cis(TAU * (sinphase)),
+        cis(TAU * (1.5 * sinphase)),
+        0.3
+      ),
+      cheapnoise(noisephase) - cheapnoise(noisephase - 0.004),
       0.3
     );
 
@@ -416,7 +421,7 @@ void main() {
       exp(-80.0 * t),
       0.3
     );
-  
+
     float sinphase = 234.0 * t - 4.0 * exp2(-t * 200.0);
     float noisephase = 128.0 * t;
     vec2 wave = mix(
