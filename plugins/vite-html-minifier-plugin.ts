@@ -18,7 +18,8 @@ export const htmlMinifierPlugin: (
           return `export default \`${src}\`;`;
         }
 
-        const result = src.replaceAll('\n', '');
+        // CRLF環境(core.autocrlf=true等)で\rが残ると、innerHTML挿入時に余計なTextノードが生まれてしまうため両方除去する
+        const result = src.replaceAll('\r', '').replaceAll('\n', '');
 
         return {
           code: `export default \`${result}\`;`,
