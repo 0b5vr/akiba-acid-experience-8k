@@ -65,6 +65,13 @@ export const FULLSCREEN = !import.meta.env.DEV;
  */
 export const DUMP_SCENES = false;
 
+/**
+ * Whether to export the generated music as a WAV file.
+ *
+ * This obviously increases the size of the final build.
+ */
+export const EXPORT_WAV = false;
+
 // == the despair zone =============================================================================
 
 /**
