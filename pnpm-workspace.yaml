@@ -2,3 +2,6 @@ allowBuilds:
   esbuild: true
 
 minimumReleaseAge: 10080
+
+minimumReleaseAgeExclude:
+  - '@0b5vr/*'
