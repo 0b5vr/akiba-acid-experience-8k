@@ -51,7 +51,7 @@ float sdbox(vec3 p, vec3 s) {
 }
 
 float map(vec3 p, float zcell) {
-  p.xy *= r2d(t * (mod(zcell, 2.0) - 0.5));
+  p.xy *= r2d(sin(t + zcell * TAU / 8.0));
 
   float theta = atan(p.y, p.x);
   float thetaCell = (floor(theta / TAU * 12.0) + 0.5) * TAU / 12.0;
@@ -80,15 +80,15 @@ void main() {
   vec2 p = v;
   p.x *= 16.0 / 9.0;
 
-  vec3 ro = vec3(0.0);
+  vec3 ro = vec3(0.0, 0.0, -mod(4.0 * t, 8.0));
   vec3 rd = normalize(vec3(p, -2.0));
   float rl = 0.0;
   float dist;
 
-  float zcell = 0.0;
+  float zcell = floor(ro.z);
 
   for (int i = 0; i < 100; i++) {
-    float rlCellEnd = (zcell - 0.5) / rd.z;
+    float rlCellEnd = (zcell - 0.5 - ro.z) / rd.z;
     dist = map(ro + rd * rl, zcell);
     rl += dist;
 
@@ -105,8 +105,9 @@ void main() {
     r.yz *= r2d(t);
     float i_fog = exp(-0.2 * rl);
 
-    float i_rawnoise = cyclic(6.0 * r, 0.5, 2.0).x;
+    float i_rawnoise = cyclic(2.0 * r, 0.5, 2.0).x;
     float i_noise = 4.0 * pow(0.5 + 0.5 * i_rawnoise, 2.0);
     outColor = vec4(vec3(i_fog * i_noise), 1.0);
+    // outColor = vec4(0.5 + 0.5 * i_n, 1.0);
   }
 }
