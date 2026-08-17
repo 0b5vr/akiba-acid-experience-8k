@@ -15,6 +15,7 @@ export const programs = {} as {
   plasma: WebGLProgram;
   post: WebGLProgram;
   smiley: WebGLProgram;
+  smiley3d: WebGLProgram;
   swirl: WebGLProgram;
   text: WebGLProgram;
 };

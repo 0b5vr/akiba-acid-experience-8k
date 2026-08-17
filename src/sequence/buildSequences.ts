@@ -14,6 +14,7 @@ const noiseaura = () => programs.noiseaura;
 const nop = () => programs.nop;
 const plasma = () => programs.plasma;
 const smiley = () => programs.smiley;
+const smiley3d = () => programs.smiley3d;
 const text = () => programs.text;
 
 sequences.scene = [
@@ -32,7 +33,8 @@ sequences.overlay = [
   [32, nop],
   [64, smiley],
   [96, noiseaura],
-  [192, crab],
+  [160, crab],
+  [192, smiley3d],
 ];
 
 sequences.text = [

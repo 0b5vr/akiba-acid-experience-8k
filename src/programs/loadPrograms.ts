@@ -12,6 +12,7 @@ import nopFrag from './assets/nop.frag?shader';
 import plasmaFrag from './assets/plasma.frag?shader';
 import postFrag from './assets/post.frag?shader';
 import smileyFrag from './assets/smiley.frag?shader';
+import smiley3dFrag from './assets/smiley3d.frag?shader';
 import swirlFrag from './assets/swirl.frag?shader';
 import textFrag from './assets/text.frag?shader';
 import { programs } from './programs';
@@ -33,6 +34,7 @@ programs.nop = lazyQuadProgram(nopFrag);
 programs.plasma = lazyQuadProgram(plasmaFrag);
 programs.post = lazyQuadProgram(postFrag);
 programs.smiley = lazyQuadProgram(smileyFrag);
+programs.smiley3d = lazyQuadProgram(smiley3dFrag);
 programs.swirl = lazyQuadProgram(swirlFrag);
 programs.text = lazyQuadProgram(textFrag);
 
