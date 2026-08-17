@@ -39,7 +39,7 @@ void main() {
   vec3 p3 = normalize(vec3(p, 0.3));
   p3.z += t;
 
-  float noise = smoothstep(0.0, 0.5, cyclic(2.0 * p3, 0.5, 2.0).x);
+  float noise = smoothstep(-0.2, 0.8, cyclic(4.0 * p3, 0.5, 2.0).x);
 
   outColor = noise * vec4(1.0);
 }
