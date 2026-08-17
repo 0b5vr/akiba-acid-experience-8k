@@ -8,6 +8,7 @@ import { easeOutSharp } from '../utils/easings';
 const box = () => programs.box;
 const boxarray = () => programs.boxarray;
 const checkersky = () => programs.checkersky;
+const crab = () => programs.crab;
 const lattice = () => programs.lattice;
 const noiseaura = () => programs.noiseaura;
 const nop = () => programs.nop;
@@ -22,6 +23,7 @@ sequences.scene = [
   [16, boxarray],
   [64, lattice],
   [128, lattice],
+  [192, checkersky],
 ];
 
 sequences.overlay = [
@@ -29,6 +31,7 @@ sequences.overlay = [
   [32, nop],
   [64, smiley],
   [96, noiseaura],
+  [192, crab],
 ];
 
 sequences.text = [
@@ -49,6 +52,7 @@ sequences.zoom = [
 sequences.tile = [
   [0, () => 1.0],
   [160, () => 4.0],
+  [192, () => 1.0],
 ];
 
 sequences.kaleidoscope = [
@@ -56,16 +60,19 @@ sequences.kaleidoscope = [
   [12, () => 6.0],
   [16, () => 0.0],
   [160, () => 8.0],
+  [192, () => 0.0],
 ];
 
 sequences.codercolor = [
   [0, () => 0.0],
   [128, () => 1.0],
+  [192, () => 0.0],
 ];
 
 sequences.chougouyoku = [
   [0, () => 0.0],
   [160, () => 1.0],
+  [192, () => 0.0],
 ];
 
 // -- hot ------------------------------------------------------------------------------------------
