@@ -12,6 +12,7 @@ export const programs = {} as {
   music: WebGLProgram;
   noiseaura: WebGLProgram;
   nop: WebGLProgram;
+  plasma: WebGLProgram;
   post: WebGLProgram;
   smiley: WebGLProgram;
   swirl: WebGLProgram;

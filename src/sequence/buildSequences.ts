@@ -12,6 +12,7 @@ const crab = () => programs.crab;
 const lattice = () => programs.lattice;
 const noiseaura = () => programs.noiseaura;
 const nop = () => programs.nop;
+const plasma = () => programs.plasma;
 const smiley = () => programs.smiley;
 const text = () => programs.text;
 
@@ -23,7 +24,7 @@ sequences.scene = [
   [16, boxarray],
   [64, lattice],
   [128, lattice],
-  [192, checkersky],
+  [192, plasma],
 ];
 
 sequences.overlay = [

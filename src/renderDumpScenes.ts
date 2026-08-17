@@ -15,6 +15,7 @@ const DUMP_SCENE_KEYS = [
   'cubetunnel',
   'lattice',
   'noiseaura',
+  'plasma',
   'smiley',
   'swirl',
   'text',
