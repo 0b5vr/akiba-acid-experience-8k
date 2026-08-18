@@ -68,12 +68,6 @@ mat2 rotate2D(float x) {
   return mat2(v.x, v.y, -v.y, v.x);
 }
 
-vec2 boxMuller(vec2 xi) {
-  float r = sqrt(-2.0 * log(xi.x));
-  float t = xi.y;
-  return r * cis(TAU * t);
-}
-
 float t2sSwing(float t) {
   float st = 4.0 * t / B2T;
   return 2.0 * floor(st / 2.0) + step(SWING, fract(0.5 * st));

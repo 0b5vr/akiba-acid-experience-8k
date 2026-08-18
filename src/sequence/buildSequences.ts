@@ -9,6 +9,8 @@ const box = () => programs.box;
 const boxarray = () => programs.boxarray;
 const checkersky = () => programs.checkersky;
 const crab = () => programs.crab;
+const cubetunnel = () => programs.cubetunnel;
+const dotmatrix = () => programs.dotmatrix;
 const lattice = () => programs.lattice;
 const noiseaura = () => programs.noiseaura;
 const nop = () => programs.nop;
@@ -23,9 +25,10 @@ sequences.scene = [
   [8, checkersky],
   [12, lattice],
   [16, boxarray],
-  [64, lattice],
+  [64, cubetunnel],
   [128, lattice],
   [192, plasma],
+  [193, dotmatrix],
 ];
 
 sequences.overlay = [

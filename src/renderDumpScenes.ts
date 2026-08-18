@@ -13,6 +13,7 @@ const DUMP_SCENE_KEYS = [
   'checkersky',
   'crab',
   'cubetunnel',
+  'dotmatrix',
   'lattice',
   'noiseaura',
   'plasma',
