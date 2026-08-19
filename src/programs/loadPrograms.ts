@@ -1,4 +1,5 @@
 import { lazyQuadProgram } from './lazyQuadProgram';
+import aep3dFrag from './assets/aep3d.frag?shader';
 import boxFrag from './assets/box.frag?shader';
 import boxarrayFrag from './assets/boxarray.frag?shader';
 import checkerskyFrag from './assets/checkersky.frag?shader';
@@ -22,6 +23,7 @@ import { programs } from './programs';
 // Compiles every shader in the intro.
 // This is where the programs come from in the prod build as well, not just on a dev build HMR.
 
+programs.aep3d = lazyQuadProgram(aep3dFrag);
 programs.box = lazyQuadProgram(boxFrag);
 programs.boxarray = lazyQuadProgram(boxarrayFrag);
 programs.checkersky = lazyQuadProgram(checkerskyFrag);

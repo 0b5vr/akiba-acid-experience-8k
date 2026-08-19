@@ -2,6 +2,7 @@
  * Every {@link WebGLProgram} in the intro, filled in by `loadPrograms.ts`.
  */
 export const programs = {} as {
+  aep3d: WebGLProgram;
   box: WebGLProgram;
   boxarray: WebGLProgram;
   checkersky: WebGLProgram;

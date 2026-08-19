@@ -8,6 +8,7 @@ import { sequences } from './sequence/sequences';
 import { evalSequence } from './sequence/evalSequence';
 
 const DUMP_SCENE_KEYS = [
+  'aep3d',
   'box',
   'boxarray',
   'checkersky',

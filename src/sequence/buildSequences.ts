@@ -5,6 +5,7 @@ import '../programs/loadPrograms';
 import { validateSequence } from './validateSequence';
 import { easeOutSharp } from '../utils/easings';
 
+const aep3d = () => programs.aep3d;
 const box = () => programs.box;
 const boxarray = () => programs.boxarray;
 const checkersky = () => programs.checkersky;
@@ -38,6 +39,7 @@ sequences.overlay = [
   [96, noiseaura],
   [160, crab],
   [192, smiley3d],
+  [196, aep3d],
 ];
 
 sequences.text = [
