@@ -55,6 +55,14 @@ sequences.zoom = [
   [16, (b) => 0.5 - 0.4 * easeOutSharp(b / 4.0, 4.0)],
 ];
 
+sequences.shake = [
+  [0, () => 0.0],
+  [196, (t) => Math.exp(-10.0 * t)],
+  [197, (t) => Math.exp(-10.0 * t)],
+  [198, (t) => Math.exp(-10.0 * t)],
+  [199, (t) => Math.exp(-10.0 * t)],
+];
+
 sequences.tile = [
   [0, () => 1.0],
   [160, () => 4.0],
@@ -81,16 +89,26 @@ sequences.chougouyoku = [
   [192, () => 0.0],
 ];
 
+sequences.white = [
+  [0, () => 0.0],
+  [192, (t) => t < 0.1 ? 1.0 : 0.0],
+  [193, (t) => t < 0.1 ? 1.0 : 0.0],
+  [194, (t) => t < 0.1 ? 1.0 : 0.0],
+  [195, (t) => t < 0.1 ? 1.0 : 0.0],
+];
+
 // -- hot ------------------------------------------------------------------------------------------
 if (import.meta.hot) {
   validateSequence(sequences.scene);
   validateSequence(sequences.overlay);
   validateSequence(sequences.text);
   validateSequence(sequences.zoom);
+  validateSequence(sequences.shake);
   validateSequence(sequences.tile);
   validateSequence(sequences.kaleidoscope);
   validateSequence(sequences.codercolor);
   validateSequence(sequences.chougouyoku);
+  validateSequence(sequences.white);
 
   import.meta.hot.accept();
 }

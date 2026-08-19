@@ -115,6 +115,10 @@ export function render(): void {
     evalSequence(sequences.zoom, beat)!,
   );
   gl.uniform1f(
+    gl.getUniformLocation(program, 'shake'),
+    evalSequence(sequences.shake, beat)!,
+  );
+  gl.uniform1f(
     gl.getUniformLocation(program, 'tile'),
     evalSequence(sequences.tile, beat)!,
   );
@@ -129,6 +133,10 @@ export function render(): void {
   gl.uniform1f(
     gl.getUniformLocation(program, 'chougouyoku'),
     evalSequence(sequences.chougouyoku, beat)!,
+  );
+  gl.uniform1f(
+    gl.getUniformLocation(program, 'white'),
+    evalSequence(sequences.white, beat)!,
   );
 
   gl.bindFramebuffer(GL_FRAMEBUFFER, null);

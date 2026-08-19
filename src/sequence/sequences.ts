@@ -5,8 +5,10 @@ export const sequences = {} as {
   overlay: Sequence<WebGLProgram>;
   text: Sequence<string>;
   zoom: Sequence<number>;
+  shake: Sequence<number>;
   tile: Sequence<number>;
   kaleidoscope: Sequence<number>;
   codercolor: Sequence<number>;
   chougouyoku: Sequence<number>;
+  white: Sequence<number>;
 };

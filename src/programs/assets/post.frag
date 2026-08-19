@@ -6,44 +6,35 @@ precision highp float;
 
 // #pragma shader_minifier_plugin bypass
 
-const int SAMPLES = 20;
-const float SAMPLES_F = float(SAMPLES);
-
-const float PI = acos(-1.0);
-const vec3 LUMA = vec3(0.2126, 0.7152, 0.0722);
-
-in vec2 v;
-
 uniform float t;
 uniform sampler2D f;
 
 uniform float zoom;
+uniform float shake;
 uniform float tile;
 uniform float kaleidoscope;
 uniform float codercolor;
 uniform float chougouyoku;
+uniform float white;
+
+in vec2 v;
 
 out vec4 outColor;
 
-uvec3 hash3u(uvec3 v) {
-  v = v * 1664525u + 1013904223u;
+const int SAMPLES = 20;
+const float SAMPLES_F = float(SAMPLES);
 
-  v.x += v.y * v.z;
-  v.y += v.z * v.x;
-  v.z += v.x * v.y;
+const float PI = acos(-1.0);
+const float TAU = 2.0 * PI;
+const vec3 LUMA = vec3(0.2126, 0.7152, 0.0722);
 
-  v ^= v >> 16u;
-
-  v.x += v.y * v.z;
-  v.y += v.z * v.x;
-  v.z += v.x * v.y;
-
-  return v;
-}
-
-vec3 hash3f(vec3 v) {
-  uvec3 r = floatBitsToUint(v);
-  return vec3(hash3u(r)) / float(-1u);
+// Ref: https://www.shadertoy.com/view/XlXcW4
+vec3 hash3f(vec3 s) {
+  uvec3 r = floatBitsToUint(s);
+  r = ((r >> 16u) ^ r.yzx) * 1111111111u;
+  r = ((r >> 16u) ^ r.yzx) * 1111111111u;
+  r = ((r >> 16u) ^ r.yzx) * 1111111111u;
+  return vec3(r) / float(-1u);
 }
 
 vec3 calctint(float t) {
@@ -68,6 +59,7 @@ void main() {
     p = length(p) * vec2(cos(a), sin(a));
   }
 
+  // accumulation
   float dither = hash3f(vec3(p, t)).x;
 
   vec3 sum = vec3(0.0);
@@ -79,6 +71,8 @@ void main() {
     vec2 uvt = pt;
     uvt.x *= 9.0 / 16.0;
     uvt = uvt * 0.5 + 0.5;
+
+    uvt.y += 0.1 * shake * sin(TAU * phase * 3.0 + t);
 
     vec3 tex = texture(f, uvt).xyz;
 
@@ -97,6 +91,9 @@ void main() {
 
   // chougouyoku - neg
   sum = mix(sum, 1.0 - sum, mod(floor(t * 15.0), 2.0) * chougouyoku);
+
+  // white
+  sum = mix(sum, vec3(1.0), white);
 
   outColor = vec4(sum, 1.0);
 }
