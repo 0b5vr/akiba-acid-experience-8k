@@ -12,6 +12,7 @@ const checkersky = () => programs.checkersky;
 const crab = () => programs.crab;
 const cubetunnel = () => programs.cubetunnel;
 const dotmatrix = () => programs.dotmatrix;
+const foldarc = () => programs.foldarc;
 const lattice = () => programs.lattice;
 const noiseaura = () => programs.noiseaura;
 const nop = () => programs.nop;
@@ -30,6 +31,10 @@ sequences.scene = [
   [128, lattice],
   [192, plasma],
   [193, dotmatrix],
+  [268, foldarc], // bar 64, ride out
+  [352, dotmatrix], // bar 88, breakdown
+  [384, foldarc], // bar 96, snare back in
+  [448, lattice], // bar 112, full arrangement back
 ];
 
 sequences.overlay = [

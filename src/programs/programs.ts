@@ -10,6 +10,7 @@ export const programs = {} as {
   cubetunnel: WebGLProgram;
   dotmatrix: WebGLProgram;
   fbm: WebGLProgram;
+  foldarc: WebGLProgram;
   lattice: WebGLProgram;
   music: WebGLProgram;
   noiseaura: WebGLProgram;

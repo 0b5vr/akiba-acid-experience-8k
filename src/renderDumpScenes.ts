@@ -15,6 +15,7 @@ const DUMP_SCENE_KEYS = [
   'crab',
   'cubetunnel',
   'dotmatrix',
+  'foldarc',
   'lattice',
   'noiseaura',
   'plasma',
