@@ -73,6 +73,10 @@ const RENORM_LIMIT = 1 << (ANS_BITS - OUT_BITS);
 /** the search never picks a selector wider than this, to keep the decoder's digits single */
 const SELECTOR_LIMIT = 512;
 
+/** how many models the search is allowed to settle on */
+const MIN_MODELS = 4;
+const MAX_MODELS = 24;
+
 // -- utils ----------------------------------------------------------------------------------------
 /** returns `${m}e${e}` where (m-1) * 10^e < v <= m * 10^e, m < 100 and m mod 10 != 0 */
 function approximateWithTwoSigDigits(v: number): string {
@@ -121,17 +125,22 @@ function numRecentBytes(sparseSelectors: number[]): number {
 // the search runs the coder hundreds of times, and each run wants a fresh ~150 MB pair of arrays.
 // allocating those every time buries us in GC, so keep one pair per size around and refill it
 
-const pool = new Map<number, { predictions: Uint16Array; counts: Uint8Array }>();
+// only the most recent size is kept: the search varies the model count, and holding on to every
+// size it tries would add up to gigabytes
+
+let pooled: { size: number; predictions: Uint16Array; counts: Uint8Array } | null = null;
 
 function acquireTables(numContexts: number, fillWith: number) {
-  let tables = pool.get(numContexts);
-  if (!tables) {
-    tables = { predictions: new Uint16Array(numContexts), counts: new Uint8Array(numContexts) };
-    pool.set(numContexts, tables);
+  if (pooled?.size !== numContexts) {
+    pooled = {
+      size: numContexts,
+      predictions: new Uint16Array(numContexts),
+      counts: new Uint8Array(numContexts),
+    };
   }
-  tables.predictions.fill(fillWith);
-  tables.counts.fill(0);
-  return tables;
+  pooled.predictions.fill(fillWith);
+  pooled.counts.fill(0);
+  return pooled;
 }
 
 // -- the model ------------------------------------------------------------------------------------
@@ -366,20 +375,26 @@ function buildDecoder(
     return offsets.reverse().join('');
   }).join('0');
 
-  // after reading one byte: write it out, then update the quote state
-  const flushByte = quotes.length > 0
-    ? `O[L++]=N-=${inMax},Q=Q?N-Q&&Q:` + (quotes.length > 1
-      ? `(${quotes.map((q) => `N==${q}`).join('|')})&&N`
-      : `N==${quotes[0]}&&N`)
+  // after reading one byte: write it out, then update the quote state.
+  // with a single quote character the state is just "in or out", so it toggles -- and being 0 or 1
+  // already, it can scale the context offset directly instead of going through `!!Q`
+  const flushByte = quotes.length === 1
+    ? `O[L++]=N-=${inMax},Q^=N==${quotes[0]}`
+    : quotes.length > 1
+    ? `O[L++]=N-=${inMax},Q=Q?N-Q&&Q:(${quotes.map((q) => `N==${q}`).join('|')})&&N`
     : `O[L++]=N-${inMax}`;
+
+  const quoteOffset = quotes.length === 1 ? '+Q*129' : quotes.length > 1 ? '+!!Q*129' : '';
 
   const args = [
     'A',
     `T=1<<${precision + 1}`,
     `W=Array(${numModels}).fill(0)`,
     `P=new Uint16Array(${contextSize}).fill(${pow2(precision - 1, precision)})`,
-    `K=new Uint8Array(${contextSize})`,
-    `O=new Uint8Array(${inputLength})`,
+    // aliasing the constructor pays for itself from the second use on
+    'U=Uint8Array',
+    `K=new U(${contextSize})`,
+    `O=new U(${inputLength})`,
     'S=0',
     `R=${skip}`,
     'L=0',
@@ -421,7 +436,7 @@ function buildDecoder(
     `for(F='${selectors}'.split(M=0).map((c,i)=>(` +
       `a=0,` +
       `[...c].map(c=>a=a*997+(O[L-c]|0)|0),` +
-      `${pow2(contextBits, precision)}-1&a*997+N${quotes.length > 0 ? '+!!Q*129' : ''}` +
+      `${pow2(contextBits, precision)}-1&a*997+N${quoteOffset}` +
     `)*${numModels}+i);` +
       `S<${pow2(ANS_BITS - OUT_BITS, precision)};` +
       `S=S*${OUT_SYMBOLS}|A[R++]` +
@@ -431,9 +446,14 @@ function buildDecoder(
   // function's scope. its top level `var`s would then land in here -- among A, T, W and the rest of
   // the single letter parameters -- instead of on the global object. the optional call form is
   // specified as an indirect eval, so it runs in the global scope for 4 bytes less than `(0,eval)`
-  const tail = evalResult
-    ? `eval?.(new TextDecoder().decode(O))`
-    : `return new TextDecoder().decode(O)`;
+  // spreading into fromCharCode is shorter, but the argument count is what limits it -- engines
+  // start throwing somewhere past 2^16, so hand anything near that to TextDecoder instead.
+  // it also only reads right when every byte is a codepoint, i.e. when the input was 7-bit
+  const stringify = inBits === 7 && inputLength < 65000
+    ? `String.fromCharCode(...O)`
+    : `new TextDecoder().decode(O)`;
+
+  const tail = evalResult ? `eval?.(${stringify})` : `return ${stringify}`;
 
   return `(${args})=>{${body}${tail}}`;
 }
@@ -609,7 +629,18 @@ function optimize(
       do {
         added = Math.random() * SELECTOR_LIMIT | 0;
       } while (next.includes(added));
-      next[Math.random() * next.length | 0] = added;
+
+      // as well as swapping a selector out, the search may drop or add one. fewer models means a
+      // shorter selector string in the decoder, more means better predictions -- and since what we
+      // measure is the whole file, the two sides of that trade are weighed against each other
+      const move = Math.random();
+      if (move < 0.15 && next.length > MIN_MODELS) {
+        next.splice(Math.random() * next.length | 0, 1);
+      } else if (move < 0.3 && next.length < MAX_MODELS) {
+        next.push(added);
+      } else {
+        next[Math.random() * next.length | 0] = added;
+      }
       next.sort((a, b) => a - b);
 
       const ratio = Math.log(temperature) / Math.log(target);
