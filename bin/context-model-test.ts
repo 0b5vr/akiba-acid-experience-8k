@@ -1,4 +1,4 @@
-#!/usr/bin/env -S deno run --allow-read --allow-write
+#!/usr/bin/env -S deno run --allow-read --allow-write --allow-run
 
 // context-model-test - pack JavaScript into a self-extracting html + context mixing coder
 // v0.2.0
@@ -94,14 +94,15 @@ function approximateWithTwoSigDigits(v: number): string {
   return exp > 1 ? `${mant}e${exp}` : `${mant * 10 ** exp}`;
 }
 
-/** emits 2^n, reusing the decoder's `T` (= 2^(precision+1)) whenever that comes out shorter */
+/** emits 2^n, reusing the decoder's `h` (= 2^(precision+1)) whenever that comes out shorter */
 function pow2(n: number, precision: number): string {
   if (n < 10 || n > precision + 10) { return `${2 ** n}`; }
   const d = n - (precision + 1);
-  if (d < 0) { return `T/${2 ** -d}`; }
-  if (d > 0) { return `T*${2 ** d}`; }
-  return 'T';
+  if (d < 0) { return `h/${2 ** -d}`; }
+  if (d > 0) { return `h*${2 ** d}`; }
+  return 'h';
 }
+
 
 /** emits 1/recipBaseCount as a decimal literal if that is shorter than the division */
 function baseCountLiteral(recipBaseCount: number): string {
@@ -128,14 +129,14 @@ function numRecentBytes(sparseSelectors: number[]): number {
 // only the most recent size is kept: the search varies the model count, and holding on to every
 // size it tries would add up to gigabytes
 
-let pooled: { size: number; predictions: Uint16Array; counts: Uint8Array } | null = null;
+let pooled: { size: number; predictions: Uint16Array; counts: Uint16Array } | null = null;
 
 function acquireTables(numContexts: number, fillWith: number) {
   if (pooled?.size !== numContexts) {
     pooled = {
       size: numContexts,
       predictions: new Uint16Array(numContexts),
-      counts: new Uint8Array(numContexts),
+      counts: new Uint16Array(numContexts),
     };
   }
   pooled.predictions.fill(fillWith);
@@ -157,7 +158,7 @@ class Model {
   /** the probability of the next bit being 1, scaled by 2^precision, per (context, model) */
   private readonly predictions: Uint16Array;
   /** how many times each (context, model) has been seen, saturating at modelMaxCount */
-  private readonly counts: Uint8Array;
+  private readonly counts: Uint16Array;
   /** the mixing weight of each model */
   private readonly weights: Float64Array;
   /** stretch(p) of each model, stashed by `predict` and consumed by `update` */
@@ -344,10 +345,14 @@ function stateBytes(state: number): number[] {
 // first argument and every other variable is a default-valued parameter. that keeps all of them
 // local, out of the `with(document)` scope an event handler attribute otherwise runs in
 //
-// A: the whole file  T: 2^(precision+1)  W: weights  P: predictions  K: counts  O: decoded bytes
-// S: rANS state  R: read position in A, starting right past the header  L: write position in O
-// Q: current quote character  N: bit context  M: mixed prediction  a: scratch  b: decoded bit
-// E: stretched probs  F: indices
+// the names are all letters that already appear elsewhere in the decoder -- inside Array,
+// Uint8Array, Math, fill, for, map, split, fromCharCode, eval -- so none of them adds a symbol to
+// DEFLATE's huffman tree once the decoder ships deflated. that is Roadroller's trick
+//
+// A: the whole file  h: 2^(precision+1)  w: weights  p: predictions  d: counts  o: decoded bytes
+// s: rANS state  r: read position in A, starting right past the header  l: write position in o
+// g: whether we are inside a string  n: bit context  m: mixed prediction  a: scratch
+// v: decoded bit  e: stretched probs  f: indices  U: Uint8Array  y, i: map arguments
 
 function buildDecoder(
   params: Params,
@@ -372,74 +377,79 @@ function buildDecoder(
     for (let j = 0; 1 << j <= selector; j++) {
       if (selector >> j & 1) { offsets.push(j + 1); }
     }
-    return offsets.reverse().join('');
-  }).join('0');
+    return offsets.reverse().join('') || '0';
+  }).join(',');
 
   // after reading one byte: write it out, then update the quote state.
   // with a single quote character the state is just "in or out", so it toggles -- and being 0 or 1
-  // already, it can scale the context offset directly instead of going through `!!Q`
+  // already, it can scale the context offset directly instead of going through `!!g`
   const flushByte = quotes.length === 1
-    ? `O[L++]=N-=${inMax},Q^=N==${quotes[0]}`
+    ? `o[l++]=n-=${inMax},g^=n==${quotes[0]}`
     : quotes.length > 1
-    ? `O[L++]=N-=${inMax},Q=Q?N-Q&&Q:(${quotes.map((q) => `N==${q}`).join('|')})&&N`
-    : `O[L++]=N-${inMax}`;
+    ? `o[l++]=n-=${inMax},g=g?n-g&&g:(${quotes.map((q) => `n==${q}`).join('|')})&&n`
+    : `o[l++]=n-${inMax}`;
 
-  const quoteOffset = quotes.length === 1 ? '+Q*129' : quotes.length > 1 ? '+!!Q*129' : '';
+  const quoteOffset = quotes.length === 1 ? '+g*129' : quotes.length > 1 ? '+!!g*129' : '';
 
   const args = [
     'A',
-    `T=1<<${precision + 1}`,
-    `W=Array(${numModels}).fill(0)`,
-    `P=new Uint16Array(${contextSize}).fill(${pow2(precision - 1, precision)})`,
-    // aliasing the constructor pays for itself from the second use on
-    'U=Uint8Array',
-    `K=new U(${contextSize})`,
-    `O=new U(${inputLength})`,
-    'S=0',
-    `R=${skip}`,
-    'L=0',
-    ...quotes.length > 0 ? ['Q=0'] : [],
-    'N',
-    'M',
+    `h=1<<${precision + 1}`,
+    // spelled out rather than `Array(n).fill(0)`: longer in source, but `0,` repeated is a
+    // distance-2 match that DEFLATE gets for next to nothing
+    `w=[${Array(numModels).fill(0)}]`,
+    `p=new Uint16Array(${contextSize}).fill(${pow2(precision - 1, precision)})`,
+    // deliberately the same type as p: a repeated `new Uint16Array(...)` is a long match that
+    // DEFLATE gets for almost nothing, where aliasing the constructor would break it up
+    `d=new Uint16Array(${contextSize})`,
+    // o is small and only ever read back through `|0`, so a plain array is fine and much shorter
+    'o=[]',
+    's=0',
+    `r=${skip}`,
+    'l=0',
+    ...quotes.length > 0 ? ['g=0'] : [],
+    'n',
+    'm',
     'a',
-    'b',
-    'E',
-    'F',
+    'v',
+    'e',
+    'f',
   ].join(',');
 
   // the three loops below do NOT run in the order they are written:
   // 1. the outer loop reads one byte at a time
   // 2. the middle loop reads one bit at a time; its update expression does the actual decoding
   // 3. the inner loop's init computes the context hashes, and its update renormalizes the state
-  const body = `for(;L<${inputLength};${flushByte})` +
-    `for(N=1;N<${inMax};` +
-      // mix the stretched predictions into M, and stash them (premultiplied by the learning rate)
-      `E=F.map((c,i)=>(` +
-        `a=P[c]*2+1,` +
-        `a=Math.log2(a/(T-a)),` +
-        `M-=W[i]*a,` +
+  const body = `for(;l<${inputLength};${flushByte})` +
+    `for(n=1;n<${inMax};` +
+      // mix the stretched predictions into m, and stash them (premultiplied by the learning rate)
+      `e=f.map((y,i)=>(` +
+        `a=p[y]*2+1,` +
+        `a=Math.log2(a/(h-a)),` +
+        `m-=w[i]*a,` +
         `a/${recipLearningRate}` +
       `)),` +
       // squash, then pull a single bit out of the rANS state
-      `M=~-T/(1+2**M)|1,` +
-      `b=S%T<M,` +
-      `S=S%T+(b?M:T-M)*(S>>${precision + 1})-!b*M,` +
+      `m=~-h/(1+2**m)|1,` +
+      `v=s%h<m,` +
+      `s=s%h+(v?m:h-m)*(s>>${precision + 1})-!v*m,` +
       // update the predictions, the counts and the weights
-      `F.map((c,i)=>(` +
-        `P[c]+=(b*${pow2(precision, precision)}-P[c]<<${deltaShift})/` +
-          `((K[c]+=K[c]<${modelMaxCount})+${baseCountLiteral(modelRecipBaseCount)})>>${deltaShift},` +
-        `W[i]+=E[i]*(b-M/T)` +
+      `f.map((y,i)=>(` +
+        `p[y]+=(v*${pow2(precision, precision)}-p[y]<<${deltaShift})/` +
+          `((d[y]+=d[y]<${modelMaxCount})+${baseCountLiteral(modelRecipBaseCount)})>>${deltaShift},` +
+        `w[i]+=e[i]*(v-m/h)` +
       `)),` +
-      `N=N*2+b` +
+      `n=n*2+v` +
     `)` +
     // hash the recent bytes of each model into an index, then top the state back up
-    `for(F='${selectors}'.split(M=0).map((c,i)=>(` +
+    `for(m=0,f=[${selectors}].map((y,i)=>(` +
       `a=0,` +
-      `[...c].map(c=>a=a*997+(O[L-c]|0)|0),` +
-      `${pow2(contextBits, precision)}-1&a*997+N${quoteOffset}` +
+      // the trailing '0' is a sentinel: o[l] has not been written yet, so it folds in as
+      // a*997+0, which is the final *997 the hash would otherwise need after the loop
+      `[...y+'0'].map(y=>a=a*997+(o[l-y]|0)|0),` +
+      `${pow2(contextBits, precision)}-1&a+n${quoteOffset}` +
     `)*${numModels}+i);` +
-      `S<${pow2(ANS_BITS - OUT_BITS, precision)};` +
-      `S=S*${OUT_SYMBOLS}|A[R++]` +
+      `s<${pow2(ANS_BITS - OUT_BITS, precision)};` +
+      `s=s*${OUT_SYMBOLS}|A[r++]` +
     `);`;
 
   // `eval?.()`, not `eval()`: the latter is a direct eval, which would hand the unpacked code this
@@ -450,8 +460,8 @@ function buildDecoder(
   // start throwing somewhere past 2^16, so hand anything near that to TextDecoder instead.
   // it also only reads right when every byte is a codepoint, i.e. when the input was 7-bit
   const stringify = inBits === 7 && inputLength < 65000
-    ? `String.fromCharCode(...O)`
-    : `new TextDecoder().decode(O)`;
+    ? `String.fromCharCode(...o)`
+    : `new TextDecoder().decode(o)`;
 
   const tail = evalResult ? `eval?.(${stringify})` : `return ${stringify}`;
 
@@ -463,9 +473,42 @@ function buildDecoder(
 interface Packed {
   headerBytes: Uint8Array;
   data: Uint8Array;
+  /** the deflated decoder, sitting after the data in the two stage layout; empty in the one stage */
+  trailer: Uint8Array;
   /** the read offset baked into the decoder, which the verifier has to match */
   skip: number;
   size: number;
+}
+
+/** zopfli is only needed for the two stage layout, so not having it is not fatal */
+let zopfli: boolean | null = null;
+
+async function haveZopfli(): Promise<boolean> {
+  if (zopfli === null) {
+    try {
+      await new Deno.Command('zopfli', { args: ['-h'], stdout: 'null', stderr: 'null' }).output();
+      zopfli = true;
+    } catch (e) {
+      if (!(e instanceof Deno.errors.NotFound)) { throw e; }
+      zopfli = false;
+    }
+  }
+  return zopfli;
+}
+
+async function deflateRaw(text: string): Promise<Uint8Array> {
+  const tmp = await Deno.makeTempFile();
+  try {
+    await Deno.writeTextFile(tmp, text);
+    const out = await new Deno.Command('zopfli', {
+      args: ['-c', '-i100', '--deflate', tmp],
+      stdout: 'piped',
+      stderr: 'null',
+    }).output();
+    return out.stdout;
+  } finally {
+    await Deno.remove(tmp);
+  }
 }
 
 function pack(input: Uint8Array, inBits: number, params: Params): Packed {
@@ -496,9 +539,55 @@ function pack(input: Uint8Array, inBits: number, params: Params): Packed {
   return {
     headerBytes: built.headerBytes,
     data,
+    trailer: new Uint8Array(0),
     skip: built.skip,
     size: built.headerBytes.length + data.length,
   };
+}
+
+/**
+ * the same thing in two stages: the decoder goes at the end of the file, deflated, and a small
+ * header inflates it and hands it the bytes it already fetched. the decoder is repetitive JS, so
+ * DEFLATE takes about a third off it -- which is exactly the trick Roadroller gets for free by
+ * living inside a .js file that the outer packer then compresses
+ */
+async function packDeflated(
+  input: Uint8Array,
+  inBits: number,
+  params: Params,
+): Promise<Packed | null> {
+  const { state, buf, quotesSeen } = encode(input, inBits, params);
+  const data = Uint8Array.from([...stateBytes(state), ...buf]);
+
+  const makeHeader = (trailerLength: number) =>
+    new TextEncoder().encode(
+      '<svg onload="fetch``.then(t=>t.bytes()).then(t=>new Response(new Response(' +
+        `t.slice(-${trailerLength})).body.pipeThrough(new DecompressionStream('deflate-raw')))` +
+        '.text().then(s=>eval?.(s)(t)))">',
+    );
+
+  // three lengths depend on each other here: the header's own length, the read offset baked into
+  // the decoder, and the deflated size. iterate until they agree, which happens as soon as none of
+  // the digit counts move
+  let skip = 0;
+  for (let i = 0; i < 8; i++) {
+    const decoder = buildDecoder(params, input.length, inBits, quotesSeen, skip, true);
+    const trailer = await deflateRaw(decoder);
+    const headerBytes = makeHeader(trailer.length);
+
+    if (headerBytes.length === skip) {
+      return {
+        headerBytes,
+        data,
+        trailer,
+        skip,
+        size: headerBytes.length + data.length + trailer.length,
+      };
+    }
+    skip = headerBytes.length;
+  }
+
+  return null;
 }
 
 // -- the parameter search -------------------------------------------------------------------------
@@ -689,8 +778,14 @@ const USAGE = 'Usage: deno run --allow-read --allow-write context-model-test.ts 
 const params: Params = { ...DEFAULT_PARAMS, sparseSelectors: [...DEFAULT_PARAMS.sparseSelectors] };
 const positional: string[] = [];
 let level = 0;
+let noDeflate = false;
 
 for (const arg of Deno.args) {
+  if (arg === '--no-deflate') {
+    noDeflate = true;
+    continue;
+  }
+
   const flag = arg.match(/^-(O|Zdy|Zlr|Zmc|Zmd|Zpr|Zcb|S)(.+)$/);
   if (!flag) {
     positional.push(arg);
@@ -771,12 +866,28 @@ console.info(
     `(${chosen.sparseSelectors.length} models, ${chosen.contextBits} context bits, ${inBits} bits per symbol)`,
 );
 
-const packed = pack(inputBytes, inBits, chosen);
+const flat = pack(inputBytes, inBits, chosen);
+let packed = flat;
+
+// the two stage layout only wins once the decoder is long enough for DEFLATE to beat the ~120 bytes
+// its own header costs, so take whichever actually comes out smaller
+if (!noDeflate && await haveZopfli()) {
+  const deflated = await packDeflated(inputBytes, inBits, chosen);
+  if (deflated && deflated.size < flat.size) {
+    packed = deflated;
+  }
+  console.info(
+    `Layout: \x1b[32m${packed === flat ? 'plain' : 'deflated decoder'}\x1b[0m` +
+      ` (plain ${flat.size.toLocaleString()}` +
+      `, deflated ${deflated ? deflated.size.toLocaleString() : 'n/a'})`,
+  );
+}
 
 // -- output ---------------------------------------------------------------------------------------
 const concated = new Uint8Array(packed.size);
 concated.set(packed.headerBytes);
 concated.set(packed.data, packed.headerBytes.length);
+concated.set(packed.trailer, packed.headerBytes.length + packed.data.length);
 
 // -- verify ---------------------------------------------------------------------------------------
 // run the generated decoder, fed with the exact bytes the browser is going to hand it: the whole
@@ -797,6 +908,9 @@ if (decoded !== inputText) {
 const percentage = (100.0 * (packed.size / inputSize)).toFixed(3);
 console.info(`Header size: \x1b[32m${packed.headerBytes.length.toLocaleString()} bytes\x1b[0m`);
 console.info(`Data size: \x1b[32m${packed.data.length.toLocaleString()} bytes\x1b[0m`);
+if (packed.trailer.length > 0) {
+  console.info(`Deflated decoder: \x1b[32m${packed.trailer.length.toLocaleString()} bytes\x1b[0m`);
+}
 console.info(`Output size: \x1b[32m${packed.size.toLocaleString()} bytes\x1b[0m (${percentage} %)`);
 
 await Deno.writeFile(outputPath, concated);
