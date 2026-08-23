@@ -5,20 +5,15 @@ import '../programs/loadPrograms';
 import { validateSequence } from './validateSequence';
 import { easeOutSharp } from '../utils/easings';
 
-const aep3d = () => programs.aep3d;
 const box = () => programs.box;
 const boxarray = () => programs.boxarray;
 const checkersky = () => programs.checkersky;
 const crab = () => programs.crab;
 const cubetunnel = () => programs.cubetunnel;
-const dotmatrix = () => programs.dotmatrix;
-const foldarc = () => programs.foldarc;
 const lattice = () => programs.lattice;
 const noiseaura = () => programs.noiseaura;
 const nop = () => programs.nop;
-const plasma = () => programs.plasma;
 const smiley = () => programs.smiley;
-const smiley3d = () => programs.smiley3d;
 const text = () => programs.text;
 
 sequences.scene = [
@@ -29,12 +24,12 @@ sequences.scene = [
   [16, boxarray],
   [64, cubetunnel],
   [128, lattice],
-  [192, plasma],
-  [193, dotmatrix],
-  [268, foldarc], // bar 64, ride out
-  [352, dotmatrix], // bar 88, breakdown
-  [384, foldarc], // bar 96, snare back in
-  [448, lattice], // bar 112, full arrangement back
+  [192, (b) => [
+    programs.lattice,
+    programs.foldarc,
+    programs.dotmatrix,
+    programs.plasma,
+  ][~~(b * 2) % 4]],
 ];
 
 sequences.overlay = [
@@ -43,8 +38,12 @@ sequences.overlay = [
   [64, smiley],
   [96, noiseaura],
   [160, crab],
-  [192, smiley3d],
-  [196, aep3d],
+  [192, (b) => [
+    programs.smiley3d,
+    programs.aep3d,
+    programs.smiley3d,
+    programs.crab,
+  ][~~(b) % 4]],
 ];
 
 sequences.text = [
@@ -64,10 +63,7 @@ sequences.zoom = [
 
 sequences.shake = [
   [0, () => 0.0],
-  [196, (t) => Math.exp(-10.0 * t)],
-  [197, (t) => Math.exp(-10.0 * t)],
-  [198, (t) => Math.exp(-10.0 * t)],
-  [199, (t) => Math.exp(-10.0 * t)],
+  [192, (b) => Math.exp(-10.0 * (b % 1.0))],
 ];
 
 sequences.tile = [
@@ -98,10 +94,7 @@ sequences.chougouyoku = [
 
 sequences.white = [
   [0, () => 0.0],
-  [192, (t) => t < 0.1 ? 1.0 : 0.0],
-  [193, (t) => t < 0.1 ? 1.0 : 0.0],
-  [194, (t) => t < 0.1 ? 1.0 : 0.0],
-  [195, (t) => t < 0.1 ? 1.0 : 0.0],
+  // [192, (b) => (b % 1.0) < 0.1 ? 1.0 : 0.0],
 ];
 
 // -- hot ------------------------------------------------------------------------------------------
