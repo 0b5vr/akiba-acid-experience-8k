@@ -52,9 +52,9 @@ export async function pack(
         'fetch``' +
           '.then(t=>t.bytes())' +
           '.then(t=>new Response(' +
-            `new Response(t.slice(-${trailerLength})).body.pipeThrough(` +
-              'new DecompressionStream(\'deflate-raw\')' +
-            ')' +
+            `new Response(t.slice(-${trailerLength}))` +
+              '.body' +
+              '.pipeThrough(new DecompressionStream(\'deflate-raw\'))' +
           ').text().then(s=>eval?.(s)(t)))' +
       '">';
     /* eslint-enable */
