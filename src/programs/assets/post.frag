@@ -9,6 +9,7 @@ precision highp float;
 uniform float t;
 uniform sampler2D f;
 
+// TODO: optimize these uniform names later
 uniform float zoom;
 uniform float shake;
 uniform float tile;

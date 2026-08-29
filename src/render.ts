@@ -110,6 +110,8 @@ export function render(): void {
     gl.getUniformLocation(program, 'f'),
     0,
   );
+
+  // TODO: optimize these uniform names later
   gl.uniform1f(
     gl.getUniformLocation(program, 'zoom'),
     evalSequence(sequences.zoom, beat)!,
