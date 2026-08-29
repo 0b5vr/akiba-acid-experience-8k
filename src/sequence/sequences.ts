@@ -11,4 +11,5 @@ export const sequences = {} as {
   codercolor: Sequence<number>;
   chougouyoku: Sequence<number>;
   white: Sequence<number>;
+  feedback: Sequence<number>;
 };
