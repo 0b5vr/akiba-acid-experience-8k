@@ -1,4 +1,7 @@
 {
-  "deno.enable": true,
-  "deno.enablePaths": ["./bin"]
+  "deno.enablePaths": [
+    "./bin",
+    "./compressor"
+  ],
+  "js/ts.tsserver.experimental.enableProjectDiagnostics": false
 }
