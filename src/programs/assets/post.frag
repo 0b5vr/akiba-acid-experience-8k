@@ -84,7 +84,7 @@ void main() {
   sum /= SAMPLES_F;
 
   // vignette
-  sum *= 1.0 - 0.2 * dot(p, p);
+  // sum *= 1.0 - 0.2 * dot(p, p);
 
   // codercolor
   float luma = dot(sum, LUMA);
