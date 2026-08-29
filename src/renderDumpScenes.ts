@@ -7,23 +7,14 @@ import { sequences } from './sequence/sequences';
 import { evalSequence } from './sequence/evalSequence';
 import { preparePass } from './renderPass';
 
-const DUMP_SCENE_KEYS = [
-  'aep3d',
-  'box',
-  'boxarray',
-  'checkersky',
-  'crab',
-  'cubetunnel',
-  'dotmatrix',
-  'foldarc',
-  'lattice',
-  'noiseaura',
-  'plasma',
-  'smiley',
-  'smiley3d',
-  'swirl',
-  'text',
-] as const satisfies (keyof typeof programs)[];
+const DUMP_SCENE_KEYS = Object.keys(programs).filter(
+  (key) => ![
+    'fbm',
+    'music',
+    'nop',
+    'post',
+  ].includes(key as keyof typeof programs),
+) as (keyof typeof programs)[];
 
 /**
  * Renders every scene (including overlays) to the screen in a grid layout.
