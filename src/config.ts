@@ -75,6 +75,14 @@ export const EXPORT_WAV = false;
 // == the despair zone =============================================================================
 
 /**
+ * Draw every program once before the intro starts, to force the ANGLE to compile them.
+ *
+ * You can save several bytes if you set this to `false`,
+ * but the intro is going to hitch every time it reaches a scene shown for the first time.
+ */
+export const USE_PREWARM = true;
+
+/**
  * Stop rendering after the time exceeds {@link INTRO_LENGTH}.
  *
  * You can save several bytes if you set this to `false`,
