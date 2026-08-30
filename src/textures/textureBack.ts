@@ -10,8 +10,7 @@ export const textureBack = gl.createTexture()!;
 gl.bindTexture(GL_TEXTURE_2D, textureBack);
 gl.texStorage2D(GL_TEXTURE_2D, 1, GL_RGBA16F, WIDTH, HEIGHT);
 
-// the feedback walks the sample position by well under a texel, so it must interpolate.
-// the default min filter would snap those steps back to whole texels.
+// it should be GL_LINEAR since it's used for video feedback
 gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 /**

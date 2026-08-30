@@ -52,7 +52,6 @@ export function render(): void {
   renderPass(evalSequence(sequences.overlay, beat)!, time);
 
   // -- post process pass --------------------------------------------------------------------------
-  // renders into a float framebuffer, so the video feedback keeps its sub-pixel motion
   gl.bindFramebuffer(GL_FRAMEBUFFER, framebufferPost);
 
   preparePass(programs.post, time, textureScene);

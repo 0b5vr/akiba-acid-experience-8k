@@ -6,8 +6,7 @@ import { LOG_SHADER_ERRORS } from '../config';
 /**
  * The 2D texture that the post process pass renders into.
  *
- * It has to be a float texture, otherwise the video feedback loses the sub-pixel motion
- * it accumulates over frames to the 8 bit quantization.
+ * It's a float texture since it's used for video feedback.
  */
 export const texturePost = gl.createTexture()!;
 
