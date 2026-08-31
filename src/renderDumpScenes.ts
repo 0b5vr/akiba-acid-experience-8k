@@ -21,6 +21,7 @@ const DUMP_SCENE_KEYS = [
   'plasma',
   'smiley',
   'smiley3d',
+  'smokySun',
   'swirl',
   'text',
 ] as const satisfies (keyof typeof programs)[];
