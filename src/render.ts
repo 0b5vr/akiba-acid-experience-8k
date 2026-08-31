@@ -1,9 +1,8 @@
-import { GL_FRAMEBUFFER, GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE_2D, GL_TRIANGLE_STRIP } from './gl-constants';
-import { BPM, HEIGHT, WIDTH } from './constants';
+import { GL_FRAMEBUFFER, GL_TRIANGLE_STRIP } from './gl-constants';
+import { BPM } from './constants';
 import { DUMP_SCENES, ENABLE_SEEKING, INTRO_LENGTH, START_DELAY, STOP_RENDERING_AFTER_END, STOP_RENDERING_BEFORE_START } from './config';
 import { audio } from './audio';
-import { textureFbm } from './textures/textureFbm';
-import { textureText, updateTextureText } from './textures/textureText';
+import { updateTextureText } from './textures/textureText';
 import { framebufferScene, textureScene } from './textures/textureScene';
 import { gl } from './gl';
 import { seekBeginTime } from './music';
@@ -11,6 +10,7 @@ import { programs } from './programs/programs';
 import { sequences } from './sequence/sequences';
 import { evalSequence } from './sequence/evalSequence';
 import { renderDumpScenes } from './renderDumpScenes';
+import { renderPass, preparePass } from './renderPass';
 
 import './programs/loadPrograms';
 import './sequence/buildSequences';
@@ -43,108 +43,46 @@ export function render(): void {
   // -- update text texture ------------------------------------------------------------------------
   updateTextureText(evalSequence(sequences.text, beat)!);
 
-  // -- scene pass ---------------------------------------------------------------------------------
-  let program = evalSequence(sequences.scene, beat)!;
-
-  gl.useProgram(program);
-
-  gl.activeTexture(GL_TEXTURE0);
-  gl.bindTexture(GL_TEXTURE_2D, textureFbm);
-
-  gl.activeTexture(GL_TEXTURE1);
-  gl.bindTexture(GL_TEXTURE_2D, textureText);
-
-  gl.uniform1f(
-    gl.getUniformLocation(program, 't'),
-    time,
-  );
-  gl.uniform1i(
-    gl.getUniformLocation(program, 'f'),
-    0,
-  );
-  gl.uniform1i(
-    gl.getUniformLocation(program, 'g'),
-    1,
-  );
-
+  // -- scene + overlay pass -----------------------------------------------------------------------
   gl.bindFramebuffer(GL_FRAMEBUFFER, framebufferScene);
-  gl.viewport(0, 0, WIDTH, HEIGHT);
-  gl.drawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-  // -- overlay pass ---------------------------------------------------------------------------------
-  program = evalSequence(sequences.overlay, beat)!;
-
-  gl.useProgram(program);
-
-  gl.activeTexture(GL_TEXTURE0);
-  gl.bindTexture(GL_TEXTURE_2D, textureFbm);
-
-  gl.activeTexture(GL_TEXTURE1);
-  gl.bindTexture(GL_TEXTURE_2D, textureText);
-
-  gl.uniform1f(
-    gl.getUniformLocation(program, 't'),
-    time,
-  );
-  gl.uniform1i(
-    gl.getUniformLocation(program, 'f'),
-    0,
-  );
-  gl.uniform1i(
-    gl.getUniformLocation(program, 'g'),
-    1,
-  );
-
-  gl.bindFramebuffer(GL_FRAMEBUFFER, framebufferScene);
-  gl.viewport(0, 0, WIDTH, HEIGHT);
-  gl.drawArrays(GL_TRIANGLE_STRIP, 0, 4);
+  renderPass(evalSequence(sequences.scene, beat)!, time);
+  renderPass(evalSequence(sequences.overlay, beat)!, time);
 
   // -- post process pass --------------------------------------------------------------------------
-  program = programs.post;
+  gl.bindFramebuffer(GL_FRAMEBUFFER, null);
 
-  gl.useProgram(program);
+  preparePass(programs.post, time, textureScene);
 
-  gl.activeTexture(GL_TEXTURE0);
-  gl.bindTexture(GL_TEXTURE_2D, textureScene);
-
+  // TODO: optimize these uniform names later
   gl.uniform1f(
-    gl.getUniformLocation(program, 't'),
-    time,
-  );
-  gl.uniform1i(
-    gl.getUniformLocation(program, 'f'),
-    0,
-  );
-  gl.uniform1f(
-    gl.getUniformLocation(program, 'zoom'),
+    gl.getUniformLocation(programs.post, 'zoom'),
     evalSequence(sequences.zoom, beat)!,
   );
   gl.uniform1f(
-    gl.getUniformLocation(program, 'shake'),
+    gl.getUniformLocation(programs.post, 'shake'),
     evalSequence(sequences.shake, beat)!,
   );
   gl.uniform1f(
-    gl.getUniformLocation(program, 'tile'),
+    gl.getUniformLocation(programs.post, 'tile'),
     evalSequence(sequences.tile, beat)!,
   );
   gl.uniform1f(
-    gl.getUniformLocation(program, 'kaleidoscope'),
+    gl.getUniformLocation(programs.post, 'kaleidoscope'),
     evalSequence(sequences.kaleidoscope, beat)!,
   );
   gl.uniform1f(
-    gl.getUniformLocation(program, 'codercolor'),
+    gl.getUniformLocation(programs.post, 'codercolor'),
     evalSequence(sequences.codercolor, beat)!,
   );
   gl.uniform1f(
-    gl.getUniformLocation(program, 'chougouyoku'),
+    gl.getUniformLocation(programs.post, 'chougouyoku'),
     evalSequence(sequences.chougouyoku, beat)!,
   );
   gl.uniform1f(
-    gl.getUniformLocation(program, 'white'),
+    gl.getUniformLocation(programs.post, 'white'),
     evalSequence(sequences.white, beat)!,
   );
 
-  gl.bindFramebuffer(GL_FRAMEBUFFER, null);
-  gl.viewport(0, 0, WIDTH, HEIGHT);
   gl.drawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }

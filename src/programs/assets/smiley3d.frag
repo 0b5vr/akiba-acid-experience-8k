@@ -38,9 +38,11 @@ vec3 nMap(vec3 p) {
 }
 
 float sdsmiley(vec2 p) {
+  p.x = abs(p.x);
+
   float i_dmouse = abs(length(p) - 0.55);
   float theta = atan(p.x, -p.y);
-  float i_width = mix(0.15, 0.05, smoothstep(0.0, 1.6, theta)) * cos(clamp(30.0 * (theta - 1.4), -1.3, 1.6));
+  float i_width = mix(0.15, 0.05, smoothstep(0.0, 1.6, theta)) * cos(clamp(30.0 * (theta - 1.4), -1.3, 3.1));
   float d = i_dmouse - i_width;
 
   p -= vec2(0.2, 0.3);

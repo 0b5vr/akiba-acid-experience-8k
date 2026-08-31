@@ -17,6 +17,7 @@ import postFrag from './assets/post.frag?shader';
 import smileyFrag from './assets/smiley.frag?shader';
 import smiley3dFrag from './assets/smiley3d.frag?shader';
 import smokySunFrag from './assets/smokySun.frag?shader';
+import smiley7010Frag from './assets/smiley7010.frag?shader';
 import swirlFrag from './assets/swirl.frag?shader';
 import textFrag from './assets/text.frag?shader';
 import { programs } from './programs';
@@ -43,6 +44,7 @@ programs.post = lazyQuadProgram(postFrag);
 programs.smiley = lazyQuadProgram(smileyFrag);
 programs.smiley3d = lazyQuadProgram(smiley3dFrag);
 programs.smokySun = lazyQuadProgram(smokySunFrag);
+programs.smiley7010 = lazyQuadProgram(smiley7010Frag);
 programs.swirl = lazyQuadProgram(swirlFrag);
 programs.text = lazyQuadProgram(textFrag);
 

@@ -9,6 +9,7 @@ precision highp float;
 uniform float t;
 uniform sampler2D f;
 
+// TODO: optimize these uniform names later
 uniform float zoom;
 uniform float shake;
 uniform float tile;
@@ -83,7 +84,7 @@ void main() {
   sum /= SAMPLES_F;
 
   // vignette
-  sum *= 1.0 - 0.2 * dot(p, p);
+  // sum *= 1.0 - 0.2 * dot(p, p);
 
   // codercolor
   float luma = dot(sum, LUMA);

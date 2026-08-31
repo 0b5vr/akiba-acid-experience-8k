@@ -1,30 +1,20 @@
-import { GL_COLOR_BUFFER_BIT, GL_FRAMEBUFFER, GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE_2D, GL_TRIANGLE_STRIP } from './gl-constants';
+import { GL_COLOR_BUFFER_BIT, GL_FRAMEBUFFER, GL_TRIANGLE_STRIP } from './gl-constants';
 import { BPM, HEIGHT, WIDTH } from './constants';
-import { textureFbm } from './textures/textureFbm';
-import { textureText, updateTextureText } from './textures/textureText';
+import { updateTextureText } from './textures/textureText';
 import { gl } from './gl';
 import { programs } from './programs/programs';
 import { sequences } from './sequence/sequences';
 import { evalSequence } from './sequence/evalSequence';
+import { preparePass } from './renderPass';
 
-const DUMP_SCENE_KEYS = [
-  'aep3d',
-  'box',
-  'boxarray',
-  'checkersky',
-  'crab',
-  'cubetunnel',
-  'dotmatrix',
-  'foldarc',
-  'lattice',
-  'noiseaura',
-  'plasma',
-  'smiley',
-  'smiley3d',
-  'smokySun',
-  'swirl',
-  'text',
-] as const satisfies (keyof typeof programs)[];
+const DUMP_SCENE_KEYS = Object.keys(programs).filter(
+  (key) => ![
+    'fbm',
+    'music',
+    'nop',
+    'post',
+  ].includes(key as keyof typeof programs),
+) as (keyof typeof programs)[];
 
 /**
  * Renders every scene (including overlays) to the screen in a grid layout.
@@ -45,37 +35,19 @@ export function renderDumpScenes(time: number): void {
   gl.clear(GL_COLOR_BUFFER_BIT);
 
   for (const [i, key] of DUMP_SCENE_KEYS.entries()) {
-    const program = programs[key];
     const col = i % cols;
     const row = Math.floor(i / cols);
 
-    gl.useProgram(program);
+    preparePass(programs[key], time);
 
-    gl.activeTexture(GL_TEXTURE0);
-    gl.bindTexture(GL_TEXTURE_2D, textureFbm);
-
-    gl.activeTexture(GL_TEXTURE1);
-    gl.bindTexture(GL_TEXTURE_2D, textureText);
-
-    gl.uniform1f(
-      gl.getUniformLocation(program, 't'),
-      time,
-    );
-    gl.uniform1i(
-      gl.getUniformLocation(program, 'f'),
-      0,
-    );
-    gl.uniform1i(
-      gl.getUniformLocation(program, 'g'),
-      1,
-    );
-
+    // has to come after `preparePass`, which resets the viewport to the full size
     gl.viewport(
       col * cellWidth,
       HEIGHT - (row + 1) * cellHeight,
       cellWidth,
       cellHeight,
     );
+
     gl.drawArrays(GL_TRIANGLE_STRIP, 0, 4);
   }
 }

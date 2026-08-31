@@ -46,7 +46,7 @@ const channels = [
   buffer.getChannelData(1),
 ];
 pixels.map((v, i) => (
-  channels[i % 2][~~(i / 2)] = v
+  channels[i % 2][(i / 2) | 0] = v
 ));
 
 if (EXPORT_WAV) {
@@ -137,7 +137,7 @@ if (import.meta.hot) {
 
     // -- audio ------------------------------------------------------------------------------------
     pixels.map((v, i) => (
-      channels[i % 2][~~(i / 2)] = v
+      channels[i % 2][(i / 2) | 0] = v
     ));
 
     bufferSource.stop();

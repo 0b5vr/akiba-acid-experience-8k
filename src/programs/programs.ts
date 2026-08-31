@@ -20,6 +20,7 @@ export const programs = {} as {
   smiley: WebGLProgram;
   smiley3d: WebGLProgram;
   smokySun: WebGLProgram;
+  smiley7010: WebGLProgram;
   swirl: WebGLProgram;
   text: WebGLProgram;
 };
