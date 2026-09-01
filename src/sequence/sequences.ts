@@ -9,6 +9,7 @@ export const sequences = {} as {
   tile: Sequence<number>;
   kaleidoscope: Sequence<number>;
   codercolor: Sequence<number>;
+  posterize: Sequence<number>;
   chougouyoku: Sequence<number>;
   white: Sequence<number>;
 };

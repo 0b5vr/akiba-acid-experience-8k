@@ -15,6 +15,7 @@ uniform float shake;
 uniform float tile;
 uniform float kaleidoscope;
 uniform float codercolor;
+uniform float posterize;
 uniform float chougouyoku;
 uniform float white;
 
@@ -88,7 +89,13 @@ void main() {
 
   // codercolor
   float luma = dot(sum, LUMA);
-  sum = mix(sum, 0.5 + 0.5 * cos(12.0 * luma + vec3(0, 2, 4) + 5.0 * t), codercolor);
+  vec3 i_codercolor = 0.5 + 0.5 * cos(12.0 * luma + vec3(0, 2, 4) + 5.0 * t);
+  sum = mix(sum, i_codercolor, codercolor);
+
+  // posterize
+  luma = dot(sum, LUMA);
+  vec3 i_posterized = smoothstep(0.2, 0.1, luma) * vec3(0.8, 1.0, 0.04) + smoothstep(0.6, 0.7, luma);
+  sum = mix(sum, i_posterized, posterize);
 
   // chougouyoku - neg
   sum = mix(sum, 1.0 - sum, mod(floor(t * 15.0), 2.0) * chougouyoku);

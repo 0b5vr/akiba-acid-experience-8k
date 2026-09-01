@@ -76,6 +76,10 @@ export function render(): void {
     evalSequence(sequences.codercolor, beat)!,
   );
   gl.uniform1f(
+    gl.getUniformLocation(programs.post, 'posterize'),
+    evalSequence(sequences.posterize, beat)!,
+  );
+  gl.uniform1f(
     gl.getUniformLocation(programs.post, 'chougouyoku'),
     evalSequence(sequences.chougouyoku, beat)!,
   );

@@ -100,6 +100,11 @@ sequences.codercolor = [
   [192, (b) => (fmix32(fmix32(3) ^ b * 2) % 16) < 1 ? 1 : 0],
 ];
 
+sequences.posterize = [
+  [0, () => 0.0],
+  [320 + 32, () => 1.0],
+];
+
 sequences.chougouyoku = [
   [0, () => 0.0],
   [160, () => 1.0],
@@ -121,6 +126,7 @@ if (import.meta.hot) {
   validateSequence(sequences.tile);
   validateSequence(sequences.kaleidoscope);
   validateSequence(sequences.codercolor);
+  validateSequence(sequences.posterize);
   validateSequence(sequences.chougouyoku);
   validateSequence(sequences.white);
 
