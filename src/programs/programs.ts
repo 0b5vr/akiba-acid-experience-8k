@@ -11,6 +11,7 @@ export const programs = {} as {
   dotmatrix: WebGLProgram;
   fbm: WebGLProgram;
   foldarc: WebGLProgram;
+  julia: WebGLProgram;
   lattice: WebGLProgram;
   music: WebGLProgram;
   noiseaura: WebGLProgram;

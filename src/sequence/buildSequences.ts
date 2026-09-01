@@ -18,6 +18,8 @@ sequences.scene = [
   [8, checkersky],
   [12, lattice],
   [16, boxarray],
+  [32, () => programs.swirl],
+  [48, () => programs.julia],
   [64, cubetunnel],
   [128, lattice],
   [192, (b) => [
