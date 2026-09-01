@@ -34,18 +34,6 @@ float samplesToTime(int samples) {
   return float(samples) / SAMPLE_RATE;
 }
 
-uvec3 hash3u(uvec3 v) {
-  v = v * 1145141919u + 1919810u;
-  v.x += v.y * v.z;
-  v.y += v.z * v.x;
-  v.z += v.x * v.y;
-  v ^= v >> 16u;
-  v.x += v.y * v.z;
-  v.y += v.z * v.x;
-  v.z += v.x * v.y;
-  return v;
-}
-
 int floorMod(int a, int b) {
   return (a % b + b) % b;
 }
@@ -54,9 +42,13 @@ int floorDiv(int a, int b) {
   return (a - floorMod(a, b)) / b;
 }
 
-vec3 hash3f(vec3 v) {
-  uvec3 x = floatBitsToUint(v);
-  return vec3(hash3u(x)) / float(-1u);
+// Ref: https://www.shadertoy.com/view/XlXcW4
+vec3 hash3f(vec3 s) {
+  uvec3 r = floatBitsToUint(s);
+  r = ((r >> 16u) ^ r.yzx) * 1111111111u;
+  r = ((r >> 16u) ^ r.yzx) * 1111111111u;
+  r = ((r >> 16u) ^ r.yzx) * 1111111111u;
+  return vec3(r) / float(-1u);
 }
 
 vec2 cis(float t) {
@@ -66,11 +58,6 @@ vec2 cis(float t) {
 mat2 rotate2D(float x) {
   vec2 v = cis(x);
   return mat2(v.x, v.y, -v.y, v.x);
-}
-
-float t2sSwing(float t) {
-  float st = 4.0 * t / B2T;
-  return 2.0 * floor(st / 2.0) + step(SWING, fract(0.5 * st));
 }
 
 int samplesToStepSwing(int samples) {
@@ -132,7 +119,7 @@ vec2 shotgun(float t, float spread, float snap, float fm) {
   vec2 sum = vec2(0.0);
 
   for (int i = 0; i < 64; i++) {
-    vec3 dice = hash3f(vec3(i + 1));
+    vec3 dice = hash3f(vec3(i, 64, 64));
 
     vec2 partial = exp2(spread * dice.xy);
     partial = mix(partial, floor(partial + 0.5), snap);
@@ -181,23 +168,6 @@ vec3 cyclic(vec3 p, float pers, float lacu) {
   }
 
   return sum.xyz / sum.w;
-}
-
-vec2 cheapnoise(float t) {
-  uvec3 s=uvec3(t * 256.0);
-  float p=fract(t * 256.0);
-
-  vec3 dice;
-  vec2 v = vec2(0.0);
-
-  dice=vec3(hash3u(s + 0u)) / float(-1u) - vec3(0.5, 0.5, 0.0);
-  v += dice.xy * smoothstep(1.0, 0.0, abs(p + dice.z));
-  dice=vec3(hash3u(s + 1u)) / float(-1u) - vec3(0.5, 0.5, 1.0);
-  v += dice.xy * smoothstep(1.0, 0.0, abs(p + dice.z));
-  dice=vec3(hash3u(s + 2u)) / float(-1u) - vec3(0.5, 0.5, 2.0);
-  v += dice.xy * smoothstep(1.0, 0.0, abs(p + dice.z));
-
-  return 2.0 * v;
 }
 
 void main() {
@@ -258,7 +228,7 @@ void main() {
     vec2 sum = vec2(0.0);
 
     for (int i = 0; i < 8; i++) {
-      vec3 dice = hash3f(vec3(i));
+      vec3 dice = hash3f(vec3(i, 8, 8));
       vec3 dice2 = hash3f(dice);
 
       vec2 wave = vec2(0.0);
@@ -298,14 +268,14 @@ void main() {
     float env = exp(-20.0 * max(t - 0.04, 0.0)) * smoothstep(0.0, 0.01, q);
 
     float sinphase = 234.0 * t - 4.0 * exp2(-t * 200.0);
-    float noisephase = 128.0 * t;
+    float noisephase = 1000.0 * t;
     vec2 wave = mix(
       mix(
         cis(TAU * (sinphase)),
         cis(TAU * (1.5 * sinphase)),
         0.3
       ),
-      cheapnoise(noisephase) - cheapnoise(noisephase - 0.004),
+      cyclic(vec3(cis(TAU * noisephase), TAU * noisephase), 2.0, 2.0).xy,
       0.3
     );
 
@@ -374,7 +344,7 @@ void main() {
     vec2 sum = vec2(0.0);
 
     for (int i = 0; i < 8; i++) {
-      vec3 dice = hash3f(vec3(i));
+      vec3 dice = hash3f(vec3(i, 8, 8));
       vec3 dice2 = hash3f(dice);
 
       vec2 wave = vec2(0.0);
@@ -417,14 +387,14 @@ void main() {
     );
 
     float sinphase = 234.0 * t - 4.0 * exp2(-t * 200.0);
-    float noisephase = 128.0 * t;
+    float noisephase = 1000.0 * t;
     vec2 wave = mix(
       mix(
         cis(TAU * (sinphase)),
         cis(TAU * (1.5 * sinphase)),
         0.3
       ),
-      cheapnoise(noisephase) - cheapnoise(noisephase - 0.004),
+      cyclic(vec3(cis(TAU * noisephase), TAU * noisephase), 2.0, 2.0).xy,
       0.3
     );
   
