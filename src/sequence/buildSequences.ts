@@ -1,4 +1,4 @@
-import { fmix32 } from '@0b5vr/experimental';
+import { fmix32, saturate } from '@0b5vr/experimental';
 import { programs } from '../programs/programs';
 import { sequences } from './sequences';
 import { validateSequence } from './validateSequence';
@@ -28,6 +28,10 @@ sequences.scene = [
     programs.dotmatrix,
     programs.plasma,
   ][(b * 2 | 0) % 4]],
+  [320, (b) => [
+    programs.lattice,
+    programs.cubetunnel,
+  ][(b | 0) % 2]],
 ];
 
 sequences.overlay = [
@@ -42,6 +46,7 @@ sequences.overlay = [
     programs.smiley3d,
     programs.crab,
   ][(b | 0) % 4]],
+  [320, () => programs.smiley7010],
 ];
 
 sequences.text = [
@@ -63,6 +68,7 @@ sequences.zoom = [
 sequences.shake = [
   [0, () => 0.0],
   [192, (b) => Math.exp(-10.0 * (b % 1.0))],
+  [320, () => 0.0],
 ];
 
 sequences.tile = [
@@ -77,6 +83,7 @@ sequences.tile = [
       9 - easeOutSharp(b * 2 % 1, 2.0) * 8,
     ][fmix32(fmix32(1) ^ b * 2) % 11] | 0
   ) || 1],
+  [320, () => 1.0],
 ];
 
 sequences.kaleidoscope = [
@@ -92,17 +99,19 @@ sequences.kaleidoscope = [
       2 + easeOutSharp(b * 2 % 1, 2.0) * 14,
     ][fmix32(fmix32(2) ^ b * 2) % 23] | 0
   ) || 0],
+  [320, () => 0.0],
 ];
 
 sequences.codercolor = [
   [0, () => 0.0],
   [128, () => 1.0],
   [192, (b) => (fmix32(fmix32(3) ^ b * 2) % 16) < 1 ? 1 : 0],
+  [320, () => 0.0],
 ];
 
 sequences.posterize = [
   [0, () => 0.0],
-  [320 + 32, () => 1.0],
+  [320 + 32, (b) => saturate(2.0 * b)],
 ];
 
 sequences.chougouyoku = [
