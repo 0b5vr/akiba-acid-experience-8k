@@ -31,10 +31,6 @@ const float PI = acos(-1.0);
 const float TAU = 2.0 * PI;
 const vec3 LUMA = vec3(0.2126, 0.7152, 0.0722);
 
-// mirrors WIDTH / HEIGHT in constants.ts
-const vec2 RES = vec2(1920.0, 1080.0);
-const vec2 ASP = vec2(16.0 / 9.0, 1.0);
-
 // Ref: https://www.shadertoy.com/view/XlXcW4
 vec3 hash3f(vec3 s) {
   uvec3 r = floatBitsToUint(s);
@@ -105,11 +101,12 @@ void main() {
   if (feedback > 0.0) {
     const mat3 ycc2rgb = mat3(1.0,1.0,1.0,0.0,-0.344,1.773,1.403,-0.714,0.0);
     const mat3 rgb2ycc = mat3(0.299,-0.168936,0.499413,0.587,-0.330468,-0.418931,0.114,0.499704,-0.081282);
-    vec2 su=v;su.x*=16.0 / 9.0;
+    const float ASPECT = 16.0 / 9.0;
+    vec2 su=v;su.x*=ASPECT;
     vec3 back=vec3(0),ycc=vec3(0);
     for(int i=0;i<16;i++)
     {
-      vec3 y=rgb2ycc*texture(b,(su/ASP+1.)*.5).rgb/16.;
+      vec3 y=rgb2ycc*texture(b,(su/vec2(ASPECT, 1.0)+1.)*.5).rgb/16.;
       y.yz*=rot(y.z*TAU+cos(v.x)*TAU)*1.1;
       su+=(y.yz*8.-su)*0.002;
       ycc+=y;
