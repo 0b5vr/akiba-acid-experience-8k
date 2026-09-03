@@ -28,10 +28,10 @@ gl.framebufferTexture2D(
 // -- render ---------------------------------------------------------------------------------------
 gl.useProgram(programs.music);
 
+// Metal doesn't support blending on 32F
 gl.disable(GL_BLEND);
 gl.viewport(0, 0, MUSIC_BUFFER_SIZE_SQRT, MUSIC_BUFFER_SIZE_SQRT);
 gl.drawArrays(GL_TRIANGLE_STRIP, 0, 4);
-gl.enable(GL_BLEND);
 
 // -- read pixels ----------------------------------------------------------------------------------
 const pixels = new Float32Array(2 * MUSIC_BUFFER_SIZE_SQRT * MUSIC_BUFFER_SIZE_SQRT);
@@ -131,10 +131,10 @@ if (import.meta.hot) {
     gl.clearColor(0, 0, 0, 0);
     gl.clear(GL_COLOR_BUFFER_BIT);
 
+    // Metal doesn't support blending on 32F
     gl.disable(GL_BLEND);
     gl.viewport(0, 0, MUSIC_BUFFER_SIZE_SQRT, MUSIC_BUFFER_SIZE_SQRT);
     gl.drawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    gl.enable(GL_BLEND);
 
     // -- read pixels ------------------------------------------------------------------------------
     gl.readPixels(0, 0, MUSIC_BUFFER_SIZE_SQRT, MUSIC_BUFFER_SIZE_SQRT, GL_RG, GL_FLOAT, pixels);
