@@ -2,7 +2,7 @@ import { fmix32, saturate } from '@0b5vr/experimental';
 import { programs } from '../programs/programs';
 import { sequences } from './sequences';
 import { validateSequence } from './validateSequence';
-import { easeOutSharp } from '../utils/easings';
+import { easeInSharp, easeOutSharp } from '../utils/easings';
 
 import '../programs/loadPrograms';
 
@@ -41,7 +41,7 @@ sequences.overlay = [
   [64, () => programs.smiley],
   [96, () => programs.noiseaura],
   [128, () => programs.morph3d],
-  [160, () => programs.crab],
+  [160, () => programs.smiley7010],
   [192, (b) => [
     programs.smiley3d,
     programs.aep3d,
@@ -70,14 +70,13 @@ sequences.zoom = [
 sequences.shake = [
   [0, () => 0.0],
   [64, (b) => 0.4 * Math.exp(-10.0 * (b % 1.0))],
+  [192 - 32, () => 0.0],
   [192, (b) => Math.exp(-10.0 * (b % 1.0))],
   [320, (b) => 0.4 * Math.exp(-10.0 * (b % 1.0))],
 ];
 
 sequences.tile = [
   [0, () => 1.0],
-  [160, () => 4.0],
-  [192, () => 1.0],
   [192, (b) => (
     [
       2,
@@ -91,9 +90,6 @@ sequences.tile = [
 
 sequences.kaleidoscope = [
   [0, () => 0.0],
-  [12, () => 6.0],
-  [16, () => 0.0],
-  [160, () => 8.0],
   [192, (b) => (
     [
       2,
@@ -118,19 +114,18 @@ sequences.posterize = [
 
 sequences.chougouyoku = [
   [0, () => 0.0],
-  [192 - 16, () => 1.0],
-  [192, () => 0.0],
 ];
 
 sequences.white = [
   [0, () => 0.0],
-  // [192, (b) => (b % 1.0) < 0.1 ? 1.0 : 0.0],
+  [192, (b) => 1.0 - easeOutSharp(b, 2.0)],
 ];
 
 sequences.feedback = [
   [0, () => 0.0],
-  [160 + 16, (b) => easeOutSharp(b / 16.0, 0.25)],
-  [192, () => 0.0],
+  [160 + 16, (b) => easeInSharp(b / 16.0, 4.0)],
+  [192, (b) => (b % 1 > 0.5 && (fmix32(fmix32(5) ^ b) % 4) < 1) ? 0.5 : 0],
+  [320, () => 0.0],
 ];
 
 // -- hot ------------------------------------------------------------------------------------------

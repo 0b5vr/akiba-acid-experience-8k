@@ -115,7 +115,7 @@ void main() {
     {
       vec3 y=rgb2ycc*texture(b,(su/vec2(ASPECT, 1.0)+1.)*.5).rgb/16.;
       y.yz*=rot(y.z*TAU+cos(v.x)*TAU)*1.1;
-      su+=(y.yz*8.-su)*0.002;
+      su+=(y.yz*8.-su)*0.004;
       ycc+=y;
     }
     back=(ycc2rgb*ycc);
