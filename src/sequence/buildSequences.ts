@@ -39,6 +39,7 @@ sequences.overlay = [
   [32, () => programs.smiley7010],
   [64, () => programs.smiley],
   [96, () => programs.noiseaura],
+  [128, () => programs.morph3d],
   [160, () => programs.crab],
   [192, (b) => [
     programs.smiley3d,
@@ -67,6 +68,7 @@ sequences.zoom = [
 
 sequences.shake = [
   [0, () => 0.0],
+  [64, (b) => 0.4 * Math.exp(-10.0 * (b % 1.0))],
   [192, (b) => Math.exp(-10.0 * (b % 1.0))],
   [320, () => 0.0],
 ];
@@ -104,7 +106,6 @@ sequences.kaleidoscope = [
 
 sequences.codercolor = [
   [0, () => 0.0],
-  [128, () => 1.0],
   [192, (b) => (fmix32(fmix32(3) ^ b * 2) % 16) < 1 ? 1 : 0],
   [320, () => 0.0],
 ];

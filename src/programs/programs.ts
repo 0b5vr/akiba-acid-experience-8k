@@ -14,6 +14,7 @@ export const programs = {} as {
   foldarc: WebGLProgram;
   julia: WebGLProgram;
   lattice: WebGLProgram;
+  morph3d: WebGLProgram;
   music: WebGLProgram;
   noiseaura: WebGLProgram;
   nop: WebGLProgram;
