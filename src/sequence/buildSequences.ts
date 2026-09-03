@@ -6,14 +6,13 @@ import { easeOutSharp } from '../utils/easings';
 
 import '../programs/loadPrograms';
 
-const box = () => programs.box;
 const boxarray = () => programs.boxarray;
 const checkersky = () => programs.checkersky;
 const cubetunnel = () => programs.cubetunnel;
 const lattice = () => programs.lattice;
 
 sequences.scene = [
-  [0, box],
+  [0, () => programs.iceplanes],
   [4, lattice],
   [8, checkersky],
   [12, boxarray],
