@@ -20,10 +20,11 @@ sequences.scene = [
   [32, () => programs.swirl],
   [48, () => programs.julia],
   [64, cubetunnel],
+  [96, () => programs.foldarc],
   [128, lattice],
   [192, (b) => [
     programs.lattice,
-    programs.foldarc,
+    programs.smokySun,
     programs.dotmatrix,
     programs.plasma,
   ][(b * 2 | 0) % 4]],
@@ -31,6 +32,7 @@ sequences.scene = [
     programs.lattice,
     programs.cubetunnel,
   ][(b | 0) % 2]],
+  [320 + 32, () => programs.foldarc],
 ];
 
 sequences.overlay = [
@@ -69,7 +71,7 @@ sequences.shake = [
   [0, () => 0.0],
   [64, (b) => 0.4 * Math.exp(-10.0 * (b % 1.0))],
   [192, (b) => Math.exp(-10.0 * (b % 1.0))],
-  [320, () => 0.0],
+  [320, (b) => 0.4 * Math.exp(-10.0 * (b % 1.0))],
 ];
 
 sequences.tile = [
@@ -116,7 +118,7 @@ sequences.posterize = [
 
 sequences.chougouyoku = [
   [0, () => 0.0],
-  [160, () => 1.0],
+  [192 - 16, () => 1.0],
   [192, () => 0.0],
 ];
 
