@@ -12,4 +12,5 @@ export const sequences = {} as {
   posterize: Sequence<number>;
   chougouyoku: Sequence<number>;
   white: Sequence<number>;
+  feedback: Sequence<number>;
 };

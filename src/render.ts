@@ -1,9 +1,11 @@
-import { GL_FRAMEBUFFER, GL_TRIANGLE_STRIP } from './gl-constants';
+import { GL_FRAMEBUFFER, GL_TEXTURE2, GL_TEXTURE_2D, GL_TRIANGLE_STRIP } from './gl-constants';
 import { BPM } from './constants';
 import { DUMP_SCENES, ENABLE_SEEKING, INTRO_LENGTH, START_DELAY, STOP_RENDERING_AFTER_END, STOP_RENDERING_BEFORE_START } from './config';
 import { audio } from './audio';
 import { updateTextureText } from './textures/textureText';
 import { framebufferScene, textureScene } from './textures/textureScene';
+import { copyToTextureBack, textureBack } from './textures/textureBack';
+import { framebufferPost, texturePost } from './textures/texturePost';
 import { gl } from './gl';
 import { seekBeginTime } from './music';
 import { programs } from './programs/programs';
@@ -50,9 +52,16 @@ export function render(): void {
   renderPass(evalSequence(sequences.overlay, beat)!, time);
 
   // -- post process pass --------------------------------------------------------------------------
-  gl.bindFramebuffer(GL_FRAMEBUFFER, null);
+  gl.bindFramebuffer(GL_FRAMEBUFFER, framebufferPost);
 
   preparePass(programs.post, time, textureScene);
+
+  gl.activeTexture(GL_TEXTURE2);
+  gl.bindTexture(GL_TEXTURE_2D, textureBack);
+  gl.uniform1i(
+    gl.getUniformLocation(programs.post, 'b'),
+    2,
+  );
 
   // TODO: optimize these uniform names later
   gl.uniform1f(
@@ -87,6 +96,18 @@ export function render(): void {
     gl.getUniformLocation(programs.post, 'white'),
     evalSequence(sequences.white, beat)!,
   );
+  gl.uniform1f(
+    gl.getUniformLocation(programs.post, 'feedback'),
+    evalSequence(sequences.feedback, beat)!,
+  );
 
   gl.drawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+  copyToTextureBack();
+
+  // -- copy to the canvas -------------------------------------------------------------------------
+  // a blit can't do this, the canvas is fixed point and the post framebuffer is float
+  gl.bindFramebuffer(GL_FRAMEBUFFER, null);
+
+  renderPass(programs.copy, time, texturePost);
 }

@@ -127,6 +127,12 @@ sequences.white = [
   // [192, (b) => (b % 1.0) < 0.1 ? 1.0 : 0.0],
 ];
 
+sequences.feedback = [
+  [0, () => 0.0],
+  [160 + 16, (b) => easeOutSharp(b / 16.0, 0.25)],
+  [192, () => 0.0],
+];
+
 // -- hot ------------------------------------------------------------------------------------------
 if (import.meta.hot) {
   validateSequence(sequences.scene);
@@ -140,6 +146,7 @@ if (import.meta.hot) {
   validateSequence(sequences.posterize);
   validateSequence(sequences.chougouyoku);
   validateSequence(sequences.white);
+  validateSequence(sequences.feedback);
 
   import.meta.hot.accept();
 }

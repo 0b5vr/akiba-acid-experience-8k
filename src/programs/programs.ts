@@ -7,6 +7,7 @@ export const programs = {} as {
   box: WebGLProgram;
   boxarray: WebGLProgram;
   checkersky: WebGLProgram;
+  copy: WebGLProgram;
   crab: WebGLProgram;
   cubetunnel: WebGLProgram;
   dotmatrix: WebGLProgram;
