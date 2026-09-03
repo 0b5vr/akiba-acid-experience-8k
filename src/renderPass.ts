@@ -1,4 +1,4 @@
-import { GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE_2D, GL_TRIANGLE_STRIP } from './gl-constants';
+import { GL_BLEND, GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE_2D, GL_TRIANGLE_STRIP } from './gl-constants';
 import { HEIGHT, WIDTH } from './constants';
 import { gl } from './gl';
 import { textureFbm } from './textures/textureFbm';
@@ -14,6 +14,7 @@ export function preparePass(
 ): void {
   gl.useProgram(program);
 
+  gl.enable(GL_BLEND);
   gl.viewport(0, 0, WIDTH, HEIGHT);
 
   gl.activeTexture(GL_TEXTURE0);

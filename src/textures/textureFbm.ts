@@ -1,4 +1,4 @@
-import { GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER, GL_RGBA32F, GL_TEXTURE_2D, GL_TRIANGLE_STRIP } from '../gl-constants';
+import { GL_BLEND, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER, GL_RGBA32F, GL_TEXTURE_2D, GL_TRIANGLE_STRIP } from '../gl-constants';
 import { HEIGHT, WIDTH } from '../constants';
 import { gl } from '../gl';
 import { programs } from '../programs/programs';
@@ -31,6 +31,7 @@ gl.framebufferTexture2D(
 // -- render ---------------------------------------------------------------------------------------
 gl.useProgram(programs.fbm);
 
+gl.enable(GL_BLEND);
 gl.viewport(0, 0, SIZE, SIZE);
 gl.drawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
@@ -48,6 +49,8 @@ if (import.meta.hot) {
     gl.useProgram(programs.fbm);
 
     gl.bindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+    gl.enable(GL_BLEND);
     gl.viewport(0, 0, SIZE, SIZE);
     gl.drawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
