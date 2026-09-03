@@ -1,4 +1,4 @@
-import { GL_COLOR_ATTACHMENT0, GL_COLOR_BUFFER_BIT, GL_FLOAT, GL_FRAMEBUFFER, GL_RG, GL_RG32F, GL_TEXTURE_2D, GL_TRIANGLE_STRIP } from './gl-constants';
+import { GL_BLEND, GL_COLOR_ATTACHMENT0, GL_COLOR_BUFFER_BIT, GL_FLOAT, GL_FRAMEBUFFER, GL_RG, GL_RG32F, GL_TEXTURE_2D, GL_TRIANGLE_STRIP } from './gl-constants';
 import { ENABLE_SEEKING, EXPORT_WAV, INTRO_LENGTH, MUSIC_BUFFER_SIZE_SQRT, MUSIC_SAMPLE_RATE, START_DELAY } from './config';
 import { audio } from './audio';
 import { exportWav } from './utils/exportWav';
@@ -28,8 +28,10 @@ gl.framebufferTexture2D(
 // -- render ---------------------------------------------------------------------------------------
 gl.useProgram(programs.music);
 
+gl.disable(GL_BLEND);
 gl.viewport(0, 0, MUSIC_BUFFER_SIZE_SQRT, MUSIC_BUFFER_SIZE_SQRT);
 gl.drawArrays(GL_TRIANGLE_STRIP, 0, 4);
+gl.enable(GL_BLEND);
 
 // -- read pixels ----------------------------------------------------------------------------------
 const pixels = new Float32Array(2 * MUSIC_BUFFER_SIZE_SQRT * MUSIC_BUFFER_SIZE_SQRT);
@@ -129,8 +131,10 @@ if (import.meta.hot) {
     gl.clearColor(0, 0, 0, 0);
     gl.clear(GL_COLOR_BUFFER_BIT);
 
+    gl.disable(GL_BLEND);
     gl.viewport(0, 0, MUSIC_BUFFER_SIZE_SQRT, MUSIC_BUFFER_SIZE_SQRT);
     gl.drawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    gl.enable(GL_BLEND);
 
     // -- read pixels ------------------------------------------------------------------------------
     gl.readPixels(0, 0, MUSIC_BUFFER_SIZE_SQRT, MUSIC_BUFFER_SIZE_SQRT, GL_RG, GL_FLOAT, pixels);
