@@ -12,6 +12,7 @@ export const programs = {} as {
   fbm: WebGLProgram;
   foldarc: WebGLProgram;
   lattice: WebGLProgram;
+  loxoSmiley: WebGLProgram;
   music: WebGLProgram;
   noiseaura: WebGLProgram;
   nop: WebGLProgram;
