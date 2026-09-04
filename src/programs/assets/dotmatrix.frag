@@ -39,9 +39,9 @@ void main() {
   p += 0.1 * p * length(p);
   p *= 16.0;
 
-  vec2 cell = round(p);
+  vec2 cell = floor(p + 0.5);
   float d = length(p - cell);
   float shape = smoothstep(0.5, 0.4, d);
-  shape *= cell.y == round(4.0 * boxmuller(hash3f(vec3(cell.xx, t)).xy).x) ? 1.0 : 0.1;
+  shape *= cell.y == floor(4.0 * boxmuller(hash3f(vec3(cell.xx, t)).xy).x + 0.5) ? 1.0 : 0.1;
   outColor = vec4(vec3(shape), 1.0);
 }

@@ -3,16 +3,21 @@
  */
 export const programs = {} as {
   aep3d: WebGLProgram;
+  aepchecker: WebGLProgram;
   box: WebGLProgram;
   boxarray: WebGLProgram;
   checkersky: WebGLProgram;
+  copy: WebGLProgram;
   crab: WebGLProgram;
   cubetunnel: WebGLProgram;
   dotmatrix: WebGLProgram;
   fbm: WebGLProgram;
   foldarc: WebGLProgram;
+  iceplanes: WebGLProgram;
+  julia: WebGLProgram;
   lattice: WebGLProgram;
   loxoSmiley: WebGLProgram;
+  morph3d: WebGLProgram;
   music: WebGLProgram;
   noiseaura: WebGLProgram;
   nop: WebGLProgram;
@@ -20,6 +25,7 @@ export const programs = {} as {
   post: WebGLProgram;
   smiley: WebGLProgram;
   smiley3d: WebGLProgram;
+  smokySun: WebGLProgram;
   smiley7010: WebGLProgram;
   swirl: WebGLProgram;
   text: WebGLProgram;
