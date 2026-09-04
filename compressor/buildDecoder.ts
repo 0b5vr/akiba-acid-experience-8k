@@ -1,5 +1,5 @@
 import type { CompressionParams } from './CompressionParams.ts';
-import { ANS_BITS, OUT_BITS, OUT_SYMBOLS } from './constants.ts';
+import { ANS_BITS, OUT_BITS } from './constants.ts';
 
 /**
  * Returns the approximately the value as a string in a shorter form.
@@ -235,8 +235,8 @@ export function buildDecoder(
   // check if the rANS state needs to be renormalized
   const thirdCond = `s<${pow2(ANS_BITS - OUT_BITS, precision)}`;
 
-  // if so, output a byte and read another one
-  const thirdAfter = `s=s*${OUT_SYMBOLS}|A[r++]`;
+  // if so, feed a byte from the stream into the rANS state
+  const thirdAfter = `s=s<<${OUT_BITS}|A[r++]`;
 
   const body = [
     `for(;${firstCond};${firstAfter})`,

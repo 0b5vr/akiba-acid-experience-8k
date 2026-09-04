@@ -1,8 +1,8 @@
 /** the number of bits we emit per output byte */
 export const OUT_BITS = 8;
 
-/** this is slightly configurable (ryg_rans equivalent would be 31) but let's not */
-export const ANS_BITS = 28;
+/** The width of the rANS state. */
+export const ANS_BITS = 31;
 
 export const OUT_SYMBOLS = 1 << OUT_BITS;
 export const RENORM_LIMIT = 1 << (ANS_BITS - OUT_BITS);
