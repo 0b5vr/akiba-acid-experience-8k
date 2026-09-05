@@ -11,7 +11,7 @@ in vec2 v;
 out vec4 outColor;
 
 const float TAU = 2.0 * acos(-1.0);
-const float BPS = 145.0 / 60.0;
+const float BPM = 140.0;
 
 float beatTau;
 float beatPhase;
@@ -91,7 +91,7 @@ vec3 render(vec3 ro, vec3 rd) {
 }
 
 void main() {
-  float beat = t * BPS;
+  float beat = t * BPM / 60.0;
   beatTau = beat * TAU;
   beatPhase = floor(0.5 * beat) + 0.5 + 0.5 * cos(acos(-1.0) * exp(-5.0 * fract(0.5 * beat)));
 
