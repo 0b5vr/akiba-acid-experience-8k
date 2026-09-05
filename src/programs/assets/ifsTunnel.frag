@@ -16,7 +16,7 @@ const float BPM = 140.0;
 float beatTau;
 float beatPhase;
 
-void updateHit(inout vec4 hit, float distance, float material, float intensity, float hue) {
+void union(inout vec4 hit, float distance, float material, float intensity, float hue) {
   if (distance < hit.x) {
     hit = vec4(distance, material, intensity, hue);
   }
@@ -33,7 +33,7 @@ mat2 rotate2d(float angle) {
 
 vec4 map(vec3 pos) {
   vec3 p = mod(pos, 2.0) - 1.0;
-  const vec3 offset = vec3(0.32, -0.05, 0.0);
+  const vec3 offset = vec3(0.32, -0.05, 0);
   p -= offset;
 
   for (int i = 0; i < 3; i++) {
@@ -43,9 +43,9 @@ vec4 map(vec3 pos) {
   }
 
   vec4 hit = vec4(1.0);
-  updateHit(hit, sdBox(p, vec3(1.0, 0.1, 0.1)), 1.0, 1.0, 10.0);
-  updateHit(hit, sdBox(p, vec3(0.04, 0.1, 0.11)), 0.0, 1.0, 0.4);
-  updateHit(hit, sdBox(p, vec3(1.0, 0.11, 0.01)), 0.0, clamp(cos(beatTau + TAU * pos.z / 16.0), 0.0, 1.0), 0.0);
+  union(hit, sdBox(p, vec3(1.0, 0.1, 0.1)), 1.0, 1.0, 10.0);
+  union(hit, sdBox(p, vec3(0.04, 0.1, 0.11)), 0.0, 1.0, 0.4);
+  union(hit, sdBox(p, vec3(1.0, 0.11, 0.01)), 0.0, clamp(cos(beatTau + TAU * pos.z / 16.0), 0.0, 1.0), 0.0);
   return hit;
 }
 
@@ -99,6 +99,6 @@ void main() {
   p.x *= 16.0 / 9.0;
 
   vec3 ro = vec3(0.0, 0.0, beat);
-  vec3 rd = normalize(vec3(p, 0.7));
+  vec3 rd = normalize(vec3(p, 0.5 + 0.5 * sin(beatTau / 8.0) * step(8.0, mod(beat, 16.0))));
   outColor = vec4(render(ro, rd), 1.0);
 }
