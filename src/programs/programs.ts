@@ -14,6 +14,7 @@ export const programs = {} as {
   fbm: WebGLProgram;
   foldarc: WebGLProgram;
   iceplanes: WebGLProgram;
+  ifsTunnel: WebGLProgram;
   julia: WebGLProgram;
   lattice: WebGLProgram;
   morph3d: WebGLProgram;
