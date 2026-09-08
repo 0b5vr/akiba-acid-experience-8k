@@ -4,7 +4,6 @@
 export const programs = {} as {
   aep3d: WebGLProgram;
   aepchecker: WebGLProgram;
-  box: WebGLProgram;
   boxarray: WebGLProgram;
   checkersky: WebGLProgram;
   copy: WebGLProgram;
