@@ -7,6 +7,7 @@ precision highp float;
 // #pragma shader_minifier_plugin bypass
 
 uniform float t;
+uniform float beat;
 uniform sampler2D f;
 uniform sampler2D b;
 
@@ -20,6 +21,7 @@ uniform float posterize;
 uniform float chougouyoku;
 uniform float white;
 uniform float feedback;
+uniform float flowInvert;
 
 in vec2 v;
 
@@ -45,6 +47,29 @@ mat2 rot(float a){float s=sin(a),c=cos(a);return mat2(c,s,-s,c);}
 
 vec3 calctint(float t) {
   return 3.0 * smoothstep(1.0, 0.0, abs(3.0 * t - vec3(1.0, 1.5, 2.0)));
+}
+
+// Same cyclic noise as noiseaura.frag.
+mat3 orthbas(vec3 z) {
+  z = normalize(z);
+  vec3 up = abs(z.y) < 0.99 ? vec3(0.0, 1.0, 0.0) : vec3(0.0, 0.0, 1.0);
+  vec3 x = normalize(cross(up, z));
+  return mat3(x, cross(z, x), z);
+}
+
+vec3 cyclic(vec3 p, float pers, float lacu) {
+  vec4 sum = vec4(0);
+  mat3 rot = orthbas(vec3(2, -3, 1));
+
+  for (int i = 0; i < 5; i++) {
+    p *= rot;
+    p += sin(p.zxy);
+    sum += vec4(cross(cos(p), sin(p.yzx)), 1);
+    sum /= pers;
+    p *= lacu;
+  }
+
+  return sum.xyz / sum.w;
 }
 
 void main() {
@@ -115,15 +140,32 @@ void main() {
     {
       vec3 y=rgb2ycc*texture(b,(su/vec2(ASPECT, 1.0)+1.)*.5).rgb/16.;
       y.yz*=rot(y.z*TAU+cos(v.x)*TAU)*1.1;
-      su+=(y.yz*8.-su)*0.004;
+      su+=(y.yz*8.-su)*0.004; 
       ycc+=y;
     }
     back=(ycc2rgb*ycc);
     sum = mix(sum,back*1.0, exp(-1.0 / (30.0 * feedback)));
+  } 
+
+  if (flowInvert > 0.0) {
+    vec2 texUv = v * 0.5 + 0.5;
+    vec2 dxy = 1.0 / vec2(textureSize(b, 0));
+    vec2 offset = (floor(cyclic(vec3(fract(texUv * 3.0), beat), 1.0, 1.0).xy)) * dxy;
+    vec2 flowUv = clamp(texUv + offset, 0.5 * dxy, 1.0 - 0.5 * dxy);
+    vec3 flowColor = texture(b, flowUv).rgb;
+    vec3 color;
+    if (length(flowColor) > 0.5) {
+      color = flowColor;
+    } else {
+      color = sum * 10.0;
+    }
+    color *= 0.8;
+    sum = mix(sum, color, flowInvert);
   }
 
   // white
   sum = mix(sum, vec3(1.0), white);
+
 
   outColor = vec4(sum, 1.0);
 }

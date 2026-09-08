@@ -56,6 +56,11 @@ export function render(): void {
 
   preparePass(programs.post, time, textureScene);
 
+  gl.uniform1f(
+    gl.getUniformLocation(programs.post, 'beat'),
+    beat,
+  );
+
   gl.activeTexture(GL_TEXTURE2);
   gl.bindTexture(GL_TEXTURE_2D, textureBack);
   gl.uniform1i(
@@ -99,6 +104,10 @@ export function render(): void {
   gl.uniform1f(
     gl.getUniformLocation(programs.post, 'feedback'),
     evalSequence(sequences.feedback, beat)!,
+  );
+  gl.uniform1f(
+    gl.getUniformLocation(programs.post, 'flowInvert'),
+    evalSequence(sequences.flowInvert, beat)!,
   );
 
   gl.drawArrays(GL_TRIANGLE_STRIP, 0, 4);

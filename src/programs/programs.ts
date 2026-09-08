@@ -6,6 +6,7 @@ export const programs = {} as {
   aepchecker: WebGLProgram;
   box: WebGLProgram;
   boxarray: WebGLProgram;
+  chain: WebGLProgram;
   checkersky: WebGLProgram;
   copy: WebGLProgram;
   crab: WebGLProgram;
@@ -13,6 +14,7 @@ export const programs = {} as {
   dotmatrix: WebGLProgram;
   fbm: WebGLProgram;
   foldarc: WebGLProgram;
+  boxTown: WebGLProgram;
   funnel: WebGLProgram;
   iceplanes: WebGLProgram;
   ifsTunnel: WebGLProgram;
