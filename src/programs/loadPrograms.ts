@@ -10,6 +10,7 @@ import cubetunnelFrag from './assets/cubetunnel.frag?shader';
 import dotmatrixFrag from './assets/dotmatrix.frag?shader';
 import fbmFrag from './assets/fbm.frag?shader';
 import foldarcFrag from './assets/foldarc.frag?shader';
+import funnelFrag from './assets/funnel.frag?shader';
 import iceplanesFrag from './assets/iceplanes.frag?shader';
 import juliaFrag from './assets/julia.frag?shader';
 import latticeFrag from './assets/lattice.frag?shader';
@@ -25,6 +26,7 @@ import smokySunFrag from './assets/smokySun.frag?shader';
 import smiley7010Frag from './assets/smiley7010.frag?shader';
 import swirlFrag from './assets/swirl.frag?shader';
 import textFrag from './assets/text.frag?shader';
+import textscrollFrag from './assets/textscroll.frag?shader';
 import { programs } from './programs';
 
 // -- programs -------------------------------------------------------------------------------------
@@ -42,6 +44,7 @@ programs.cubetunnel = lazyQuadProgram(cubetunnelFrag);
 programs.dotmatrix = lazyQuadProgram(dotmatrixFrag);
 programs.fbm = lazyQuadProgram(fbmFrag);
 programs.foldarc = lazyQuadProgram(foldarcFrag);
+programs.funnel = lazyQuadProgram(funnelFrag);
 programs.iceplanes = lazyQuadProgram(iceplanesFrag);
 programs.julia = lazyQuadProgram(juliaFrag);
 programs.lattice = lazyQuadProgram(latticeFrag);
@@ -57,6 +60,7 @@ programs.smokySun = lazyQuadProgram(smokySunFrag);
 programs.smiley7010 = lazyQuadProgram(smiley7010Frag);
 programs.swirl = lazyQuadProgram(swirlFrag);
 programs.text = lazyQuadProgram(textFrag);
+programs.textscroll = lazyQuadProgram(textscrollFrag);
 
 // -- hot ------------------------------------------------------------------------------------------
 if (import.meta.hot) {

@@ -13,6 +13,7 @@ export const programs = {} as {
   dotmatrix: WebGLProgram;
   fbm: WebGLProgram;
   foldarc: WebGLProgram;
+  funnel: WebGLProgram;
   iceplanes: WebGLProgram;
   julia: WebGLProgram;
   lattice: WebGLProgram;
@@ -28,4 +29,5 @@ export const programs = {} as {
   smiley7010: WebGLProgram;
   swirl: WebGLProgram;
   text: WebGLProgram;
+  textscroll: WebGLProgram;
 };
