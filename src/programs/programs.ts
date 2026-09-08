@@ -17,6 +17,7 @@ export const programs = {} as {
   iceplanes: WebGLProgram;
   julia: WebGLProgram;
   lattice: WebGLProgram;
+  loxoSmiley: WebGLProgram;
   morph3d: WebGLProgram;
   music: WebGLProgram;
   noiseaura: WebGLProgram;
