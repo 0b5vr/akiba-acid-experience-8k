@@ -15,6 +15,10 @@ const float ASPECT = 16.0 / 9.0;
 const float BPS = 140.0 / 60.0;
 const float NOISE_SCALE = 0.1;
 
+mat2 r2d(float t) {
+  return mat2(cos(t), sin(t), -sin(t), cos(t));
+}
+
 float fbm(vec2 p) {
   return 0.5 + 0.5 * texture(f, p).x;
 }
@@ -124,9 +128,8 @@ vec3 sunColor(vec2 uv) {
     return vec3(0.0);
   }
 
-  mat2 rotation = mat2(cos(t), sin(t), -sin(t), cos(t));
   float halo = sunHalo(
-    p * rotation,
+    p * r2d(t),
     0.3,
     0.5,
     24.0

@@ -27,8 +27,8 @@ float sdBox(vec3 p, vec3 size) {
   return length(max(q, 0.0)) + min(0.0, max(q.x, max(q.y, q.z)));
 }
 
-mat2 rotate2d(float angle) {
-  return mat2(cos(angle), sin(angle), -sin(angle), cos(angle));
+mat2 r2d(float t) {
+  return mat2(cos(t), sin(t), -sin(t), cos(t));
 }
 
 vec4 map(vec3 pos) {
@@ -38,8 +38,8 @@ vec4 map(vec3 pos) {
 
   for (int i = 0; i < 3; i++) {
     p = abs(p + offset) - offset;
-    p.xz *= rotate2d(TAU * 0.8);
-    p.zy *= rotate2d(TAU * 0.2 + beatPhase + pos.z * 0.1);
+    p.xz *= r2d(TAU * 0.8);
+    p.zy *= r2d(TAU * 0.2 + beatPhase + pos.z * 0.1);
   }
 
   vec4 hit = vec4(1.0);
