@@ -284,13 +284,19 @@ export const shaderMinifierPlugin: (
       }
 
       if (!minify) {
-        return `export default \`${src}\`;`;
+        return {
+          code: `export default \`${src}\`;`,
+          map: null,
+        };
       }
 
       if (bypassRegex.test(src)) {
         console.warn(`#pragma shader_minifier_plugin bypass detected in ${id}. Bypassing shader minifier`);
 
-        return `export default \`${src}\`;`;
+        return {
+          code: `export default \`${src}\`;`,
+          map: null,
+        };
       }
 
       if (!batch || isServe) {
@@ -300,6 +306,7 @@ export const shaderMinifierPlugin: (
 
         return {
           code: `export default \`${minified}\`;`,
+          map: null,
         };
       } else {
         // batch mode: register the shader source and return a placeholder string
@@ -309,6 +316,7 @@ export const shaderMinifierPlugin: (
 
         return {
           code: `export default \`${placeholder}\`;`,
+          map: null,
         };
       }
     },
