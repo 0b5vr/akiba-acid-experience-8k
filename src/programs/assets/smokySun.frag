@@ -15,8 +15,30 @@ const float ASPECT = 16.0 / 9.0;
 const float BPS = 140.0 / 60.0;
 const float NOISE_SCALE = 0.1;
 
+mat3 orthbas(vec3 z) {
+  z = normalize(z);
+  vec3 up = abs(z.y) < 0.99 ? vec3(0.0, 1.0, 0.0) : vec3(0.0, 0.0, 1.0);
+  vec3 x = normalize(cross(up, z));
+  return mat3(x, cross(z, x), z);
+}
+
 float fbm(vec2 p) {
   return 0.5 + 0.5 * texture(f, p).x;
+}
+
+vec3 cyclic(vec3 p, float pers, float lacu) {
+  vec4 sum = vec4(0);
+  mat3 rot = orthbas(vec3(2, -3, 1));
+
+  for (int i = 0; i < 5; i++) {
+    p *= rot;
+    p += sin(p.zxy);
+    sum += vec4(cross(cos(p), sin(p.yzx)), 1);
+    sum /= pers;
+    p *= lacu;
+  }
+
+  return sum.xyz / sum.w;
 }
 
 float smokeDensity(vec2 uv) {
@@ -85,18 +107,24 @@ float sunHalo(
     + 0.6 * p
     + vec2(0.002, -0.003) * t;
   float noise = fbm(noiseUv);
-  float phase = rays * a + 4.0 * (noise - 0.5);
 
-  vec2 rootUv =
-    vec2(0.5)
-    + 0.6 * radius * normalize(p)
-    + vec2(0.002, -0.003) * t;
-  float rayLength = mix(
-    0.55,
-    1.2,
-    fbm(rootUv + vec2(0.37, 0.19))
-  );
-  float rayProgress = clamp(radialPhase / rayLength, 0.0, 1.0);
+  vec3 noiseP = vec3(2.0 * cos(a), 2.0 * sin(a), 1.5 * radialPhase - 0.3 * t);
+  float bendNoise = cyclic(noiseP + noise * 0.2, .8, 1.3).x;
+  float bendEnvelope = smoothstep(0.0, 0.5, radialPhase);
+
+  float phase =
+    rays * a
+    + 5.0 * bendEnvelope * bendNoise;
+
+  float lengthNoise = 0.5 + 0.5 * cyclic(vec3(
+    1.7 * cos(a),
+    1.7 * sin(a),
+    .1 * t
+  ), 0.5, 2.0).y;
+
+  float rayLength = mix(0.8, 1.2, lengthNoise);
+
+  float rayProgress = clamp(radialPhase, 0.0, 1.0);
   float ray = pow(
     0.5 + 0.5 * cos(phase),
     mix(6.0, 48.0, rayProgress)
@@ -126,7 +154,7 @@ vec3 sunColor(vec2 uv) {
 
   mat2 rotation = mat2(cos(t), sin(t), -sin(t), cos(t));
   float halo = sunHalo(
-    p * rotation,
+    p ,
     0.3,
     0.5,
     24.0
