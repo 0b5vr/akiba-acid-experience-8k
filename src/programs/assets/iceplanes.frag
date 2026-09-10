@@ -5,7 +5,6 @@ precision highp float;
 //]
 
 uniform float t;
-uniform sampler2D f;
 
 in vec2 v;
 
