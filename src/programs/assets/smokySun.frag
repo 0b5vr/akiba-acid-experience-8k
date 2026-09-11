@@ -91,54 +91,6 @@ float sdCircle(vec2 p, vec3 circle) {
   return distance(p, circle.xy) - circle.z;
 }
 
-float sunHalo(
-  vec2 p,
-  float radius,
-  float haloWidth,
-  float rays
-) {
-  float r = length(p);
-  float a = atan(p.y, p.x);
-  float radialDistance = r - radius;
-  float radialPhase = max(radialDistance / haloWidth, 0.0);
-
-  vec2 noiseUv =
-    vec2(0.5)
-    + 0.6 * p
-    + vec2(0.002, -0.003) * t;
-  float noise = fbm(noiseUv);
-
-  vec3 noiseP = vec3(2.0 * cos(a), 2.0 * sin(a), 1.5 * radialPhase - 0.3 * t);
-  float bendNoise = cyclic(noiseP + noise * 0.2, .8, 1.3).x;
-  float bendEnvelope = smoothstep(0.0, 0.5, radialPhase);
-
-  float phase =
-    rays * a
-    + 5.0 * bendEnvelope * bendNoise;
-
-  float lengthNoise = 0.5 + 0.5 * cyclic(vec3(
-    1.7 * cos(a),
-    1.7 * sin(a),
-    .1 * t
-  ), 0.5, 2.0).y;
-
-  float rayLength = mix(0.8, 1.2, lengthNoise);
-
-  float rayProgress = clamp(radialPhase, 0.0, 1.0);
-  float ray = pow(
-    0.5 + 0.5 * cos(phase),
-    mix(6.0, 48.0, rayProgress)
-  );
-
-  float outer = 1.0 - smoothstep(
-    rayLength - 0.18,
-    rayLength,
-    radialPhase
-  );
-
-  return ray * outer;
-}
-
 vec2 borderCoord(vec2 uv) {
   float bottom = uv.y;
   float top = 1.0 - uv.y;
@@ -190,12 +142,6 @@ float borderHalo(vec2 uv, float rays) {
   return ray * inner;
 }
 
-  float hash21(vec2 p) {
-    p = fract(p * vec2(123.34, 345.45));
-    p += dot(p, p + 34.345);
-    return fract(p.x * p.y);
-  }
-
   float hash(vec3 p) {
     p = fract(p * 0.3183099 + vec3(0.71, 0.113, 0.419));
     p *= 17.0;
@@ -243,8 +189,7 @@ vec3 sunColor(vec2 uv) {
   vec2 p = uv - 0.5;
   p.x *= ASPECT;
   float rt = 0.5 * t;
-    mat2 rotation = mat2(cos(rt), sin(rt), -sin(rt), cos(rt));
-
+  mat2 rotation = mat2(cos(rt), sin(rt), -sin(rt), cos(rt));
 
   float pulseRadius = 0.1 + 0.1 * exp(-8.0 * mod(t, 1.0 / BPS));
   if (sdhexagram(rotation * (p - vec2(0.6, 0.0)), 0.12) < 0.0) {
@@ -255,26 +200,8 @@ vec3 sunColor(vec2 uv) {
     return vec3(0.55, 0.0, 0.02);
   }
 
-  float halo = sunHalo(
-    p ,
-    0.3,
-    0.5,
-    24.0
-  );
-  halo = max(0., borderHalo(uv, 48.0));
-  vec3 bgColor = vec3(0.9215, 0.54117, 0.1294);
-  float grain = hash(vec3(
-      gl_FragCoord.xy,
-      floor(13.0 )
-    )) - 0.5;
-  float colorNoise = cyclic(
-    vec3(2.0 * p, 0.5),
-    0.7,
-    1.6
-  ).x;
-   // bgColor *= 1.0 + 0.14 * grain;
-  vec3 c = mix(bgColor, vec3(0.55, 0.16, 0.02), colorNoise);
-  return mix(bgColor, vec3(0), smoothstep(0.0, 0.1, halo));
+  // bg
+  return vec3(0.9215, 0.54117, 0.1294);
 }
 
 // -- main ----------------------------------------------------------------------------------------
@@ -285,9 +212,13 @@ void main() {
 
   float grain = hash(vec3(
     gl_FragCoord.xy,
-    floor(13.0)
+    floor(10.0 * t)
   )) - 0.5;
-  color *= 1.0 + 0.14 * grain;
+  color *= 1.0 + 0.3 * grain;
+
+  float halo = max(0., borderHalo(uv, 48.0));
+  color = mix(color, vec3(0), smoothstep(0.0, 0.1, halo));
+
   color = mix(color, vec3(1.0), density);
 
   outColor = vec4(color, 1.0);
