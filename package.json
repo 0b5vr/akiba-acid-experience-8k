@@ -8,6 +8,7 @@
     "build": "pnpm build-js && pnpm build-comp",
     "build-js": "vite build --mode prod",
     "build-comp": "deno run --allow-read --allow-write --allow-run compressor/index.ts -P=compression-params.json dist/assets/*.js dist/compressed.html",
+    "analyze": "deno run --allow-read --allow-write --allow-run compressor/index.ts -P=compression-params.json --analyze=dist/assets/*.js.map dist/assets/*.js dist/compressed.html",
     "lint": "eslint",
     "lint-fix": "eslint --fix",
     "typecheck": "tsc",
