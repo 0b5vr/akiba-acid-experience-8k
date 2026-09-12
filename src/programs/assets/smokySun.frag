@@ -142,48 +142,47 @@ float borderHalo(vec2 uv, float rays) {
   return ray * inner;
 }
 
-  float hash(vec3 p) {
-    p = fract(p * 0.3183099 + vec3(0.71, 0.113, 0.419));
-    p *= 17.0;
-    return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+float hash(vec3 p) {
+  p = fract(p * 0.3183099 + vec3(0.71, 0.113, 0.419));
+  p *= 17.0;
+  return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+}
+
+float sdtriangle(vec2 p, float r) {
+  const float SQRT3 = sqrt(3.0);
+
+  p.x = abs(p.x) - r;
+  p.y += r / SQRT3;
+
+  if (p.x + SQRT3 * p.y > 0.0) {
+    p = vec2(
+      p.x - SQRT3 * p.y,
+      -SQRT3 * p.x - p.y
+    ) / 2.0;
   }
 
-  float sdtriangle(vec2 p, float r) {
-    const float SQRT3 = sqrt(3.0);
+  p.x -= clamp(p.x, -2.0 * r, 0.0);
 
-    p.x = abs(p.x) - r;
-    p.y += r / SQRT3;
+  return -length(p) * sign(p.y);
+}
 
-    if (p.x + SQRT3 * p.y > 0.0) {
-      p = vec2(
-        p.x - SQRT3 * p.y,
-        -SQRT3 * p.x - p.y
-      ) / 2.0;
-    }
+float sdhexagram(vec2 p, float r) {
+  float upward = sdtriangle(p, r);
+  float downward = sdtriangle(-p, r);
+  return min(upward, downward);
+}
 
-    p.x -= clamp(p.x, -2.0 * r, 0.0);
+float sdCrescent(
+  vec2 p,
+  float outerRadius,
+  float innerRadius,
+  vec2 cutOffset
+) {
+  float outer = length(p) - outerRadius;
+  float cut = length(p- cutOffset) - innerRadius;
 
-    return -length(p) * sign(p.y);
-  }
-
-  float sdhexagram(vec2 p, float r) {
-    float upward = sdtriangle(p, r);
-    float downward = sdtriangle(-p, r);
-    return min(upward, downward);
-  }
-
-
-  float sdCrescent(
-    vec2 p,
-    float outerRadius,
-    float innerRadius,
-    vec2 cutOffset
-  ) {
-    float outer = length(p) - outerRadius;
-    float cut = length(p- cutOffset) - innerRadius;
-
-    return max(outer, -cut);
-  }
+  return max(outer, -cut);
+}
 
 vec3 sunColor(vec2 uv) {
   vec2 p = uv - 0.5;
@@ -217,7 +216,10 @@ void main() {
   color *= 1.0 + 0.3 * grain;
 
   float halo = max(0., borderHalo(uv, 48.0));
-  color = mix(color, vec3(0), smoothstep(0.0, 0.1, halo));
+  vec3 haloColor = vec3(0.1, 0.088, 0.072);
+  haloColor *= 1.0 + 1.8 * grain;
+  
+  color = mix(color, haloColor, smoothstep(0.0, 0.1, halo));
 
   color = mix(color, vec3(1.0), density);
 
