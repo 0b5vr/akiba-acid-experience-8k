@@ -13,7 +13,7 @@ out vec4 outColor;
 const float PI = acos(-1.0);
 const float BPS = 140.0 / 60.0;
 const float A = 5.0;
-const float T = 0.12;
+const float T = 0.07;
 const float RMAX = 10.0;
 
 vec3 hash3f(vec3 s) {
@@ -39,6 +39,19 @@ float sdsmiley(vec2 p) {
   return d;
 }
 
+vec3 noise3(float x) {
+  vec3 n = vec3(0.0);
+  for(int i = 0; i < 2; i++) {
+    n += (mix(
+      hash3f(vec3(floor(x), 3.0, float(i))),
+      hash3f(vec3(floor(x) + 1.0, 3.0, float(i))),
+      smoothstep(0.0, 1.0, fract(x))
+    ) - 0.5) / float(1 + i);
+    x *= 2.0;
+  }
+  return n;
+}
+
 mat2 r2d(float t) {
   return mat2(cos(t), sin(t), -sin(t), cos(t));
 }
@@ -48,19 +61,19 @@ float slope(float r) {
 }
 
 float map(vec3 p) {
-  float r = length(p.xz);
+  float r = max(length(p.xz), 0.1);
   return (p.y + A / r - T * r) / (1.0 + slope(r));
 }
 
 void main() {
   float b = t * BPS;
 
-  vec2 p = v;
-  p.x *= 16.0 / 9.0;
-
-  vec3 ro = vec3(0.0, 1.8, 3.6);
-  vec3 rd = normalize(vec3(p, -1.25));
-  rd.yz *= r2d(0.81);
+  vec3 ro = vec3(0.0, 1.8, 3.6) + vec3(1.6, 0.2, 1.2) * noise3(0.1 * b);
+  vec3 m = noise3(0.125 * b);
+  vec3 rd = normalize(vec3(v.x * 16.0 / 9.0, v.y, -1.5));
+  rd.xy *= r2d(0.12 * m.x);
+  rd.yz *= r2d(0.81 + 0.18 * m.y);
+  rd.xz *= r2d(0.15 * m.z);
 
   float rl = 0.0;
   vec3 rp;
@@ -79,7 +92,7 @@ void main() {
   if(dist < 0.001) {
     float r = length(rp.xz);
 
-    vec2 g = vec2(4.0 * rp.y + 0.8 * b, 12.0 * atan(rp.z, rp.x) / PI);
+    vec2 g = vec2(4.0 * rp.y - 1.2 * b, 12.0 * atan(rp.z, rp.x) / PI);
     vec2 w = min(fwidth(g), 0.1);
     float px = max(6.0 / rl, 1.0);
     vec2 i_lines = smoothstep((px + 0.5) * w, (px - 0.5) * w, 0.5 - abs(fract(g) - 0.5));
