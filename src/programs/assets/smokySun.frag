@@ -19,6 +19,10 @@ mat2 r2d(float t) {
   return mat2(cos(t), sin(t), -sin(t), cos(t));
 }
 
+vec2 cis(float t) {
+  return vec2(cos(t), sin(t));
+}
+
 mat3 orthbas(vec3 z) {
   z = normalize(z);
   vec3 up = abs(z.y) < 0.99 ? vec3(0.0, 1.0, 0.0) : vec3(0.0, 0.0, 1.0);
@@ -128,8 +132,7 @@ float borderHalo(vec2 uv, float rays) {
     2.0
   ));
   vec3 noiseP = vec3(
-    2.0 * cos(angle),
-    2.0 * sin(angle),
+    2.0 * cis(angle),
     8.0 * depth - 0.3 * t + 3.0 * h
   );
   float bendNoise = cyclic(noiseP, 0.8, 1.3).x;
@@ -137,8 +140,7 @@ float borderHalo(vec2 uv, float rays) {
   float phase = rays * angle + 3. * bendEnvelope * bendNoise;
 
   float lengthNoise = 0.5 + 0.5 * cyclic(vec3(
-    1.7 * cos(angle),
-    1.7 * sin(angle),
+    1.7 * cis(angle),
     0.1 * t + 3.0 * h
   ), 0.8, 2.0).y;
   float rayLength = mix(0.12, 0.45, lengthNoise);
@@ -157,21 +159,14 @@ float borderHalo(vec2 uv, float rays) {
   return ray * inner;
 }
 
-float sdtriangle(vec2 p, float r) {
+float sdtriangle(in vec2 p, in float r) {
   const float SQRT3 = sqrt(3.0);
-
   p.x = abs(p.x) - r;
-  p.y += r / SQRT3;
-
+  p.y = p.y + r / SQRT3;
   if (p.x + SQRT3 * p.y > 0.0) {
-    p = vec2(
-      p.x - SQRT3 * p.y,
-      -SQRT3 * p.x - p.y
-    ) / 2.0;
+    p = vec2(p.x - SQRT3 * p.y, -SQRT3 * p.x - p.y) / 2.0;
   }
-
   p.x -= clamp(p.x, -2.0 * r, 0.0);
-
   return -length(p) * sign(p.y);
 }
 
