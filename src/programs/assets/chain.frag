@@ -4,75 +4,87 @@
 precision highp float;
 //]
 
-// Ported from the user-provided Shadertoy-style chain shader.
 uniform float t;
 
 in vec2 v;
 
 out vec4 outColor;
 
-const float PI = acos(-1.0);
-
-float sd_chain(vec3 p, float le, float r1, float r2) {
-  vec3 q = vec3(p.x, max(abs(p.y) - le, 0.0), p.z);
-  return length(vec2(length(q.xy) - r1, q.z)) - r2;
+mat2 r2d(float t) {
+  return mat2(cos(t), sin(t), -sin(t), cos(t));
 }
 
-vec3 rotate(vec3 p, vec3 axis, float theta) {
-  float cosTheta = cos(theta);
-  float sinTheta = sin(theta);
-  return p * cosTheta + cross(axis, p) * sinTheta + axis * dot(axis, p) * (1.0 - cosTheta);
+mat3 orthbas(vec3 z) {
+  z = normalize(z);
+  vec3 up = abs(z.y) < 0.99 ? vec3(0.0, 1.0, 0.0) : vec3(0.0, 0.0, 1.0);
+  vec3 x = normalize(cross(up, z));
+  return mat3(x, cross(z, x), z);
+}
+
+vec3 cyclic(vec3 p, float pers, float lacu) {
+  vec4 sum = vec4(0);
+  mat3 rot = orthbas(vec3(2, -3, 1));
+
+  for (int i = 0; i < 5; i++) {
+    p *= rot;
+    p += sin(p.zxy);
+    sum += vec4(cross(cos(p), sin(p.yzx)), 1);
+    sum /= pers;
+    p *= lacu;
+  }
+
+  return sum.xyz / sum.w;
+}
+
+float sd_chain(vec3 p) {
+  p.z = max(abs(p.z) - 0.3, 0.0);
+  return length(vec2(length(p.xz) - 0.2, p.y)) - 0.05;
 }
 
 float map(vec3 p) {
-  p = rotate(p, vec3(1.0, 0.0, 0.0), PI * 0.5);
-  p = rotate(p, vec3(0.0, 1.0, 0.0), p.y * 0.1);
-  p -= vec3(1.0, 0.0, 2.0);
+  p.xy *= r2d(0.1 * p.z);
+  p.xy = fract(p.xy) - 0.5;
+  p.z = mod(p.z, 1.5) - 0.75;
 
-  p.xz = mod(p.xz, 2.0) - 1.0;
-  vec3 p1 = p;
-  p1.y = mod(p1.y, 1.5) - 0.75;
-  float d1 = sd_chain(p1, 0.3, 0.2, 0.05);
+  vec3 q = p;
+  q.z = abs(q.z) - 0.75;
+  q.xy = q.yx;
 
-  vec3 p2 = p;
-  p2.y += 0.75;
-  p2 = rotate(p2, vec3(0.0, 1.0, 0.0), PI / 2.0);
-  p2.y = mod(p2.y, 1.5) - 0.75;
-  float d2 = sd_chain(p2, 0.3, 0.2, 0.05);
-
-  return min(d1, d2);
+  return min(sd_chain(p), sd_chain(q));
 }
 
-vec3 getNormal(vec3 p) {
-  vec2 e = vec2(1.0, -1.0) * 0.001;
+vec3 nMap(vec3 p) {
+  const vec2 d = vec2(0.0, 0.001);
   return normalize(vec3(
-    map(p + e.xyy) - map(p + e.yyy),
-    map(p + e.yxy) - map(p + e.yyy),
-    map(p + e.yyx) - map(p + e.yyy)
+    map(p + d.yxx) - map(p - d.yxx),
+    map(p + d.xyx) - map(p - d.xyx),
+    map(p + d.xxy) - map(p - d.xxy)
   ));
 }
 
 void main() {
-  vec2 uv = v;
-  uv.x *= 16.0 / 9.0;
-  vec3 col = vec3(0.0);
+  vec2 p = v;
+  p.x *= 16.0 / 9.0;
 
-  vec3 ro = vec3(0.0, 0.0, -1.0 + t * 10.0);
-  vec3 rd = normalize(vec3(uv, 1.0));
+  vec3 ro = vec3(0.0, 0.0, 1.0 - t * 10.0);
+  vec3 rd = normalize(vec3(p, -2.0));
+  float rl = 0.0;
+  float dist;
 
-  vec3 p = ro;
   for (int i = 0; i < 100; i++) {
-    float d = map(p);
-    if (d < 0.001) {
-      vec3 n = getNormal(p);
-      vec3 light = normalize(ro + vec3(0.0, 0.0, 100.0) - p);
-      vec3 h = normalize(light - rd);
-      // abs preserves the even power while avoiding pow's undefined negative base.
-      col = vec3(1.0 - float(i) / 100.0) * pow(abs(dot(h, n)), 10.0) * 5.0;
-      break;
-    }
-    p += rd * d;
+    dist = map(ro + rd * rl);
+    rl += dist;
   }
 
-  outColor = vec4(col, 1.0);
+  outColor = vec4(0.0, 0.0, 0.0, 1.0);
+  if (dist < 0.01) {
+    vec3 i_n = nMap(ro + rd * rl);
+    vec3 r = reflect(rd, i_n);
+    r.yz *= r2d(t);
+    float i_fog = exp(-0.4 * rl);
+
+    float i_rawnoise = cyclic(4.0 * r, 0.5, 2.0).x;
+    float i_noise = 4.0 * pow(0.5 + 0.5 * i_rawnoise, 4.0);
+    outColor = vec4(vec3(i_fog * i_noise), 1.0);
+  }
 }
