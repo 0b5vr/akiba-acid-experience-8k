@@ -33,6 +33,8 @@ sequences.scene = [
     programs.cubetunnel,
   ][(b | 0) % 2]],
   [320 + 32, () => programs.foldarc],
+  [352, () => programs.boxTown],
+  [360, () => programs.chain],
 ];
 
 sequences.overlay = [
@@ -109,7 +111,7 @@ sequences.codercolor = [
 
 sequences.posterize = [
   [0, () => 0.0],
-  [320 + 32, (b) => saturate(2.0 * b)],
+  [360 + 32, (b) => saturate(2.0 * b)],
 ];
 
 sequences.chougouyoku = [
@@ -128,6 +130,15 @@ sequences.feedback = [
   [320, () => 0.0],
 ];
 
+// 0 disables flow inversion; 1 applies the full effect from the first beat.
+sequences.flowInvert = [
+  [0, () => 1.0],
+];
+
+sequences.flowInvert = [
+]
+
+
 // -- hot ------------------------------------------------------------------------------------------
 if (import.meta.hot) {
   validateSequence(sequences.scene);
@@ -142,6 +153,7 @@ if (import.meta.hot) {
   validateSequence(sequences.chougouyoku);
   validateSequence(sequences.white);
   validateSequence(sequences.feedback);
+  validateSequence(sequences.flowInvert);
 
   import.meta.hot.accept();
 }

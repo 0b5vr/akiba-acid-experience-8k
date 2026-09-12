@@ -13,4 +13,5 @@ export const sequences = {} as {
   chougouyoku: Sequence<number>;
   white: Sequence<number>;
   feedback: Sequence<number>;
+  flowInvert: Sequence<number>;
 };
