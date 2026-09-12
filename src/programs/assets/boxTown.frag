@@ -12,6 +12,8 @@ in vec2 v;
 
 out vec4 outColor;
 
+const float BPM = 140.0;
+
 const uint C_HASH = 2309480282U;
 
 vec3 hash33(vec3 p) {
@@ -59,11 +61,13 @@ float easeOut(float x, float n) {
 }
 
 float map(vec3 p) {
+  float beat = t * BPM / 60.0;
+
   p.xz -= gridCenter;
   float offset = mix(
-    hash13(vec3(gridCenter, floor(t))),
-    hash13(vec3(gridCenter, floor(t) + 1.0)),
-    easeOut(fract(t), 10.0)
+    hash13(vec3(gridCenter, floor(beat))),
+    hash13(vec3(gridCenter, floor(beat) + 1.0)),
+    easeOut(fract(beat), 4.0)
   ) * 7.0 - 3.0;
   float d = min(
     sdBox(p + vec3(0.0, offset, 0.0), vec3(0.3, 4.0, 0.3)),

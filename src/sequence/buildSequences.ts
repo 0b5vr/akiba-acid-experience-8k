@@ -8,7 +8,6 @@ import '../programs/loadPrograms';
 
 const boxarray = () => programs.boxarray;
 const checkersky = () => programs.checkersky;
-const cubetunnel = () => programs.cubetunnel;
 const lattice = () => programs.lattice;
 
 sequences.scene = [
@@ -19,8 +18,10 @@ sequences.scene = [
   [16, () => programs.aepchecker],
   [32, () => programs.swirl],
   [48, () => programs.julia],
-  [64, cubetunnel],
+  [64, () => programs.cubetunnel],
+  [72, () => programs.chain],
   [96, () => programs.foldarc],
+  [112, () => programs.boxTown],
   [128, lattice],
   [192, (b) => [
     programs.lattice,
