@@ -131,14 +131,11 @@ sequences.feedback = [
   [320, () => 0.0],
 ];
 
-// 0 disables flow inversion; 1 applies the full effect from the first beat.
 sequences.flowInvert = [
-  [0, () => 1.0],
+  [0, () => 0.0],
+  [192, (b) => (b % 1 > 0.5 && (fmix32(fmix32(6) ^ b) % 4) < 1) ? 0.9 : 0],
+  [320, () => 0.0],
 ];
-
-sequences.flowInvert = [
-]
-
 
 // -- hot ------------------------------------------------------------------------------------------
 if (import.meta.hot) {
