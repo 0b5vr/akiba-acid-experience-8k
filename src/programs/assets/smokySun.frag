@@ -19,8 +19,40 @@ mat2 r2d(float t) {
   return mat2(cos(t), sin(t), -sin(t), cos(t));
 }
 
+vec2 cis(float t) {
+  return vec2(cos(t), sin(t));
+}
+
+mat3 orthbas(vec3 z) {
+  z = normalize(z);
+  vec3 up = abs(z.y) < 0.99 ? vec3(0.0, 1.0, 0.0) : vec3(0.0, 0.0, 1.0);
+  vec3 x = normalize(cross(up, z));
+  return mat3(x, cross(z, x), z);
+}
+
 float fbm(vec2 p) {
   return 0.5 + 0.5 * texture(f, p).x;
+}
+
+vec3 cyclic(vec3 p, float pers, float lacu) {
+  vec4 sum = vec4(0);
+  mat3 rot = orthbas(vec3(2, -3, 1));
+
+  for (int i = 0; i < 5; i++) {
+    p *= rot;
+    p += sin(p.zxy);
+    sum += vec4(cross(cos(p), sin(p.yzx)), 1);
+    sum /= pers;
+    p *= lacu;
+  }
+
+  return sum.xyz / sum.w;
+}
+
+float hash(vec3 p) {
+  p = fract(p * 0.3183099 + vec3(0.71, 0.113, 0.419));
+  p *= 17.0;
+  return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
 }
 
 float smokeDensity(vec2 uv) {
@@ -73,75 +105,126 @@ float sdCircle(vec2 p, vec3 circle) {
   return distance(p, circle.xy) - circle.z;
 }
 
-float sunHalo(
-  vec2 p,
-  float radius,
-  float haloWidth,
-  float rays
-) {
-  float r = length(p);
-  float a = atan(p.y, p.x);
-  float radialDistance = r - radius;
-  float radialPhase = max(radialDistance / haloWidth, 0.0);
+vec2 borderCoord(vec2 uv) {
+  float bottom = uv.y;
+  float top = 1.0 - uv.y;
+  float depth = min(bottom, top);
 
-  vec2 noiseUv =
-    vec2(0.5)
-    + 0.6 * p
-    + vec2(0.002, -0.003) * t;
-  float noise = fbm(noiseUv);
-  float phase = rays * a + 4.0 * (noise - 0.5);
+  float perimeter;
+  if (bottom == depth) {
+    perimeter = 0.5 * uv.x;
+  } else {
+    perimeter = 0.5 + 0.5 * (1.0 - uv.x);
+  }
 
-  vec2 rootUv =
-    vec2(0.5)
-    + 0.6 * radius * normalize(p)
-    + vec2(0.002, -0.003) * t;
-  float rayLength = mix(
-    0.55,
-    1.2,
-    fbm(rootUv + vec2(0.37, 0.19))
+  return vec2(perimeter, depth);
+}
+
+float borderHalo(vec2 uv, float rays) {
+  vec2 border = borderCoord(uv);
+  float perimeter = border.x;
+  float depth = border.y;
+  float angle = 6.28318530718 * perimeter;
+
+  float h = hash(vec3(
+    floor(rays * perimeter + 0.5),
+    1.0,
+    2.0
+  ));
+  vec3 noiseP = vec3(
+    2.0 * cis(angle),
+    8.0 * depth - 0.3 * t + 3.0 * h
   );
-  float rayProgress = clamp(radialPhase / rayLength, 0.0, 1.0);
+  float bendNoise = cyclic(noiseP, 0.8, 1.3).x;
+  float bendEnvelope = smoothstep(0.0, 0.12, depth);
+  float phase = rays * angle + 3. * bendEnvelope * bendNoise;
+
+  float lengthNoise = 0.5 + 0.5 * cyclic(vec3(
+    1.7 * cis(angle),
+    0.1 * t + 3.0 * h
+  ), 0.8, 2.0).y;
+  float rayLength = mix(0.12, 0.45, lengthNoise);
+
+  float rayProgress = clamp(depth / 0.45, 0.0, 1.0);
   float ray = pow(
     0.5 + 0.5 * cos(phase),
-    mix(6.0, 48.0, rayProgress)
+    mix(8.0, 48.0, rayProgress)
   );
-
-  float outer = 1.0 - smoothstep(
-    rayLength - 0.18,
+  float inner = 1.0 - smoothstep(
+    rayLength - 0.04,
     rayLength,
-    radialPhase
+    depth
   );
 
-  return ray * outer;
+  return ray * inner;
+}
+
+float sdtriangle(in vec2 p, in float r) {
+  const float SQRT3 = sqrt(3.0);
+  p.x = abs(p.x) - r;
+  p.y = p.y + r / SQRT3;
+  if (p.x + SQRT3 * p.y > 0.0) {
+    p = vec2(p.x - SQRT3 * p.y, -SQRT3 * p.x - p.y) / 2.0;
+  }
+  p.x -= clamp(p.x, -2.0 * r, 0.0);
+  return -length(p) * sign(p.y);
+}
+
+float sdhexagram(vec2 p, float r) {
+  float upward = sdtriangle(p, r);
+  float downward = sdtriangle(-p, r);
+  return min(upward, downward);
+}
+
+float sdCrescent(
+  vec2 p,
+  float outerRadius,
+  float innerRadius,
+  vec2 cutOffset
+) {
+  float outer = length(p) - outerRadius;
+  float cut = length(p- cutOffset) - innerRadius;
+
+  return max(outer, -cut);
 }
 
 vec3 sunColor(vec2 uv) {
   vec2 p = uv - 0.5;
   p.x *= ASPECT;
+  mat2 rotation = r2d(0.5 * t);
 
-  float pulseRadius = 0.1 + 0.2 * exp(-8.0 * mod(t, 1.0 / BPS));
-  if (sdCircle(p, vec3(0.0, 0.0, pulseRadius)) < 0.0) {
+  float pulseRadius = 0.1 + 0.1 * exp(-8.0 * mod(t, 1.0 / BPS));
+  if (sdhexagram(rotation * (p - vec2(0.6, 0.0)), 0.12) < 0.0) {
     return vec3(0.55, 0.0, 0.02);
   }
 
-  if (sdCircle(p, vec3(0.0, 0.0, 0.3)) < 0.0) {
-    return vec3(0.0);
+  if (sdCrescent((p - vec2(-.6, 0.)) * rotation, 0.13, 0.13, vec2(0.11, 0.03)) < 0.0) {
+    return vec3(0.55, 0.0, 0.02);
   }
 
-  float halo = sunHalo(
-    p * r2d(t),
-    0.3,
-    0.5,
-    24.0
-  );
-  vec3 bgColor = vec3(0.9215, 0.54117, 0.1294);
-  return mix(bgColor, vec3(0), smoothstep(0.0, 0.1, halo));
+  // bg
+  return vec3(0.9215, 0.54117, 0.1294);
 }
 
 // -- main ----------------------------------------------------------------------------------------
 void main() {
   vec2 uv = 0.5 + 0.5 * v;
   float density = smokeDensity(uv);
+  vec3 color = sunColor(uv);
 
-  outColor = vec4(mix(sunColor(uv), vec3(1.0), density), 1.0);
+  float grain = hash(vec3(
+    gl_FragCoord.xy,
+    floor(10.0 * t)
+  )) - 0.5;
+  color *= 1.0 + 0.3 * grain;
+
+  float halo = max(0., borderHalo(uv, 48.0));
+  vec3 haloColor = vec3(0.17, 0.08, 0.102);
+  haloColor *= 1.0 + 1.5 * grain;
+  
+  color = mix(color, haloColor, smoothstep(0.0, 0.1, halo));
+
+  color = mix(color, vec3(1.0), density);
+
+  outColor = vec4(color, 1.0);
 }
