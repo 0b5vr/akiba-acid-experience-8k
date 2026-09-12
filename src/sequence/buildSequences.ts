@@ -34,8 +34,6 @@ sequences.scene = [
     programs.cubetunnel,
   ][(b | 0) % 2]],
   [320 + 32, () => programs.foldarc],
-  [352, () => programs.boxTown],
-  [360, () => programs.chain],
 ];
 
 sequences.overlay = [
