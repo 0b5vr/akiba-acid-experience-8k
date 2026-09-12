@@ -27,7 +27,7 @@ const float TAU = 2.0 * PI;
 
 mat2 r2d(float t)
 {
-  return mat2(cos(t),sin(t),-sin(t),cos(t));
+  return mat2(cos(t), sin(t), -sin(t), cos(t));
 }
 
 mat3 orthbas(vec3 z)

@@ -1,7 +1,6 @@
 import { lazyQuadProgram } from './lazyQuadProgram';
 import aep3dFrag from './assets/aep3d.frag?shader';
 import aepcheckerFrag from './assets/aepchecker.frag?shader';
-import boxFrag from './assets/box.frag?shader';
 import boxarrayFrag from './assets/boxarray.frag?shader';
 import chainFrag from './assets/chain.frag?shader';
 import checkerskyFrag from './assets/checkersky.frag?shader';
@@ -39,7 +38,6 @@ import { programs } from './programs';
 
 programs.aep3d = lazyQuadProgram(aep3dFrag);
 programs.aepchecker = lazyQuadProgram(aepcheckerFrag);
-programs.box = lazyQuadProgram(boxFrag);
 programs.boxarray = lazyQuadProgram(boxarrayFrag);
 programs.chain = lazyQuadProgram(chainFrag);
 programs.checkersky = lazyQuadProgram(checkerskyFrag);

@@ -43,8 +43,8 @@ vec2 cexp(vec2 z) {
   return exp(z.x) * vec2(cos(z.y), sin(z.y));
 }
 
-mat2 rotation2d(float angle) {
-  return mat2(cos(angle), sin(angle), -sin(angle), cos(angle));
+mat2 r2d(float t) {
+  return mat2(cos(t), sin(t), -sin(t), cos(t));
 }
 
 vec2 normalizePoint(vec2 z) {
@@ -223,7 +223,7 @@ void main() {
     0.16 * sin(1.1 * fixedMotionTime)
     + 0.045 * sin(2.7 * fixedMotionTime)
   );
-  cameraBasis *= rotation2d(lockedRoll);
+  cameraBasis *= r2d(lockedRoll);
 
   float targetScale = clamp(0.62 * fixedPointDistance, 0.006, 0.34);
   float zoomPhase = smoothstep(0.25, 0.9, abs(pingPong));
