@@ -55,9 +55,8 @@ vec2 cis(float t) {
   return vec2(cos(t), sin(t));
 }
 
-mat2 rotate2D(float x) {
-  vec2 v = cis(x);
-  return mat2(v.x, v.y, -v.y, v.x);
+mat2 r2d(float t) {
+  return mat2(cos(t), sin(t), -sin(t), cos(t));
 }
 
 int samplesToStepSwing(int samples) {
@@ -333,7 +332,7 @@ void main() {
       + tri(t * 1500.0 - 0.5 * env)
     ));
 
-    dest += 0.2 * mix(0.8, 1.0, duck) * env * vec2(wave) * rotate2D(seq.x);
+    dest += 0.2 * mix(0.8, 1.0, duck) * env * vec2(wave) * r2d(seq.x);
   }
 
   if (barIndex >= 48 && barIndex < 80 || barIndex >= 112 && barIndex < 136) { // ride

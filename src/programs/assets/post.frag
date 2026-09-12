@@ -41,7 +41,9 @@ vec3 hash3f(vec3 s) {
   return vec3(r) / float(-1u);
 }
 
-mat2 rot(float a){float s=sin(a),c=cos(a);return mat2(c,s,-s,c);}
+mat2 r2d(float t) {
+  return mat2(cos(t), sin(t), -sin(t), cos(t));
+}
 
 vec3 calctint(float t) {
   return 3.0 * smoothstep(1.0, 0.0, abs(3.0 * t - vec3(1.0, 1.5, 2.0)));
@@ -114,7 +116,7 @@ void main() {
     for(int i=0;i<16;i++)
     {
       vec3 y=rgb2ycc*texture(b,(su/vec2(ASPECT, 1.0)+1.)*.5).rgb/16.;
-      y.yz*=rot(y.z*TAU+cos(v.x)*TAU)*1.1;
+      y.yz*=r2d(y.z*TAU+cos(v.x)*TAU)*1.1;
       su+=(y.yz*8.-su)*0.004;
       ycc+=y;
     }

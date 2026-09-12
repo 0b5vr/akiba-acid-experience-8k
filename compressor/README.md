@@ -15,6 +15,14 @@ This time, the compressor uses [context mixing](https://en.wikipedia.org/wiki/Co
 deno run --allow-read --allow-write --allow-run compressor/index.ts input.js output.html
 ```
 
+### Optimization
+
+TBD
+
+### Size analysis
+
+TBD
+
 ## Shoutouts
 
 - gasman, for [pnginator](https://gist.github.com/gasman/2560551)

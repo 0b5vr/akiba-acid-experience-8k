@@ -3,8 +3,10 @@
 import { relative } from 'https://deno.land/std@0.221.0/path/relative.ts';
 import { expandGlob } from 'https://deno.land/std@0.221.0/fs/expand_glob.ts';
 import { parseArgs } from 'https://deno.land/std@0.221.0/cli/parse_args.ts';
-import { blue, green, red } from 'https://deno.land/std@0.221.0/fmt/colors.ts';
+import { blue, dim, green, red } from 'https://deno.land/std@0.221.0/fmt/colors.ts';
+import { Table } from 'jsr:@cliffy/table@1.2.1';
 
+import { analyze } from './analysis/analyze.ts';
 import { DEFAULT_PARAMS, type CompressionParams } from './CompressionParams.ts';
 import { SELECTOR_LIMIT } from './constants.ts';
 import { encode } from './encode.ts';
@@ -13,19 +15,35 @@ import { pack, PackResult } from './pack.ts';
 import { optimize } from './optimize.ts';
 import { haveZopfli } from './deflate/haveZopfli.ts';
 import { cloneCompressionParams } from './utils/cloneCompressionParams.ts';
+import { AnalyzeOrder } from './analysis/AnalyzeOrder.ts';
+import { sortAnalyzeSourceResults } from './analysis/sortAnalyzeSourceResults.ts';
 
 // -- arguments ------------------------------------------------------------------------------------
-const USAGE = 'Usage: deno run --allow-read --allow-write --allow-run compressor/index.ts [-O<level>] [-P<path>] input.js output.html';
+const USAGE = `Usage: deno run --allow-read --allow-write --allow-run compressor/index.ts [-O<level>] [-P<path>] [--analyze=<input.js.map>] [--analyze-order=${Object.values(AnalyzeOrder).join('|')}] input.js output.html`;
 
-const args = parseArgs(Deno.args, { string: ['O', 'P'], default: { O: '0' } });
+const args = parseArgs(Deno.args, {
+  string: ['O', 'P', 'analyze', 'analyze-order'],
+  default: { 'O': '0', 'analyze-order': 'size' },
+});
 const positional = args._.map(String);
 const level = Number(args.O);
 const paramsPath = args.P;
+const analyzeGlob = args.analyze;
 
+// validate positional arguments
 if (positional.length < 2) {
   console.error(USAGE);
   Deno.exit(1);
 }
+
+// validate --analyze-order
+if (!Object.values(AnalyzeOrder).includes(args['analyze-order'] as AnalyzeOrder)) {
+  console.error(red(`Unknown analyze order: ${args['analyze-order']}`));
+  console.error(USAGE);
+  Deno.exit(1);
+}
+
+const analyzeOrder = args['analyze-order'] as AnalyzeOrder;
 
 // -- params ---------------------------------------------------------------------------------------
 let params: CompressionParams = cloneCompressionParams(DEFAULT_PARAMS);
@@ -140,3 +158,46 @@ if (decoded !== inputText) {
 await Deno.writeFile(outputPath, concated);
 
 console.info(`Done ${green('✓')}`);
+
+// -- analysis -------------------------------------------------------------------------------------
+if (analyzeGlob) {
+  const mapEntry = await expandGlob(analyzeGlob).next();
+  const mapPath = mapEntry?.value?.path;
+
+  if (!mapPath) {
+    console.error(red(`Glob did not match: ${analyzeGlob}`));
+    Deno.exit(1);
+  }
+
+  console.info('');
+  console.info(`Analyzing using the sourcemap ${blue(relative('.', mapPath))}...`);
+  console.info('');
+
+  const rawSourceMap = JSON.parse(await Deno.readTextFile(mapPath));
+  const results = analyze(inputText, inBits, packed.params, rawSourceMap);
+  const sorted = sortAnalyzeSourceResults(results, analyzeOrder);
+
+  const totalCostBits = sorted.reduce((sum, { costBits }) => sum + costBits, 0);
+  const nameWidth = Math.min(60, Math.max(...sorted.map(({ source }) => source.length)));
+
+  /** Trims the leading `../` of a source and fits it into {@link nameWidth}. */
+  const shorten = (source: string): string => {
+    const trimmed = source.replace(/^(\.\.\/)+/, '');
+    return trimmed.length <= nameWidth ? trimmed : `…${trimmed.slice(1 - nameWidth)}`;
+  };
+
+  new Table()
+    .header(['', ...['input', 'packed', 'ratio', 'share'].map(dim)])
+    .body(sorted.map(({ source, rawBytes, costBits }) => [
+      shorten(source),
+      rawBytes.toLocaleString(),
+      green((costBits / 8).toFixed(1)),
+      (costBits / (8 * rawBytes)).toFixed(3),
+      `${(100 * costBits / totalCostBits).toFixed(2)} %`,
+    ]))
+    .align('right')
+    .column(0, { align: 'left' })
+    .padding(2)
+    .render();
+  console.info('');
+}

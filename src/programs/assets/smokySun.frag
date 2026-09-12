@@ -15,6 +15,10 @@ const float ASPECT = 16.0 / 9.0;
 const float BPS = 140.0 / 60.0;
 const float NOISE_SCALE = 0.1;
 
+mat2 r2d(float t) {
+  return mat2(cos(t), sin(t), -sin(t), cos(t));
+}
+
 mat3 orthbas(vec3 z) {
   z = normalize(z);
   vec3 up = abs(z.y) < 0.99 ? vec3(0.0, 1.0, 0.0) : vec3(0.0, 0.0, 1.0);
@@ -192,8 +196,7 @@ float sdCrescent(
 vec3 sunColor(vec2 uv) {
   vec2 p = uv - 0.5;
   p.x *= ASPECT;
-  float rt = 0.5 * t;
-  mat2 rotation = mat2(cos(rt), sin(rt), -sin(rt), cos(rt));
+  mat2 rotation = r2d(0.5 * t);
 
   float pulseRadius = 0.1 + 0.1 * exp(-8.0 * mod(t, 1.0 / BPS));
   if (sdhexagram(rotation * (p - vec2(0.6, 0.0)), 0.12) < 0.0) {
