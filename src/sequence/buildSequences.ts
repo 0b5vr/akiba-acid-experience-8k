@@ -112,7 +112,7 @@ sequences.codercolor = [
 
 sequences.posterize = [
   [0, () => 0.0],
-  [360 + 32, (b) => saturate(2.0 * b)],
+  [320 + 32, (b) => saturate(2.0 * b)],
 ];
 
 sequences.chougouyoku = [
