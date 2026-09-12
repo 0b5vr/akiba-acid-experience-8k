@@ -41,6 +41,12 @@ vec3 cyclic(vec3 p, float pers, float lacu) {
   return sum.xyz / sum.w;
 }
 
+float hash(vec3 p) {
+  p = fract(p * 0.3183099 + vec3(0.71, 0.113, 0.419));
+  p *= 17.0;
+  return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+}
+
 float smokeDensity(vec2 uv) {
   vec2 p = uv - 0.5;
   p.x *= ASPECT;
@@ -112,19 +118,24 @@ float borderHalo(vec2 uv, float rays) {
   float depth = border.y;
   float angle = 6.28318530718 * perimeter;
 
+  float h = hash(vec3(
+    floor(rays * perimeter + 0.5),
+    1.0,
+    2.0
+  ));
   vec3 noiseP = vec3(
     2.0 * cos(angle),
     2.0 * sin(angle),
-    8.0 * depth - 0.3 * t
+    8.0 * depth - 0.3 * t + 3.0 * h
   );
   float bendNoise = cyclic(noiseP, 0.8, 1.3).x;
   float bendEnvelope = smoothstep(0.0, 0.12, depth);
-  float phase = rays * angle + 5.0 * bendEnvelope * bendNoise;
+  float phase = rays * angle + 3. * bendEnvelope * bendNoise;
 
   float lengthNoise = 0.5 + 0.5 * cyclic(vec3(
     1.7 * cos(angle),
     1.7 * sin(angle),
-    0.1 * t
+    0.1 * t + 3.0 * h
   ), 0.8, 2.0).y;
   float rayLength = mix(0.12, 0.45, lengthNoise);
 
@@ -140,12 +151,6 @@ float borderHalo(vec2 uv, float rays) {
   );
 
   return ray * inner;
-}
-
-float hash(vec3 p) {
-  p = fract(p * 0.3183099 + vec3(0.71, 0.113, 0.419));
-  p *= 17.0;
-  return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
 }
 
 float sdtriangle(vec2 p, float r) {
@@ -216,8 +221,8 @@ void main() {
   color *= 1.0 + 0.3 * grain;
 
   float halo = max(0., borderHalo(uv, 48.0));
-  vec3 haloColor = vec3(0.1, 0.088, 0.072);
-  haloColor *= 1.0 + 1.8 * grain;
+  vec3 haloColor = vec3(0.17, 0.08, 0.102);
+  haloColor *= 1.0 + 1.5 * grain;
   
   color = mix(color, haloColor, smoothstep(0.0, 0.1, halo));
 
