@@ -35,16 +35,16 @@ mat2 r2d(float t) {
 }
 
 vec4 map(vec3 pos) {
-  float a = 2.5;
+  float a = 2.0;
   vec3 p = mod(pos, a) - a * 0.5;
   const vec3 offset = vec3(0.3, -0.07, 0);
   p -= offset;
 
-  // for (int i = 0; i < 3; i++) {
-  for (int i = 0; i < 1 + (int(beat) / 4) % 4; i++) {
+  for (int i = 0; i < 3; i++) {
+  // for (int i = 0; i < 1 + (int(beat) / 4) % 4; i++) {
     p = abs(p + offset) - offset;
     p.xz *= r2d(TAU * 0.8);
-    p.zy *= r2d(beatPhase + pos.z * 0.05);
+    p.zy *= r2d(mod(beatPhase + pos.z * 0.1, TAU * 0.8) - TAU * 0.4);
   }
 
   vec4 hit = vec4(1.0);
@@ -72,7 +72,7 @@ vec3 render(vec3 ro, vec3 rd) {
   vec3 color = vec3(0.0);
   float rayLength = 0.0;
 
-  for (int i = 0; i < 200; i++) {
+  for (int i = 0; i < 100; i++) {
     vec3 p = ro + rd * rayLength;
     vec4 hit = map(p);
 
@@ -92,7 +92,7 @@ vec3 render(vec3 ro, vec3 rd) {
     }
   }
 
-  return color * exp(-0.01 * rayLength);
+  return color * exp(-0.1 * rayLength);
 }
 
 void main() {
@@ -103,7 +103,7 @@ void main() {
   vec2 p = v;
   p.x *= 16.0 / 9.0;
 
-  vec3 ro = vec3(0.0, 0.0, beat * 8.0);
-  vec3 rd = normalize(vec3(p, 16.0));
+  vec3 ro = vec3(0.0, 0.0, beat);
+  vec3 rd = normalize(vec3(p, 1.0));
   outColor = vec4(render(ro, rd), 1.0);
 }
