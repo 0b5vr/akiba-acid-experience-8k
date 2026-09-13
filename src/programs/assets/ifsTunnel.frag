@@ -49,7 +49,7 @@ vec4 map(vec3 pos) {
 
   vec4 hit = vec4(1.0);
   union(hit, sdBox(p, vec3(1.0, 0.1, 0.1)), 1.0, 1.0, 10.0);
-  union(hit, sdBox(p, vec3(0.04, 0.1, 0.11)), 0.0, clamp(sin(beatTau), 0.0, 1.0), 0.4);
+  union(hit, sdBox(p, vec3(0.04, 0.1, 0.11)), 0.0, 1.0, 0.4);
   union(hit, sdBox(p, vec3(1.0, 0.11, 0.01)), 0.0, clamp(sin(beatTau + TAU * pos.z / 16.0), 0.0, 1.0), 0.0);
   return hit;
 }
