@@ -40,10 +40,11 @@ vec4 map(vec3 pos) {
   const vec3 offset = vec3(0.3, -0.07, 0);
   p -= offset;
 
+  // for (int i = 0; i < 3; i++) {
   for (int i = 0; i < 1 + (int(beat) / 4) % 4; i++) {
     p = abs(p + offset) - offset;
     p.xz *= r2d(TAU * 0.8);
-    p.zy *= r2d(mod(beatPhase + pos.z * 0.05, TAU) - TAU * 0.5);
+    p.zy *= r2d(beatPhase + pos.z * 0.05);
   }
 
   vec4 hit = vec4(1.0);
