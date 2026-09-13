@@ -13,8 +13,11 @@ out vec4 outColor;
 const float TAU = 2.0 * acos(-1.0);
 const float BPM = 140.0;
 
-float beatTau;
-float beatPhase;
+float beat, beatTau, beatPhase;
+
+float phase(float x) {
+  return floor(x) + 0.5 + 0.5 * cos(TAU * 0.5 * exp(-5.0 * fract(x)));
+}
 
 void union(inout vec4 hit, float distance, float material, float intensity, float hue) {
   if (distance < hit.x) {
@@ -32,20 +35,21 @@ mat2 r2d(float t) {
 }
 
 vec4 map(vec3 pos) {
-  vec3 p = mod(pos, 2.0) - 1.0;
-  const vec3 offset = vec3(0.32, -0.05, 0);
+  float a = 2.5;
+  vec3 p = mod(pos, a) - a * 0.5;
+  const vec3 offset = vec3(0.3, -0.07, 0);
   p -= offset;
 
-  for (int i = 0; i < 3; i++) {
+  for (int i = 0; i < 1 + (int(beat) / 4) % 4; i++) {
     p = abs(p + offset) - offset;
     p.xz *= r2d(TAU * 0.8);
-    p.zy *= r2d(TAU * 0.2 + beatPhase + pos.z * 0.1);
+    p.zy *= r2d(mod(beatPhase + pos.z * 0.05, TAU) - TAU * 0.5);
   }
 
   vec4 hit = vec4(1.0);
   union(hit, sdBox(p, vec3(1.0, 0.1, 0.1)), 1.0, 1.0, 10.0);
-  union(hit, sdBox(p, vec3(0.04, 0.1, 0.11)), 0.0, 1.0, 0.4);
-  union(hit, sdBox(p, vec3(1.0, 0.11, 0.01)), 0.0, clamp(cos(beatTau + TAU * pos.z / 16.0), 0.0, 1.0), 0.0);
+  union(hit, sdBox(p, vec3(0.04, 0.1, 0.11)), 0.0, clamp(sin(beatTau), 0.0, 1.0), 0.4);
+  union(hit, sdBox(p, vec3(1.0, 0.11, 0.01)), 0.0, clamp(sin(beatTau + TAU * pos.z / 16.0), 0.0, 1.0), 0.0);
   return hit;
 }
 
@@ -67,7 +71,7 @@ vec3 render(vec3 ro, vec3 rd) {
   vec3 color = vec3(0.0);
   float rayLength = 0.0;
 
-  for (int i = 0; i < 100; i++) {
+  for (int i = 0; i < 200; i++) {
     vec3 p = ro + rd * rayLength;
     vec4 hit = map(p);
 
@@ -87,18 +91,18 @@ vec3 render(vec3 ro, vec3 rd) {
     }
   }
 
-  return color * exp(-0.1 * rayLength);
+  return color * exp(-0.01 * rayLength);
 }
 
 void main() {
-  float beat = t * BPM / 60.0;
+  beat = t * BPM / 60.0;
   beatTau = beat * TAU;
-  beatPhase = floor(0.5 * beat) + 0.5 + 0.5 * cos(acos(-1.0) * exp(-5.0 * fract(0.5 * beat)));
+  beatPhase = phase(beat);
 
   vec2 p = v;
   p.x *= 16.0 / 9.0;
 
-  vec3 ro = vec3(0.0, 0.0, beat);
-  vec3 rd = normalize(vec3(p, 0.5 + 0.5 * sin(beatTau / 8.0) * step(8.0, mod(beat, 16.0))));
+  vec3 ro = vec3(0.0, 0.0, beat * 8.0);
+  vec3 rd = normalize(vec3(p, 16.0));
   outColor = vec4(render(ro, rd), 1.0);
 }
