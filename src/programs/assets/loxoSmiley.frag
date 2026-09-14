@@ -117,41 +117,23 @@ float smileyMask(vec2 p) {
 }
 
 vec2 loxodromicOrbitTrap(vec2 p, vec2 w0, float phaseGap) {
-  vec2 forwardStep = cexp(vec2(-TRANSLATION * ORBIT_STEP, TWIST * ORBIT_STEP));
-  vec2 backwardStep = cexp(vec2(TRANSLATION * ORBIT_STEP, -TWIST * ORBIT_STEP));
-  vec2 forwardBridgeStep = cexp(vec2(-TRANSLATION * BRIDGE_STEP, TWIST * BRIDGE_STEP));
-  vec2 backwardBridgeStep = cexp(vec2(TRANSLATION * BRIDGE_STEP, -TWIST * BRIDGE_STEP));
-  vec2 forwardOrbit = cmul(forwardStep, w0);
-  vec2 backwardOrbit = cmul(backwardStep, w0);
-
   vec2 bridgeOrbit = normalizePoint(CIRCLE_CENTER);
-  vec2 forwardBridgeOrbit = cmul(forwardBridgeStep, bridgeOrbit);
-  vec2 backwardBridgeOrbit = cmul(backwardBridgeStep, bridgeOrbit);
 
-  float smiley = smileyMask(p);
-  float nearestBridgeDistance = bridgeDistance(p, CIRCLE_CENTER);
+  float smiley = 0.0;
+  float nearestBridgeDistance = 1e3;
 
-  for (int i = 0; i < BRIDGE_ITERATIONS; i++) {
-    float forwardBridgeDistance = bridgeDistance(p, denormalizePoint(forwardBridgeOrbit));
-    float backwardBridgeDistance = bridgeDistance(p, denormalizePoint(backwardBridgeOrbit));
+  for (int i = -BRIDGE_ITERATIONS; i <= BRIDGE_ITERATIONS; i++) {
+    float s = float(i);
 
-    if (i < SMILEY_ITERATIONS) {
-      smiley = max(smiley, smileyMask(denormalizePoint(forwardOrbit)));
-      smiley = max(smiley, smileyMask(denormalizePoint(backwardOrbit)));
-      forwardOrbit = cmul(forwardStep, forwardOrbit);
-      backwardOrbit = cmul(backwardStep, backwardOrbit);
-    }
+    nearestBridgeDistance = min(nearestBridgeDistance, bridgeDistance(
+      p,
+      denormalizePoint(applyLoxodromicFlow(bridgeOrbit, BRIDGE_STEP * s))
+    ));
 
-    nearestBridgeDistance = min(
-      nearestBridgeDistance,
-      min(forwardBridgeDistance, backwardBridgeDistance)
-    );
-
-    forwardBridgeOrbit = cmul(forwardBridgeStep, forwardBridgeOrbit);
-    backwardBridgeOrbit = cmul(backwardBridgeStep, backwardBridgeOrbit);
-
-    if (smiley > 0.5) {
-      break;
+    if (abs(i) <= SMILEY_ITERATIONS) {
+      smiley = max(smiley, smileyMask(
+        denormalizePoint(applyLoxodromicFlow(w0, ORBIT_STEP * s))
+      ));
     }
   }
 
