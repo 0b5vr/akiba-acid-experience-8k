@@ -99,21 +99,30 @@ vec3 gamingColor(float hue) {
   return 0.5 + 0.5 * cos(TAU * (hue + vec3(0.0, 2.0 / 3.0, 1.0 / 3.0)));
 }
 
-float smileyMask(vec2 p) {
-  p = (p - SMILEY_A) / SMILEY_A_SCALE;
-  vec2 o = p;
+float sdsmiley(vec2 p) {
   p.x = abs(p.x);
-  float mouthDistance = abs(length(p) - 0.55);
+
+  float i_dmouse = abs(length(p) - 0.55);
   float theta = atan(p.x, -p.y);
-  float mouthWidth = mix(0.15, 0.05, smoothstep(0.0, 1.6, theta))
-    * cos(clamp(30.0 * (theta - 1.4), -1.3, 1.6));
-  float d = mouthDistance - mouthWidth;
+  float i_width = mix(0.15, 0.05, smoothstep(0.0, 1.6, theta)) * cos(clamp(30.0 * (theta - 1.4), -1.3, 3.1));
+  float d = i_dmouse - i_width;
 
   p -= vec2(0.2, 0.3);
   p.y *= 0.3;
-  d = min(min(d, length(p) - 0.08),
-          abs(length(o) - 0.8) - 0.02);
-  return step(d, 0.0);
+  d = min(d, length(p) - 0.08);
+
+  return d;
+}
+
+float sdsmileycircle(vec2 p) {
+  return min(
+    abs(length(p) - 0.8) - 0.02,
+    sdsmiley(p)
+  );
+}
+
+float smileyMask(vec2 p) {
+  return step(sdsmileycircle((p - SMILEY_A) / SMILEY_A_SCALE), 0.0);
 }
 
 vec2 loxodromicOrbitTrap(vec2 p, vec2 w0, float phaseGap) {
