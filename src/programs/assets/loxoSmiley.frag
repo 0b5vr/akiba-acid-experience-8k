@@ -11,7 +11,6 @@ in vec2 v;
 out vec4 outColor;
 
 const float PI = acos(-1.0);
-const float TAU = 2.0 * PI;
 const vec2 P_MINUS = vec2(-0.72, -0.3);
 const vec2 P_PLUS = vec2(0.78, 0.38);
 const vec2 SMILEY_A = vec2(0.08, -0.04);
@@ -95,10 +94,6 @@ float bridgeDistance(vec2 p, vec2 center) {
   return sdSegment(p, center - halfLength * direction, center + halfLength * direction);
 }
 
-vec3 gamingColor(float hue) {
-  return 0.5 + 0.5 * cos(TAU * (hue + vec3(0.0, 2.0 / 3.0, 1.0 / 3.0)));
-}
-
 float sdsmiley(vec2 p) {
   p.x = abs(p.x);
 
@@ -158,15 +153,14 @@ vec3 background(vec2 p) {
   vec2 w = normalizePoint(p);
   float centerPhase = loxodromicPhase(normalizePoint(SMILEY_A));
   float radiusLog = log(max(length(w), 1e-6));
-  float orbitPhase = atan(w.y, w.x) + TWIST / TRANSLATION * radiusLog;
-  float phaseGap = phaseDistance(orbitPhase, centerPhase);
+  float phaseGap = phaseDistance(loxodromicPhase(w), centerPhase);
   float railDistance = abs(phaseGap - RAIL_OFFSET);
   float railPixels = railDistance / max(fwidth(railDistance), 1e-5);
   float railCore = 1.0 - smoothstep(0.75, 1.65, railPixels);
   float railGlow = exp(-0.34 * railPixels);
 
-  float hue = 0.1 * t + 0.16 * radiusLog;
-  vec3 railColor = gamingColor(hue);
+  float hue = 0.6 * t + radiusLog;
+  vec3 railColor = 0.5 + 0.5 * cos(vec3(0, 2, 4) - hue);
   vec3 col = railColor * mix(0.4 * railGlow, 1.0, railCore);
 
   vec2 trapMasks = loxodromicOrbitTrap(p, w, phaseGap);
