@@ -9,7 +9,6 @@ import { preparePass } from './renderPass';
 
 const DUMP_SCENE_KEYS = Object.keys(programs).filter(
   (key) => ![
-    'fbm',
     'music',
     'nop',
     'post',

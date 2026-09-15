@@ -11,7 +11,6 @@ export const programs = {} as {
   crab: WebGLProgram;
   cubetunnel: WebGLProgram;
   dotmatrix: WebGLProgram;
-  fbm: WebGLProgram;
   foldarc: WebGLProgram;
   boxTown: WebGLProgram;
   funnel: WebGLProgram;

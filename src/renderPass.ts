@@ -1,7 +1,6 @@
 import { GL_BLEND, GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE_2D, GL_TRIANGLE_STRIP } from './gl-constants';
 import { HEIGHT, WIDTH } from './constants';
 import { gl } from './gl';
-import { textureFbm } from './textures/textureFbm';
 import { textureText } from './textures/textureText';
 
 /**
@@ -10,7 +9,7 @@ import { textureText } from './textures/textureText';
 export function preparePass(
   program: WebGLProgram,
   time: number,
-  tex0: WebGLTexture = textureFbm,
+  tex0: WebGLTexture = textureText,
 ): void {
   gl.useProgram(program);
 
@@ -43,7 +42,7 @@ export function preparePass(
 export function renderPass(
   program: WebGLProgram,
   time: number,
-  tex0: WebGLTexture = textureFbm,
+  tex0: WebGLTexture = textureText,
 ): void {
   preparePass(program, time, tex0);
 
