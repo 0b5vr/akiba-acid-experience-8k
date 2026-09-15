@@ -69,7 +69,7 @@ float map(vec3 p) {
 }
 
 vec3 nMap(vec3 p) {
-  vec2 d = vec2(0.0, 1E-4);
+  const vec2 d = vec2(0.0, 0.001);
   return normalize(vec3(
     map(p + d.yxx) - map(p - d.yxx),
     map(p + d.xyx) - map(p - d.xyx),
