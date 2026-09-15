@@ -33,15 +33,15 @@ float map(vec3 p) {
   p.yz *= r2d(1.0);
   p.zx *= r2d(1.0);
 
-  float phase = mod(t * 140.0 / 60.0, 4.0);
+  float phase = mod(t * 140.0 / 60.0 + 0.2, 4.0);
 
   float d = length(p) - 1.0;
   float d0 = d;
 
-  d = mix(d, sdtorus(p, 0.8, 0.4), smoothstep(0.0, 0.9, phase));
-  d = mix(d, sdbox(p, vec3(0.8)), smoothstep(1.0, 1.9, phase));
-  d = mix(d, sdcylinder(p, 0.6, 1.0), smoothstep(2.0, 2.9, phase));
-  d = mix(d, d0, smoothstep(3.0, 3.9, phase));
+  d = mix(d, sdtorus(p, 0.8, 0.4), smoothstep(0.0, 0.7, phase));
+  d = mix(d, sdbox(p, vec3(0.8)), smoothstep(1.0, 1.7, phase));
+  d = mix(d, sdcylinder(p, 0.6, 1.0), smoothstep(2.0, 2.7, phase));
+  d = mix(d, d0, smoothstep(3.0, 3.7, phase));
 
   return d;
 }
