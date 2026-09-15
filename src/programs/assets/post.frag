@@ -16,7 +16,7 @@ uniform float p2; // tile
 uniform float p3; // kaleidoscope
 uniform float p4; // codercolor
 uniform float p5; // posterize
-uniform float p6; // white
+uniform float p6; // black / white
 uniform float p7; // feedback
 uniform float p8; // flowInvert
 
@@ -123,6 +123,12 @@ void main() {
   vec3 i_posterized = smoothstep(0.2, 0.1, luma) * vec3(0.8, 1.0, 0.04) + smoothstep(0.6, 0.7, luma);
   sum = mix(sum, i_posterized, p5);
 
+  // black
+  sum = mix(sum, vec3(0.0), max(-p6, 0.0));
+
+  // white
+  sum = mix(sum, vec3(1.0), max(p6, 0.0));
+
   // ビデオフィードバックンゴ
   if (p7 > 0.0) {
     const mat3 ycc2rgb = mat3(1.0,1.0,1.0,0.0,-0.344,1.773,1.403,-0.714,0.0);
@@ -139,7 +145,7 @@ void main() {
     }
     back=(ycc2rgb*ycc);
     sum = mix(sum,back*1.0, exp(-1.0 / (30.0 * p7)));
-  } 
+  }
 
   if (p8 > 0.0) {
     float beat = t * BPM / 60.0;
@@ -157,10 +163,6 @@ void main() {
     color *= 0.8;
     sum = mix(sum, color, p8);
   }
-
-  // white
-  sum = mix(sum, vec3(1.0), p6);
-
 
   outColor = vec4(sum, 1.0);
 }
