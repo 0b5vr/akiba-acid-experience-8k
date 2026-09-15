@@ -6,7 +6,6 @@ import { easeInSharp, easeOutSharp } from '../utils/easings';
 
 import '../programs/loadPrograms';
 
-const boxarray = () => programs.boxarray;
 const checkersky = () => programs.checkersky;
 const lattice = () => programs.lattice;
 
@@ -14,7 +13,7 @@ sequences.scene = [
   [0, () => programs.iceplanes],
   [4, lattice],
   [8, checkersky],
-  [12, boxarray],
+  [12, () => programs.iceplanes],
   [16, () => programs.aepchecker],
   [32, () => programs.swirl],
   [48, () => programs.julia],
@@ -25,8 +24,8 @@ sequences.scene = [
   [128, lattice],
   [192, (b) => [
     programs.lattice,
-    programs.smokySun,
-    programs.dotmatrix,
+    programs.iceplanes,
+    programs.cubetunnel,
     programs.plasma,
   ][(b * 2 | 0) % 4]],
   [320, (b) => [
@@ -40,7 +39,6 @@ sequences.overlay = [
   [0, () => programs.text],
   [32, () => programs.smiley7010],
   [64, () => programs.smiley],
-  [96, () => programs.noiseaura],
   [128, () => programs.morph3d],
   [160, () => programs.smiley7010],
   [192, (b) => [
