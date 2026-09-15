@@ -256,13 +256,14 @@ void main() {
     dest += 0.3 * mix(0.5, 1.0, duck) * tanh(4.0 * env * wave);
   }
 
-  if (barIndex >= 16 && barIndex < 144) { // hi tom
-    vec4 seq = seq16(sampleIndex % BAR_SAMPLES, 0x1050);
+  if (barIndex >= 16 && barIndex < 144) { // toms
+    vec4 seq = seq16(sampleIndex % BAR_SAMPLES, 0x1252);
     float t = seq.y;
-    float q = seq.w;
+
+    bool hi = mod(seq.x, 8.0) < 4.0;
 
     float env = exp(-20.0 * t);
-    float freq = 110.0;
+    float freq = hi ? 110.0 : 80.0;
     float phase = (
       t
       - 0.03 * exp2(-40.0 * t)
@@ -271,27 +272,7 @@ void main() {
     phase *= TAU * freq;
 
     vec2 wave = cis(phase + sin(3.0 * phase) + 10.0 * t);
-    wave.x *= 0.5;
-
-    dest += 0.2 * mix(0.8, 1.0, duck) * tanh(2.0 * env * wave);
-  }
-
-  if (barIndex >= 16 && barIndex < 144) { // low tom
-    vec4 seq = seq16(sampleIndex % BAR_SAMPLES, 0x0202);
-    float t = seq.y;
-    float q = seq.w;
-
-    float env = exp(-20.0 * t);
-    float freq = 80.0;
-    float phase = (
-      t
-      - 0.03 * exp2(-40.0 * t)
-      - 0.01 * exp2(-150.0 * t)
-    );
-    phase *= TAU * freq;
-
-    vec2 wave = cis(phase + sin(3.0 * phase) + 10.0 * t);
-    wave.y *= 0.5;
+    wave *= hi ? vec2(0.5, 1.0) : vec2(1.0, 0.5);
 
     dest += 0.2 * mix(0.8, 1.0, duck) * tanh(2.0 * env * wave);
   }
