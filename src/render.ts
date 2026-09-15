@@ -1,4 +1,4 @@
-import { GL_FRAMEBUFFER, GL_TEXTURE2, GL_TEXTURE_2D, GL_TRIANGLE_STRIP } from './gl-constants';
+import { GL_FRAMEBUFFER, GL_TEXTURE2, GL_TEXTURE_2D, GL_TRIANGLES } from './gl-constants';
 import { BPM } from './constants';
 import { DUMP_SCENES, ENABLE_SEEKING, INTRO_LENGTH, START_DELAY, STOP_RENDERING_AFTER_END, STOP_RENDERING_BEFORE_START } from './config';
 import { audio } from './audio';
@@ -110,7 +110,7 @@ export function render(): void {
     evalSequence(sequences.flowInvert, beat)!,
   );
 
-  gl.drawArrays(GL_TRIANGLE_STRIP, 0, 4);
+  gl.drawArrays(GL_TRIANGLES, 0, 3);
 
   copyToTextureBack();
 

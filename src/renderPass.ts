@@ -1,4 +1,4 @@
-import { GL_BLEND, GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE_2D, GL_TRIANGLE_STRIP } from './gl-constants';
+import { GL_BLEND, GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE_2D, GL_TRIANGLES } from './gl-constants';
 import { HEIGHT, WIDTH } from './constants';
 import { gl } from './gl';
 import { textureText } from './textures/textureText';
@@ -46,5 +46,5 @@ export function renderPass(
 ): void {
   preparePass(program, time, tex0);
 
-  gl.drawArrays(GL_TRIANGLE_STRIP, 0, 4);
+  gl.drawArrays(GL_TRIANGLES, 0, 3);
 }

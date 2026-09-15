@@ -1,4 +1,4 @@
-import { GL_COLOR_BUFFER_BIT, GL_FRAMEBUFFER, GL_TRIANGLE_STRIP } from './gl-constants';
+import { GL_COLOR_BUFFER_BIT, GL_FRAMEBUFFER, GL_TRIANGLES } from './gl-constants';
 import { BPM, HEIGHT, WIDTH } from './constants';
 import { updateTextureText } from './textures/textureText';
 import { gl } from './gl';
@@ -47,6 +47,6 @@ export function renderDumpScenes(time: number): void {
       cellHeight,
     );
 
-    gl.drawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    gl.drawArrays(GL_TRIANGLES, 0, 3);
   }
 }
