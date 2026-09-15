@@ -39,7 +39,7 @@ export default defineConfig(({ mode }) => {
         batch: true,
         batchShuffleSeed: 2,
         minifierOptions: {
-          noRenamingList: ['main', 'v', 't', 'beat', 'b', 'zoom', 'shake', 'tile', 'kaleidoscope', 'codercolor', 'posterize', 'white', 'feedback', 'flowInvert'],
+          noRenamingList: ['main', 'v', 't', 'b', 'zoom', 'shake', 'tile', 'kaleidoscope', 'codercolor', 'posterize', 'white', 'feedback', 'flowInvert'],
           aggressiveInlining: true,
           noSequence: true,
         },

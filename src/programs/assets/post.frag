@@ -7,7 +7,6 @@ precision highp float;
 // #pragma shader_minifier_plugin bypass
 
 uniform float t;
-uniform float beat;
 uniform sampler2D f;
 uniform sampler2D b;
 
@@ -27,6 +26,7 @@ in vec2 v;
 
 out vec4 outColor;
 
+const float BPM = 140.0;
 const int SAMPLES = 20;
 const float SAMPLES_F = float(SAMPLES);
 
@@ -150,6 +150,7 @@ void main() {
   } 
 
   if (flowInvert > 0.0) {
+    float beat = t * BPM / 60.0;
     vec2 texUv = v * 0.5 + 0.5;
     vec2 dxy = 1.0 / vec2(textureSize(b, 0));
     vec2 offset = (floor(cyclic(vec3(fract(texUv * 3.0), beat), 1.0, 1.0).xy)) * dxy;

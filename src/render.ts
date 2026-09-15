@@ -56,11 +56,6 @@ export function render(): void {
 
   preparePass(programs.post, time, textureScene);
 
-  gl.uniform1f(
-    gl.getUniformLocation(programs.post, 'beat'),
-    beat,
-  );
-
   gl.activeTexture(GL_TEXTURE1);
   gl.bindTexture(GL_TEXTURE_2D, textureBack);
   gl.uniform1i(
