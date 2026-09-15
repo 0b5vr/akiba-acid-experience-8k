@@ -14,14 +14,21 @@ const float PI = acos(-1.0);
 const vec2 P_MINUS = vec2(-0.72, -0.3);
 const vec2 P_PLUS = vec2(0.78, 0.38);
 const vec2 SMILEY_A = vec2(0.08, -0.04);
-const vec2 CIRCLE_CENTER = vec2(-0.2932632, -0.2052643);
 const float SMILEY_A_SCALE = 0.27;
 const float TRANSLATION = 0.72;
 const float TWIST = 2.1;
 const float ORBIT_STEP = 0.48;
 const float BRIDGE_STEP = 0.16;
 const float RAIL_OFFSET = 1.85;
-const float CAMERA_TANGENT_STEP = 0.01;
+// Precomputed from P_MINUS, P_PLUS, SMILEY_A, TRANSLATION and TWIST.
+// normalizePoint(SMILEY_A)
+const vec2 NORMALIZED_SMILEY_A = vec2(-1.0042017, 0.2310924);
+// normalizePoint(vec2(-0.2932632, -0.2052643))
+const vec2 NORMALIZED_CIRCLE_CENTER = vec2(-0.3435738, 0.0990864);
+// atan(w.y, w.x) + TWIST / TRANSLATION * log(length(w)), w = NORMALIZED_SMILEY_A
+const float CENTER_PHASE = 3.0028888;
+// cexp(vec2(-TRANSLATION, TWIST) * 0.01)
+const vec2 CAMERA_TANGENT_FACTOR = vec2(0.9926069, 0.0208478);
 const int SMILEY_ITERATIONS = 26;
 const int BRIDGE_ITERATIONS = 80;
 
@@ -34,7 +41,7 @@ vec2 cmul(vec2 a, vec2 b) {
 }
 
 vec2 cdiv(vec2 a, vec2 b) {
-  float d = max(dot(b, b), 1e-8);
+  float d = dot(b, b);
   return vec2(a.x * b.x + a.y * b.y, a.y * b.x - a.x * b.y) / d;
 }
 
@@ -51,27 +58,15 @@ vec2 normalizePoint(vec2 z) {
 }
 
 vec2 denormalizePoint(vec2 w) {
-  return cdiv(cmul(w, P_PLUS) - P_MINUS, w - vec2(1.0, 0.0));
+  return P_PLUS + cdiv(P_PLUS - P_MINUS, w - vec2(1.0, 0.0));
 }
 
 vec2 applyLoxodromicFlow(vec2 w, float s) {
   return cmul(cexp(vec2(-TRANSLATION * s, TWIST * s)), w);
 }
 
-float loxodromicPhase(vec2 w) {
-  return atan(w.y, w.x)
-    + TWIST / TRANSLATION * log(max(length(w), 1e-6));
-}
-
 float phaseDistance(float a, float b) {
-  float d = a - b;
-  return abs(atan(sin(d), cos(d)));
-}
-
-float sdSegment(vec2 p, vec2 a, vec2 b) {
-  vec2 segment = b - a;
-  float along = clamp(dot(p - a, segment) / max(dot(segment, segment), 1e-8), 0.0, 1.0);
-  return length(p - a - along * segment);
+  return abs(mod(a - b + PI, 2.0 * PI) - PI);
 }
 
 // p: world coordinates
@@ -86,12 +81,12 @@ float bridgeDistance(vec2 p, vec2 center) {
     logarithmicDerivative.y + pitch * logarithmicDerivative.x,
     logarithmicDerivative.x - pitch * logarithmicDerivative.y
   );
-  float gradientLength = max(length(gradient), 1e-6);
-  vec2 direction = gradient / gradientLength;
-
-  // divide by jacobian
-  float halfLength = 1.2 * (PI - RAIL_OFFSET) / gradientLength;
-  return sdSegment(p, center - halfLength * direction, center + halfLength * direction);
+  // Project onto the centered segment in phase units, avoiding normalization.
+  vec2 offset = p - center;
+  float halfPhase = 1.2 * (PI - RAIL_OFFSET);
+  return length(offset - gradient * clamp(
+    dot(offset, gradient), -halfPhase, halfPhase
+  ) / dot(gradient, gradient));
 }
 
 float sdsmiley(vec2 p) {
@@ -121,7 +116,7 @@ float smileyMask(vec2 p) {
 }
 
 vec2 loxodromicOrbitTrap(vec2 p, vec2 w0, float phaseGap) {
-  vec2 bridgeOrbit = normalizePoint(CIRCLE_CENTER);
+  vec2 bridgeOrbit = NORMALIZED_CIRCLE_CENTER;
 
   float smiley = 0.0;
   float nearestBridgeDistance = 1e3;
@@ -141,7 +136,7 @@ vec2 loxodromicOrbitTrap(vec2 p, vec2 w0, float phaseGap) {
     }
   }
 
-  float bridgePixels = nearestBridgeDistance / max(fwidth(nearestBridgeDistance), 1e-5);
+  float bridgePixels = nearestBridgeDistance / fwidth(nearestBridgeDistance);
   float bridge = 1.0 - smoothstep(0.85, 2.0, bridgePixels);
   float betweenRails = step(RAIL_OFFSET, phaseGap);
   bridge *= betweenRails;
@@ -151,21 +146,21 @@ vec2 loxodromicOrbitTrap(vec2 p, vec2 w0, float phaseGap) {
 
 vec3 background(vec2 p) {
   vec2 w = normalizePoint(p);
-  float centerPhase = loxodromicPhase(normalizePoint(SMILEY_A));
-  float radiusLog = log(max(length(w), 1e-6));
-  float phaseGap = phaseDistance(loxodromicPhase(w), centerPhase);
+  float radiusLog = log(length(w));
+  float phase = atan(w.y, w.x) + TWIST / TRANSLATION * radiusLog;
+  float phaseGap = phaseDistance(phase, CENTER_PHASE);
   float railDistance = abs(phaseGap - RAIL_OFFSET);
-  float railPixels = railDistance / max(fwidth(railDistance), 1e-5);
+  float railPixels = railDistance / fwidth(railDistance);
   float railCore = 1.0 - smoothstep(0.75, 1.65, railPixels);
   float railGlow = exp(-0.34 * railPixels);
 
   float hue = 0.6 * t + radiusLog;
   vec3 railColor = 0.5 + 0.5 * cos(vec3(0, 2, 4) - hue);
-  vec3 col = railColor * mix(0.4 * railGlow, 1.0, railCore);
+  float brightness = mix(0.4 * railGlow, 1.0, railCore);
 
   vec2 trapMasks = loxodromicOrbitTrap(p, w, phaseGap);
-  col = mix(col, railColor, trapMasks.y);
-  col = mix(col, vec3(1.0, 1.0, 0.0), trapMasks.x);
+  brightness = mix(brightness, 1.0, trapMasks.y);
+  vec3 col = mix(railColor * brightness, vec3(1.0, 1.0, 0.0), trapMasks.x);
 
   return col;
 }
@@ -181,16 +176,16 @@ void main() {
   float eased = mix(leg, smoother(leg), 0.65);
   float pingPong = mix(-1.0, 1.0, eased);
   float cameraPathParameter = 5.8 * pingPong;
-  vec2 normalizedCameraStart = normalizePoint(SMILEY_A);
+  vec2 normalizedCameraStart = NORMALIZED_SMILEY_A;
   vec2 normalizedCameraPosition = applyLoxodromicFlow(
     normalizedCameraStart,
     cameraPathParameter
   );
   vec2 cameraPosition = denormalizePoint(normalizedCameraPosition);
 
-  vec2 normalizedCameraNext = applyLoxodromicFlow(
+  vec2 normalizedCameraNext = cmul(
     normalizedCameraPosition,
-    CAMERA_TANGENT_STEP
+    CAMERA_TANGENT_FACTOR
   );
   vec2 cameraNextPosition = denormalizePoint(normalizedCameraNext);
   vec2 forward = normalize(cameraNextPosition - cameraPosition);
