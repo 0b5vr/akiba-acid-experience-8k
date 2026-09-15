@@ -54,6 +54,7 @@ sequences.scene = [
 sequences.overlay = [
   [0, () => programs.text],
   [64, () => programs.textscroll],
+  [96, () => programs.morph3d],
   [128, () => programs.aep3d],
   [160, () => programs.smiley7010],
   [192, (b) => [
