@@ -33,7 +33,7 @@ export function renderDumpScenes(time: number): void {
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
   gl.clear(GL_COLOR_BUFFER_BIT);
 
-  for (const [i, key] of DUMP_SCENE_KEYS.entries()) {
+  DUMP_SCENE_KEYS.map((key, i) => {
     const col = i % cols;
     const row = Math.floor(i / cols);
 
@@ -48,5 +48,5 @@ export function renderDumpScenes(time: number): void {
     );
 
     gl.drawArrays(GL_TRIANGLES, 0, 3);
-  }
+  });
 }

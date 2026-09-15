@@ -13,10 +13,10 @@ import type { Sequence } from './Sequence';
 export function evalSequence<T>(sequence: Sequence<T>, beat: number): T | undefined {
   let value: T | undefined = undefined;
 
-  for (const [eventBeat, action] of sequence) {
-    if (eventBeat > beat) { break; }
+  sequence.map(([eventBeat, action]) => {
+    if (eventBeat > beat) { return; }
     value = action(beat - eventBeat);
-  }
+  });
 
   return value;
 }
