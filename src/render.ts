@@ -8,6 +8,7 @@ import { copyToTextureBack, textureBack } from './textures/textureBack';
 import { framebufferPost, texturePost } from './textures/texturePost';
 import { gl } from './gl';
 import { seekBeginTime } from './music';
+import { postSequences } from './sequence/postSequences';
 import { programs } from './programs/programs';
 import { sequences } from './sequence/sequences';
 import { evalSequence } from './sequence/evalSequence';
@@ -63,10 +64,10 @@ export function render(): void {
     1,
   );
 
-  (['zoom', 'shake', 'tile', 'kaleidoscope', 'codercolor', 'posterize', 'white', 'feedback', 'flowInvert'] as const).map((key) => (
+  postSequences.map((sequence, i) => (
     gl.uniform1f(
-      gl.getUniformLocation(programs.post, key),
-      evalSequence(sequences[key], beat)!,
+      gl.getUniformLocation(programs.post, `p${i}`),
+      evalSequence(sequence, beat)!,
     )
   ));
 

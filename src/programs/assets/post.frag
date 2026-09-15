@@ -10,17 +10,15 @@ uniform float t;
 uniform sampler2D f;
 uniform sampler2D b;
 
-// TODO: optimize these uniform names later
-uniform float zoom;
-uniform float shake;
-uniform float tile;
-uniform float kaleidoscope;
-uniform float codercolor;
-uniform float posterize;
-uniform float chougouyoku;
-uniform float white;
-uniform float feedback;
-uniform float flowInvert;
+uniform float p0; // zoom
+uniform float p1; // shake
+uniform float p2; // tile
+uniform float p3; // kaleidoscope
+uniform float p4; // codercolor
+uniform float p5; // posterize
+uniform float p6; // white
+uniform float p7; // feedback
+uniform float p8; // flowInvert
 
 in vec2 v;
 
@@ -78,17 +76,14 @@ void main() {
   vec2 p = v;
 
   // tile
-  p = mod((p + 1.0) * tile, 2.0) - 1.0;
+  p = mod((p + 1.0) * p2, 2.0) - 1.0;
 
   p.x *= 16.0 / 9.0;
 
-  // chougouyoku - zoom
-  p *= 1.0 - 0.1 * mod(floor(t * 30.0), 2.0) * chougouyoku;
-
   // kaleidoscope
-  if (kaleidoscope > 0.0) {
+  if (p3 > 0.0) {
     float a = atan(p.y, p.x);
-    a = abs(mod(a / PI + 1.0 / kaleidoscope, 2.0 / kaleidoscope) - 1.0 / kaleidoscope) * PI;
+    a = abs(mod(a / PI + 1.0 / p3, 2.0 / p3) - 1.0 / p3) * PI;
     p = length(p) * vec2(cos(a), sin(a));
   }
 
@@ -99,13 +94,13 @@ void main() {
   for (int i = 0; i < SAMPLES; i++) {
     float phase = (float(i) + dither) / SAMPLES_F;
 
-    vec2 pt = p * (1.0 - zoom * phase);
+    vec2 pt = p * (1.0 - p0 * phase);
 
     vec2 uvt = pt;
     uvt.x *= 9.0 / 16.0;
     uvt = uvt * 0.5 + 0.5;
 
-    uvt.y += 0.1 * shake * sin(TAU * phase * 3.0 + t);
+    uvt.y += 0.1 * p1 * sin(TAU * phase * 3.0 + t);
 
     vec3 tex = texture(f, uvt).xyz;
 
@@ -121,18 +116,15 @@ void main() {
   // codercolor
   float luma = dot(sum, LUMA);
   vec3 i_codercolor = 0.5 + 0.5 * cos(12.0 * luma + vec3(0, 2, 4) + 5.0 * t);
-  sum = mix(sum, i_codercolor, codercolor);
+  sum = mix(sum, i_codercolor, p4);
 
   // posterize
   luma = dot(sum, LUMA);
   vec3 i_posterized = smoothstep(0.2, 0.1, luma) * vec3(0.8, 1.0, 0.04) + smoothstep(0.6, 0.7, luma);
-  sum = mix(sum, i_posterized, posterize);
-
-  // chougouyoku - neg
-  sum = mix(sum, 1.0 - sum, mod(floor(t * 15.0), 2.0) * chougouyoku);
+  sum = mix(sum, i_posterized, p5);
 
   // ビデオフィードバックンゴ
-  if (feedback > 0.0) {
+  if (p7 > 0.0) {
     const mat3 ycc2rgb = mat3(1.0,1.0,1.0,0.0,-0.344,1.773,1.403,-0.714,0.0);
     const mat3 rgb2ycc = mat3(0.299,-0.168936,0.499413,0.587,-0.330468,-0.418931,0.114,0.499704,-0.081282);
     const float ASPECT = 16.0 / 9.0;
@@ -146,10 +138,10 @@ void main() {
       ycc+=y;
     }
     back=(ycc2rgb*ycc);
-    sum = mix(sum,back*1.0, exp(-1.0 / (30.0 * feedback)));
+    sum = mix(sum,back*1.0, exp(-1.0 / (30.0 * p7)));
   } 
 
-  if (flowInvert > 0.0) {
+  if (p8 > 0.0) {
     float beat = t * BPM / 60.0;
     vec2 texUv = v * 0.5 + 0.5;
     vec2 dxy = 1.0 / vec2(textureSize(b, 0));
@@ -163,11 +155,11 @@ void main() {
       color = sum * 10.0;
     }
     color *= 0.8;
-    sum = mix(sum, color, flowInvert);
+    sum = mix(sum, color, p8);
   }
 
   // white
-  sum = mix(sum, vec3(1.0), white);
+  sum = mix(sum, vec3(1.0), p6);
 
 
   outColor = vec4(sum, 1.0);
