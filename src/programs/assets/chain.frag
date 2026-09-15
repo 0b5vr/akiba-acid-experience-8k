@@ -42,7 +42,7 @@ float sd_chain(vec3 p) {
 }
 
 float map(vec3 p) {
-  p.xy *= r2d(0.1 * p.z);
+  p.xy *= r2d(0.2 * p.z);
   p.xy = fract(p.xy) - 0.5;
   p.z = mod(p.z, 1.5) - 0.75;
 
@@ -66,7 +66,7 @@ void main() {
   vec2 p = v;
   p.x *= 16.0 / 9.0;
 
-  vec3 ro = vec3(0.0, 0.0, 1.0 - t * 10.0);
+  vec3 ro = vec3(0.0, 0.0, 1.0 - t * 4.0);
   vec3 rd = normalize(vec3(p, -2.0));
   float rl = 0.0;
   float dist;
@@ -81,9 +81,9 @@ void main() {
     vec3 i_n = nMap(ro + rd * rl);
     vec3 r = reflect(rd, i_n);
     r.yz *= r2d(t);
-    float i_fog = exp(-0.4 * rl);
+    float i_fog = exp(-0.2 * rl);
 
-    float i_rawnoise = cyclic(4.0 * r, 0.5, 2.0).x;
+    float i_rawnoise = cyclic(1.0 * r, 0.5, 2.0).x;
     float i_noise = 4.0 * pow(0.5 + 0.5 * i_rawnoise, 4.0);
     outColor = vec4(vec3(i_fog * i_noise), 1.0);
   }
