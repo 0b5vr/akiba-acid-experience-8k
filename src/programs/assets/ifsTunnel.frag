@@ -15,8 +15,8 @@ const float BPM = 140.0;
 
 float beat, beatTau, beatPhase;
 
-float phase(float x) {
-  return floor(x) + 0.5 + 0.5 * cos(TAU * 0.5 * exp(-5.0 * fract(x)));
+float easeOutSharp(float x, float k) {
+  return 1.0 - pow(1.0 - x, k);
 }
 
 void union(inout vec4 hit, float distance, float material, float intensity, float hue) {
@@ -102,7 +102,7 @@ vec3 render(vec3 ro, vec3 rd) {
 void main() {
   beat = t * BPM / 60.0;
   beatTau = beat * TAU;
-  beatPhase = phase(beat);
+  beatPhase = floor(beat) + easeOutSharp(fract(beat), 4.0);
 
   vec2 p = v;
   p.x *= 16.0 / 9.0;
