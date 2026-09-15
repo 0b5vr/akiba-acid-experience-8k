@@ -22,12 +22,6 @@ const float TAU = PI * 2.0;
 const float SWING = 0.54;
 const float TRANSPOSE = 3.0;
 
-#define saturate(x) clamp(x, 0., 1.)
-#define linearstep(a,b,x) saturate(((x)-(a))/((b)-(a)))
-#define clip(x) clamp(x, -1., 1.)
-#define lofi(i,m) (floor((i)/(m))*(m))
-#define tri(p) (1.-4.*abs(fract(p)-0.5))
-
 out vec2 fragColor;
 
 float samplesToTime(int samples) {
@@ -71,10 +65,6 @@ int stepToSamplesSwing(int st) {
   return floorDiv(st, 2) * TWO_STEP_SAMPLES + (floorMod(st, 2) == 0 ? 0 : SWING_STEP_SAMPLES);
 }
 
-float s2tSwing(float st) {
-  return B2T * 0.5 * (floor(st / 2.0) + SWING * mod(st, 2.0));
-}
-
 vec4 seq16(int samples, int seq) {
   const int BAR_SAMPLES = STEP_SAMPLES * 16;
   samples = floorMod(samples, BAR_SAMPLES);
@@ -112,21 +102,6 @@ vec2 ladderLPF(float freq, float cutoff, float reso) {
     1.0 / sqrt(a * a + b * b),
     atan(a, b)
   );
-}
-
-vec2 shotgun(float t, float spread, float snap, float fm) {
-  vec2 sum = vec2(0.0);
-
-  for (int i = 0; i < 64; i++) {
-    vec3 dice = hash3f(vec3(i, 64, 64));
-
-    vec2 partial = exp2(spread * dice.xy);
-    partial = mix(partial, floor(partial + 0.5), snap);
-
-    sum += sin(TAU * t * partial + fm * sin(TAU * t * partial));
-  }
-
-  return sum / 64.0;
 }
 
 float glidephase(float t, float t1, float p0, float p1) {
@@ -182,16 +157,16 @@ void main() {
   float timeBeat = samplesToTime(sampleIndex % BEAT_SAMPLES);
   float bars = timeGlobal / B2T / 4.0;
 
-  int barIndex = sampleIndex / BAR_SAMPLES;
+  int eightBarIndex = sampleIndex / (BAR_SAMPLES * 8);
 
   float duck = smoothstep(0.0, 0.4, timeBeat) * smoothstep(0.0, 0.001, B2T - timeBeat);
 
-  if (barIndex >= 16 && barIndex < 144) { // kick
+  if (eightBarIndex >= 2 && eightBarIndex < 18) { // kick
     float t = timeBeat;
     float q = B2T - t;
   
     float env = smoothstep(0.0, 0.001, q) * exp(-20.0 * max(t - 0.1, 0.0));
-    if (barIndex / 8 == 5 || barIndex / 8 == 13) {
+    if (eightBarIndex == 5 || eightBarIndex == 13) {
       env *= exp(-50.0 * t);
     }
   
@@ -211,7 +186,7 @@ void main() {
     }
   }
 
-  if (barIndex >= 24 && barIndex < 88 || barIndex >= 112 && barIndex < 136) { // hihat
+  if (eightBarIndex >= 3 && eightBarIndex < 11 || eightBarIndex >= 14 && eightBarIndex < 17) { // hihat
     vec4 seq = seq16(sampleIndex % BAR_SAMPLES, 0xffff);
     float t = seq.y;
 
@@ -241,10 +216,9 @@ void main() {
     dest += 0.2 * env * mix(0.5, 1.0, duck) * tanh(2.0 * sum);
   }
 
-  if (barIndex >= 32 && barIndex < 88 || barIndex >= 112 && barIndex < 128) { // clap
+  if (eightBarIndex >= 4 && eightBarIndex < 11 || eightBarIndex >= 14 && eightBarIndex < 16) { // clap
     vec4 seq = seq16(sampleIndex % BAR_SAMPLES, 0x2001);
     float t = seq.y;
-    float q = seq.w;
 
     float env = mix(
       exp2(-40.0 * t),
@@ -259,7 +233,7 @@ void main() {
     dest += 0.2 * mix(0.8, 1.0, duck) * tanh(20.0 * env * wave);
   }
 
-  if (barIndex >= 48 && barIndex < 88 || barIndex >= 96 && barIndex < 128) { // snare909
+  if (eightBarIndex >= 6 && eightBarIndex < 11 || eightBarIndex >= 12 && eightBarIndex < 16) { // snare909
     vec4 seq = seq16(sampleIndex % BAR_SAMPLES, 0x2543);
     float t = seq.t;
     float q = seq.q;
@@ -281,13 +255,14 @@ void main() {
     dest += 0.3 * mix(0.5, 1.0, duck) * tanh(4.0 * env * wave);
   }
 
-  if (barIndex >= 16 && barIndex < 144) { // hi tom
-    vec4 seq = seq16(sampleIndex % BAR_SAMPLES, 0x1050);
+  if (eightBarIndex >= 2 && eightBarIndex < 18) { // toms
+    vec4 seq = seq16(sampleIndex % BAR_SAMPLES, 0x1252);
     float t = seq.y;
-    float q = seq.w;
+
+    bool hi = mod(seq.x, 8.0) < 4.0;
 
     float env = exp(-20.0 * t);
-    float freq = 110.0;
+    float freq = hi ? 110.0 : 80.0;
     float phase = (
       t
       - 0.03 * exp2(-40.0 * t)
@@ -296,46 +271,26 @@ void main() {
     phase *= TAU * freq;
 
     vec2 wave = cis(phase + sin(3.0 * phase) + 10.0 * t);
-    wave.x *= 0.5;
+    wave *= hi ? vec2(0.5, 1.0) : vec2(1.0, 0.5);
 
     dest += 0.2 * mix(0.8, 1.0, duck) * tanh(2.0 * env * wave);
   }
 
-  if (barIndex >= 16 && barIndex < 144) { // low tom
-    vec4 seq = seq16(sampleIndex % BAR_SAMPLES, 0x0202);
-    float t = seq.y;
-    float q = seq.w;
-
-    float env = exp(-20.0 * t);
-    float freq = 80.0;
-    float phase = (
-      t
-      - 0.03 * exp2(-40.0 * t)
-      - 0.01 * exp2(-150.0 * t)
-    );
-    phase *= TAU * freq;
-
-    vec2 wave = cis(phase + sin(3.0 * phase) + 10.0 * t);
-    wave.y *= 0.5;
-
-    dest += 0.2 * mix(0.8, 1.0, duck) * tanh(2.0 * env * wave);
-  }
-
-  if (barIndex >= 16 && barIndex < 144) { // rim
+  if (eightBarIndex >= 2 && eightBarIndex < 18) { // rim
     vec4 seq = seq16(sampleIndex % BAR_SAMPLES, 0xd6d7);
     float t = seq.y;
 
     float env = step(0.0, t) * exp2(-400.0 * t);
 
     float wave = tanh(4.0 * (
-      + tri(t * 400.0 - 0.5 * env)
-      + tri(t * 1500.0 - 0.5 * env)
+      + sin(t * 2400.0 - 3.0 * env)
+      + sin(t * 9000.0 - 3.0 * env)
     ));
 
     dest += 0.2 * mix(0.8, 1.0, duck) * env * vec2(wave) * r2d(seq.x);
   }
 
-  if (barIndex >= 48 && barIndex < 80 || barIndex >= 112 && barIndex < 136) { // ride
+  if (eightBarIndex >= 6 && eightBarIndex < 10 || eightBarIndex >= 14 && eightBarIndex < 17) { // ride
     float t = seq16(sampleIndex % BAR_SAMPLES, 0x2222).y;
 
     float env = exp(-2.0 * t);
@@ -357,15 +312,25 @@ void main() {
     dest += 0.15 * mix(0.2, 1.0, duck) * env * tanh(sum);
   }
 
-  if (barIndex >= 16) { // crash
+  if (eightBarIndex >= 2) { // crash
     float t = samplesToTime(sampleIndex % (16 * BAR_SAMPLES));
 
     float env = mix(exp(-t), exp(-10.0 * t), 0.7);
-    vec2 wave = shotgun(3800.0 * t, 2.0, 0.0, 1.0);
-    dest += 0.4 * env * mix(0.5, 1.0, duck) * tanh(8.0 * wave);
+
+    // 64 partials shotgun
+    vec2 wave = vec2(0.0);
+    for (int i = 0; i < 64; i++) {
+      vec2 i_xi = hash3f(vec3(i, 64, 64)).xy;
+      vec2 i_partial = exp2(2.0 * i_xi);
+      vec2 phase = TAU * 3800.0 * t * i_partial;
+      wave += sin(phase + sin(phase));
+    }
+
+    // dest += 0.4 * env * mix(0.5, 1.0, duck) * tanh(8.0 * (wave / 64.0));
+    dest += 0.4 * env * mix(0.5, 1.0, duck) * tanh(0.125 * wave);
   }
 
-  if (barIndex / 8 == 5 || barIndex / 8 == 13) { // snare roll
+  if (eightBarIndex == 5 || eightBarIndex == 13) { // snare roll
     float fade = smoothstep(0.0, 1.0, fract(bars / 8.0));
   
     vec4 seq = seq16(sampleIndex % BAR_SAMPLES, 0xffff);
@@ -407,18 +372,18 @@ void main() {
     float SLIDE_T0 = 0.8 * S2T;
     float SLIDE_TIME = 0.6 * S2T;
 
-    float cutoffKnobWave = sin(timeGlobal) + sin(1.41 * timeGlobal) + sin(1.88 * timeGlobal);
-    float cutoffKnob = barIndex < 20 ? 0.3 * smoothstep(14.0, 20.0, bars) :
-      barIndex < 48 ? mix(0.3, 0.7 + 0.1 * cutoffKnobWave, smoothstep(40.0, 48.0, bars)) :
-      barIndex < 80 ? mix(0.7 + 0.1 * cutoffKnobWave, 0.6, smoothstep(79.0, 80.0, bars)) :
-      barIndex < 112 ? mix(0.6, 0.7 + 0.1 * cutoffKnobWave, smoothstep(104.0, 112.0, bars)) :
-      barIndex < 129 ? mix(0.7 + 0.1 * cutoffKnobWave, 0.5, smoothstep(127.0, 129.0, bars)) :
-      barIndex < 144 ? mix(0.5, 0.3, smoothstep(136.0, 144.0, bars)) :
-      0.3;
-    float resoKnob = barIndex < 48 ? mix(0.0, 0.9, smoothstep(40.0, 48.0, bars)) :
-      barIndex < 129 ? mix(0.9, 0.7, smoothstep(127.0, 129.0, bars)) :
-      0.7;
-    float dissonanceKnob = barIndex < 88 ? 0.0 : 0.2;
+    float cutoffKnobHi = 0.7 + 0.1 * (sin(timeGlobal) + sin(1.41 * timeGlobal) + sin(1.88 * timeGlobal));
+    float cutoffKnob = 0.3 * smoothstep(14.0, 20.0, bars);
+    cutoffKnob = mix(cutoffKnob, cutoffKnobHi, smoothstep(40.0, 48.0, bars));
+    cutoffKnob = mix(cutoffKnob, 0.6, smoothstep(79.0, 80.0, bars));
+    cutoffKnob = mix(cutoffKnob, cutoffKnobHi, smoothstep(104.0, 112.0, bars));
+    cutoffKnob = mix(cutoffKnob, 0.5, smoothstep(127.0, 129.0, bars));
+    cutoffKnob = mix(cutoffKnob, 0.3, smoothstep(136.0, 144.0, bars));
+
+    float resoKnob = 0.9 * smoothstep(40.0, 48.0, bars);
+    resoKnob = mix(resoKnob, 0.7, smoothstep(127.0, 129.0, bars));
+
+    float dissonanceKnob = 0.2 * step(88.0, bars);
 
     int basestep = samplesToStepSwing(sampleIndex);
     float seqi = floor(float(basestep) / 1.15);
@@ -443,7 +408,7 @@ void main() {
     int i = int(seqi) % N_NOTES;
     float pitch = 36.0 + TRANSPOSE + float(NOTES[i]);
     float pitch1 = pitch + float(SLIDE[i]);
-    float basefreq = p2f(mix(pitch, pitch1, linearstep(0.0, SLIDE_TIME, t - SLIDE_T0)));
+    float basefreq = p2f(mix(pitch, pitch1, clamp((t - SLIDE_T0) / SLIDE_TIME, 0.0, 1.0)));
     float basephase = glidephase(t - SLIDE_T0, SLIDE_TIME, pitch, pitch1);
   
     vec2 sum = vec2(0.0);
@@ -465,14 +430,12 @@ void main() {
       float phase = basephase * p;
       // phase += TAU * dice.z;
   
-      vec2 wave = vec2(0.0);
-      wave += sin(TAU * phase + filt.y);
-      sum += wave * env * coeff * filt.x;
+      sum += sin(TAU * phase + filt.y) * env * coeff * filt.x;
     }
   
     float bias = -0.4;
-    dest += 0.25 * mix(0.8, 1.0, duck) * (clip(4.0 * (sum + bias)) - bias);
+    dest += 0.25 * mix(0.8, 1.0, duck) * (clamp(4.0 * (sum + bias), -1.0, 1.0) - bias);
   }
 
-  fragColor = clip(1.3 * tanh(dest) * smoothstep(152.0, 144.0, bars));
+  fragColor = clamp(1.3 * tanh(dest) * smoothstep(152.0, 144.0, bars), -1.0, 1.0);
 }

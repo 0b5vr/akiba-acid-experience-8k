@@ -4,9 +4,9 @@
 precision highp float;
 //]
 
-in vec2 v;
-
 uniform float t;
+
+in vec2 v;
 
 out vec4 outColor;
 

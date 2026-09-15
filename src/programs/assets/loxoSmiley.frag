@@ -11,7 +11,6 @@ in vec2 v;
 out vec4 outColor;
 
 const float PI = acos(-1.0);
-const float TAU = 2.0 * PI;
 const vec2 P_MINUS = vec2(-0.72, -0.3);
 const vec2 P_PLUS = vec2(0.78, 0.38);
 const vec2 SMILEY_A = vec2(0.08, -0.04);
@@ -95,63 +94,50 @@ float bridgeDistance(vec2 p, vec2 center) {
   return sdSegment(p, center - halfLength * direction, center + halfLength * direction);
 }
 
-vec3 gamingColor(float hue) {
-  return 0.5 + 0.5 * cos(TAU * (hue + vec3(0.0, 2.0 / 3.0, 1.0 / 3.0)));
-}
-
-float smileyMask(vec2 p) {
-  p = (p - SMILEY_A) / SMILEY_A_SCALE;
-  vec2 o = p;
+float sdsmiley(vec2 p) {
   p.x = abs(p.x);
-  float mouthDistance = abs(length(p) - 0.55);
+
+  float i_dmouse = abs(length(p) - 0.55);
   float theta = atan(p.x, -p.y);
-  float mouthWidth = mix(0.15, 0.05, smoothstep(0.0, 1.6, theta))
-    * cos(clamp(30.0 * (theta - 1.4), -1.3, 1.6));
-  float d = mouthDistance - mouthWidth;
+  float i_width = mix(0.15, 0.05, smoothstep(0.0, 1.6, theta)) * cos(clamp(30.0 * (theta - 1.4), -1.3, 3.1));
+  float d = i_dmouse - i_width;
 
   p -= vec2(0.2, 0.3);
   p.y *= 0.3;
-  d = min(min(d, length(p) - 0.08),
-          abs(length(o) - 0.8) - 0.02);
-  return step(d, 0.0);
+  d = min(d, length(p) - 0.08);
+
+  return d;
+}
+
+float sdsmileycircle(vec2 p) {
+  return min(
+    abs(length(p) - 0.8) - 0.02,
+    sdsmiley(p)
+  );
+}
+
+float smileyMask(vec2 p) {
+  return step(sdsmileycircle((p - SMILEY_A) / SMILEY_A_SCALE), 0.0);
 }
 
 vec2 loxodromicOrbitTrap(vec2 p, vec2 w0, float phaseGap) {
-  vec2 forwardStep = cexp(vec2(-TRANSLATION * ORBIT_STEP, TWIST * ORBIT_STEP));
-  vec2 backwardStep = cexp(vec2(TRANSLATION * ORBIT_STEP, -TWIST * ORBIT_STEP));
-  vec2 forwardBridgeStep = cexp(vec2(-TRANSLATION * BRIDGE_STEP, TWIST * BRIDGE_STEP));
-  vec2 backwardBridgeStep = cexp(vec2(TRANSLATION * BRIDGE_STEP, -TWIST * BRIDGE_STEP));
-  vec2 forwardOrbit = cmul(forwardStep, w0);
-  vec2 backwardOrbit = cmul(backwardStep, w0);
-
   vec2 bridgeOrbit = normalizePoint(CIRCLE_CENTER);
-  vec2 forwardBridgeOrbit = cmul(forwardBridgeStep, bridgeOrbit);
-  vec2 backwardBridgeOrbit = cmul(backwardBridgeStep, bridgeOrbit);
 
-  float smiley = smileyMask(p);
-  float nearestBridgeDistance = bridgeDistance(p, CIRCLE_CENTER);
+  float smiley = 0.0;
+  float nearestBridgeDistance = 1e3;
 
-  for (int i = 0; i < BRIDGE_ITERATIONS; i++) {
-    float forwardBridgeDistance = bridgeDistance(p, denormalizePoint(forwardBridgeOrbit));
-    float backwardBridgeDistance = bridgeDistance(p, denormalizePoint(backwardBridgeOrbit));
+  for (int i = -BRIDGE_ITERATIONS; i <= BRIDGE_ITERATIONS; i++) {
+    float s = float(i);
 
-    if (i < SMILEY_ITERATIONS) {
-      smiley = max(smiley, smileyMask(denormalizePoint(forwardOrbit)));
-      smiley = max(smiley, smileyMask(denormalizePoint(backwardOrbit)));
-      forwardOrbit = cmul(forwardStep, forwardOrbit);
-      backwardOrbit = cmul(backwardStep, backwardOrbit);
-    }
+    nearestBridgeDistance = min(nearestBridgeDistance, bridgeDistance(
+      p,
+      denormalizePoint(applyLoxodromicFlow(bridgeOrbit, BRIDGE_STEP * s))
+    ));
 
-    nearestBridgeDistance = min(
-      nearestBridgeDistance,
-      min(forwardBridgeDistance, backwardBridgeDistance)
-    );
-
-    forwardBridgeOrbit = cmul(forwardBridgeStep, forwardBridgeOrbit);
-    backwardBridgeOrbit = cmul(backwardBridgeStep, backwardBridgeOrbit);
-
-    if (smiley > 0.5) {
-      break;
+    if (abs(i) <= SMILEY_ITERATIONS) {
+      smiley = max(smiley, smileyMask(
+        denormalizePoint(applyLoxodromicFlow(w0, ORBIT_STEP * s))
+      ));
     }
   }
 
@@ -167,15 +153,14 @@ vec3 background(vec2 p) {
   vec2 w = normalizePoint(p);
   float centerPhase = loxodromicPhase(normalizePoint(SMILEY_A));
   float radiusLog = log(max(length(w), 1e-6));
-  float orbitPhase = atan(w.y, w.x) + TWIST / TRANSLATION * radiusLog;
-  float phaseGap = phaseDistance(orbitPhase, centerPhase);
+  float phaseGap = phaseDistance(loxodromicPhase(w), centerPhase);
   float railDistance = abs(phaseGap - RAIL_OFFSET);
   float railPixels = railDistance / max(fwidth(railDistance), 1e-5);
   float railCore = 1.0 - smoothstep(0.75, 1.65, railPixels);
   float railGlow = exp(-0.34 * railPixels);
 
-  float hue = 0.1 * t + 0.16 * radiusLog;
-  vec3 railColor = gamingColor(hue);
+  float hue = 0.6 * t + radiusLog;
+  vec3 railColor = 0.5 + 0.5 * cos(vec3(0, 2, 4) - hue);
   vec3 col = railColor * mix(0.4 * railGlow, 1.0, railCore);
 
   vec2 trapMasks = loxodromicOrbitTrap(p, w, phaseGap);

@@ -15,8 +15,8 @@ const float BPM = 140.0;
 
 float beat, beatTau, beatPhase;
 
-float phase(float x) {
-  return floor(x) + 0.5 + 0.5 * cos(TAU * 0.5 * exp(-5.0 * fract(x)));
+float easeOutSharp(float x, float k) {
+  return 1.0 - pow(1.0 - x, k);
 }
 
 void union(inout vec4 hit, float distance, float material, float intensity, float hue) {
@@ -34,7 +34,7 @@ mat2 r2d(float t) {
   return mat2(cos(t), sin(t), -sin(t), cos(t));
 }
 
-vec4 map(vec3 pos) {
+vec4 map4(vec3 pos) {
   float a = 2.0;
   vec3 p = mod(pos, a) - a * 0.5;
   const vec3 offset = vec3(0.3, -0.07, 0);
@@ -54,12 +54,16 @@ vec4 map(vec3 pos) {
   return hit;
 }
 
-vec3 normal(vec3 p) {
-  const vec2 e = vec2(0.01, 0.0);
+float map(vec3 p) {
+  return map4(p).x;
+}
+
+vec3 nMap(vec3 p) {
+  const vec2 d = vec2(0.0, 0.001);
   return normalize(vec3(
-    map(p + e.xyy).x - map(p - e.xyy).x,
-    map(p + e.yxy).x - map(p - e.yxy).x,
-    map(p + e.yyx).x - map(p - e.yyx).x
+    map(p + d.yxx) - map(p - d.yxx),
+    map(p + d.xyx) - map(p - d.xyx),
+    map(p + d.xxy) - map(p - d.xxy)
   ));
 }
 
@@ -74,13 +78,13 @@ vec3 render(vec3 ro, vec3 rd) {
 
   for (int i = 0; i < 100; i++) {
     vec3 p = ro + rd * rayLength;
-    vec4 hit = map(p);
+    vec4 hit = map4(p);
 
     if (hit.y == 1.0) {
       rayLength += hit.x;
       if (hit.x < 0.001) {
         vec3 light = normalize(vec3(1.0, 1.0, -1.0));
-        vec3 n = normal(p);
+        vec3 n = nMap(p);
         float diffuse = clamp(dot(n, light), 0.0, 1.0);
         float specular = pow(clamp(dot(n, normalize(light - rd)), 0.0, 1.0), 10.0);
         color += 0.1 * diffuse + specular;
@@ -98,7 +102,7 @@ vec3 render(vec3 ro, vec3 rd) {
 void main() {
   beat = t * BPM / 60.0;
   beatTau = beat * TAU;
-  beatPhase = phase(beat);
+  beatPhase = floor(beat) + easeOutSharp(fract(beat), 4.0);
 
   vec2 p = v;
   p.x *= 16.0 / 9.0;

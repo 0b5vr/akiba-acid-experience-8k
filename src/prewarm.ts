@@ -12,9 +12,9 @@ import './programs/loadPrograms';
 export function prewarm(): void {
   gl.bindFramebuffer(GL_FRAMEBUFFER, framebufferScene);
 
-  for (const key in programs) {
-    renderPass(programs[key as keyof typeof programs], 0);
-  }
+  Object.values(programs).map((program) => (
+    renderPass(program, 0)
+  ));
 
   // we probably don't need this
   // gl.finish();

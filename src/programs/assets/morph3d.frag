@@ -4,9 +4,9 @@
 precision highp float;
 //]
 
-in vec2 v;
-
 uniform float t;
+
+in vec2 v;
 
 out vec4 outColor;
 
@@ -20,7 +20,7 @@ float sdbox(vec3 p, vec3 s) {
 }
 
 float sdcylinder(vec3 p, float r, float h) {
-  vec2 d = vec2(length(p.xy), abs(p.z)) - vec2(r, h);
+  vec2 d = vec2(length(p.xy) - r, length(p.z) - h);
   return min(max(d.x, d.y), 0.0) + length(max(d, 0.0));
 }
 

@@ -1,4 +1,4 @@
-import { GL_FRAMEBUFFER, GL_TEXTURE2, GL_TEXTURE_2D, GL_TRIANGLE_STRIP } from './gl-constants';
+import { GL_FRAMEBUFFER, GL_TEXTURE1, GL_TEXTURE_2D, GL_TRIANGLES } from './gl-constants';
 import { BPM } from './constants';
 import { DUMP_SCENES, ENABLE_SEEKING, INTRO_LENGTH, START_DELAY, STOP_RENDERING_AFTER_END, STOP_RENDERING_BEFORE_START } from './config';
 import { audio } from './audio';
@@ -56,61 +56,21 @@ export function render(): void {
 
   preparePass(programs.post, time, textureScene);
 
-  gl.uniform1f(
-    gl.getUniformLocation(programs.post, 'beat'),
-    beat,
-  );
-
-  gl.activeTexture(GL_TEXTURE2);
+  gl.activeTexture(GL_TEXTURE1);
   gl.bindTexture(GL_TEXTURE_2D, textureBack);
   gl.uniform1i(
     gl.getUniformLocation(programs.post, 'b'),
-    2,
+    1,
   );
 
-  // TODO: optimize these uniform names later
-  gl.uniform1f(
-    gl.getUniformLocation(programs.post, 'zoom'),
-    evalSequence(sequences.zoom, beat)!,
-  );
-  gl.uniform1f(
-    gl.getUniformLocation(programs.post, 'shake'),
-    evalSequence(sequences.shake, beat)!,
-  );
-  gl.uniform1f(
-    gl.getUniformLocation(programs.post, 'tile'),
-    evalSequence(sequences.tile, beat)!,
-  );
-  gl.uniform1f(
-    gl.getUniformLocation(programs.post, 'kaleidoscope'),
-    evalSequence(sequences.kaleidoscope, beat)!,
-  );
-  gl.uniform1f(
-    gl.getUniformLocation(programs.post, 'codercolor'),
-    evalSequence(sequences.codercolor, beat)!,
-  );
-  gl.uniform1f(
-    gl.getUniformLocation(programs.post, 'posterize'),
-    evalSequence(sequences.posterize, beat)!,
-  );
-  gl.uniform1f(
-    gl.getUniformLocation(programs.post, 'chougouyoku'),
-    evalSequence(sequences.chougouyoku, beat)!,
-  );
-  gl.uniform1f(
-    gl.getUniformLocation(programs.post, 'white'),
-    evalSequence(sequences.white, beat)!,
-  );
-  gl.uniform1f(
-    gl.getUniformLocation(programs.post, 'feedback'),
-    evalSequence(sequences.feedback, beat)!,
-  );
-  gl.uniform1f(
-    gl.getUniformLocation(programs.post, 'flowInvert'),
-    evalSequence(sequences.flowInvert, beat)!,
-  );
+  (['zoom', 'shake', 'tile', 'kaleidoscope', 'codercolor', 'posterize', 'white', 'feedback', 'flowInvert'] as const).map((key) => (
+    gl.uniform1f(
+      gl.getUniformLocation(programs.post, key),
+      evalSequence(sequences[key], beat)!,
+    )
+  ));
 
-  gl.drawArrays(GL_TRIANGLE_STRIP, 0, 4);
+  gl.drawArrays(GL_TRIANGLES, 0, 3);
 
   copyToTextureBack();
 

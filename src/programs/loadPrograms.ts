@@ -8,7 +8,6 @@ import copyFrag from './assets/copy.frag?shader';
 import crabFrag from './assets/crab.frag?shader';
 import cubetunnelFrag from './assets/cubetunnel.frag?shader';
 import dotmatrixFrag from './assets/dotmatrix.frag?shader';
-import fbmFrag from './assets/fbm.frag?shader';
 import foldarcFrag from './assets/foldarc.frag?shader';
 import boxTownFrag from './assets/boxTown.frag?shader';
 import funnelFrag from './assets/funnel.frag?shader';
@@ -36,6 +35,7 @@ import { programs } from './programs';
 // Compiles every shader in the intro.
 // This is where the programs come from in the prod build as well, not just on a dev build HMR.
 
+programs.music = lazyQuadProgram(musicFrag);
 programs.aep3d = lazyQuadProgram(aep3dFrag);
 programs.aepchecker = lazyQuadProgram(aepcheckerFrag);
 programs.boxarray = lazyQuadProgram(boxarrayFrag);
@@ -45,7 +45,6 @@ programs.copy = lazyQuadProgram(copyFrag);
 programs.crab = lazyQuadProgram(crabFrag);
 programs.cubetunnel = lazyQuadProgram(cubetunnelFrag);
 programs.dotmatrix = lazyQuadProgram(dotmatrixFrag);
-programs.fbm = lazyQuadProgram(fbmFrag);
 programs.foldarc = lazyQuadProgram(foldarcFrag);
 programs.boxTown = lazyQuadProgram(boxTownFrag);
 programs.funnel = lazyQuadProgram(funnelFrag);
@@ -55,7 +54,6 @@ programs.julia = lazyQuadProgram(juliaFrag);
 programs.lattice = lazyQuadProgram(latticeFrag);
 programs.loxoSmiley = lazyQuadProgram(loxoSmileyFrag);
 programs.morph3d = lazyQuadProgram(morph3dFrag);
-programs.music = lazyQuadProgram(musicFrag);
 programs.noiseaura = lazyQuadProgram(noiseauraFrag);
 programs.nop = lazyQuadProgram(nopFrag);
 programs.plasma = lazyQuadProgram(plasmaFrag);

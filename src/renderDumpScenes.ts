@@ -1,4 +1,4 @@
-import { GL_COLOR_BUFFER_BIT, GL_FRAMEBUFFER, GL_TRIANGLE_STRIP } from './gl-constants';
+import { GL_COLOR_BUFFER_BIT, GL_FRAMEBUFFER, GL_TRIANGLES } from './gl-constants';
 import { BPM, HEIGHT, WIDTH } from './constants';
 import { updateTextureText } from './textures/textureText';
 import { gl } from './gl';
@@ -9,7 +9,6 @@ import { preparePass } from './renderPass';
 
 const DUMP_SCENE_KEYS = Object.keys(programs).filter(
   (key) => ![
-    'fbm',
     'music',
     'nop',
     'post',
@@ -34,7 +33,7 @@ export function renderDumpScenes(time: number): void {
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
   gl.clear(GL_COLOR_BUFFER_BIT);
 
-  for (const [i, key] of DUMP_SCENE_KEYS.entries()) {
+  DUMP_SCENE_KEYS.map((key, i) => {
     const col = i % cols;
     const row = Math.floor(i / cols);
 
@@ -48,6 +47,6 @@ export function renderDumpScenes(time: number): void {
       cellHeight,
     );
 
-    gl.drawArrays(GL_TRIANGLE_STRIP, 0, 4);
-  }
+    gl.drawArrays(GL_TRIANGLES, 0, 3);
+  });
 }
