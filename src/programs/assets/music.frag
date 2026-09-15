@@ -372,18 +372,18 @@ void main() {
     float SLIDE_T0 = 0.8 * S2T;
     float SLIDE_TIME = 0.6 * S2T;
 
-    float cutoffKnobWave = sin(timeGlobal) + sin(1.41 * timeGlobal) + sin(1.88 * timeGlobal);
-    float cutoffKnob = barIndex < 20 ? 0.3 * smoothstep(14.0, 20.0, bars) :
-      barIndex < 48 ? mix(0.3, 0.7 + 0.1 * cutoffKnobWave, smoothstep(40.0, 48.0, bars)) :
-      barIndex < 80 ? mix(0.7 + 0.1 * cutoffKnobWave, 0.6, smoothstep(79.0, 80.0, bars)) :
-      barIndex < 112 ? mix(0.6, 0.7 + 0.1 * cutoffKnobWave, smoothstep(104.0, 112.0, bars)) :
-      barIndex < 129 ? mix(0.7 + 0.1 * cutoffKnobWave, 0.5, smoothstep(127.0, 129.0, bars)) :
-      barIndex < 144 ? mix(0.5, 0.3, smoothstep(136.0, 144.0, bars)) :
-      0.3;
-    float resoKnob = barIndex < 48 ? mix(0.0, 0.9, smoothstep(40.0, 48.0, bars)) :
-      barIndex < 129 ? mix(0.9, 0.7, smoothstep(127.0, 129.0, bars)) :
-      0.7;
-    float dissonanceKnob = barIndex < 88 ? 0.0 : 0.2;
+    float cutoffKnobHi = 0.7 + 0.1 * (sin(timeGlobal) + sin(1.41 * timeGlobal) + sin(1.88 * timeGlobal));
+    float cutoffKnob = 0.3 * smoothstep(14.0, 20.0, bars);
+    cutoffKnob = mix(cutoffKnob, cutoffKnobHi, smoothstep(40.0, 48.0, bars));
+    cutoffKnob = mix(cutoffKnob, 0.6, smoothstep(79.0, 80.0, bars));
+    cutoffKnob = mix(cutoffKnob, cutoffKnobHi, smoothstep(104.0, 112.0, bars));
+    cutoffKnob = mix(cutoffKnob, 0.5, smoothstep(127.0, 129.0, bars));
+    cutoffKnob = mix(cutoffKnob, 0.3, smoothstep(136.0, 144.0, bars));
+
+    float resoKnob = 0.9 * smoothstep(40.0, 48.0, bars);
+    resoKnob = mix(resoKnob, 0.7, smoothstep(127.0, 129.0, bars));
+
+    float dissonanceKnob = 0.2 * step(88.0, bars);
 
     int basestep = samplesToStepSwing(sampleIndex);
     float seqi = floor(float(basestep) / 1.15);
