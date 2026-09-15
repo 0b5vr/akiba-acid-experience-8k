@@ -37,7 +37,7 @@ export default defineConfig(({ mode }) => {
       shaderMinifierPlugin({
         minify: true, // mode === 'prod',
         batch: true,
-        batchShuffleSeed: 2,
+        batchShuffleSeed: 15,
         minifierOptions: {
           noRenamingList: ['main', 'v', 't', 'b', 'zoom', 'shake', 'tile', 'kaleidoscope', 'codercolor', 'posterize', 'white', 'feedback', 'flowInvert'],
           aggressiveInlining: true,
