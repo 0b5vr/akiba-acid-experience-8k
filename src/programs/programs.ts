@@ -16,7 +16,7 @@ export const programs = {} as {
   ifsTunnel: WebGLProgram;
   julia: WebGLProgram;
   lattice: WebGLProgram;
-  loxoSmiley: WebGLProgram;
+  logSmiley: WebGLProgram;
   morph3d: WebGLProgram;
   music: WebGLProgram;
   nop: WebGLProgram;

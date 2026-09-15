@@ -10,7 +10,7 @@ import { postSequences } from './postSequences';
 sequences.scene = [
   [0, () => programs.iceplanes],
   [64, () => programs.lattice],
-  [96, () => programs.loxoSmiley],
+  [96, () => programs.logSmiley],
   [128, () => programs.ifsTunnel],
   [160, () => programs.aepchecker],
   [192, (b) => [
@@ -20,7 +20,7 @@ sequences.scene = [
     programs.plasma,
   ][(b * 2 | 0) % 4]],
   [256, (b) => [
-    programs.loxoSmiley,
+    programs.logSmiley,
     programs.boxTown,
     programs.julia,
     programs.ifsTunnel,
