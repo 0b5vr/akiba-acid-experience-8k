@@ -18,13 +18,17 @@ const float SMILEY_PHASE = 0.5015318;
 
 float sdsmiley(vec2 p) {
   p.x = abs(p.x);
+
+  float i_dmouse = abs(length(p) - 0.55);
   float theta = atan(p.x, -p.y);
-  float width = mix(0.15, 0.05, smoothstep(0.0, 1.6, theta))
-    * cos(clamp(30.0 * (theta - 1.4), -1.3, 3.1));
-  float d = min(abs(length(p) - 0.55) - width, abs(length(p) - 0.8) - 0.02);
+  float i_width = mix(0.15, 0.05, smoothstep(0.0, 1.6, theta)) * cos(clamp(30.0 * (theta - 1.4), -1.3, 3.1));
+  float d = min(i_dmouse - i_width, abs(length(p) - 0.8) - 0.02);
+
   p -= vec2(0.2, 0.3);
   p.y *= 0.3;
-  return min(d, length(p) - 0.08);
+  d = min(d, length(p) - 0.08);
+
+  return d;
 }
 
 void main() {
@@ -56,9 +60,13 @@ void main() {
   for (int i = -2; i <= 1; i++) {
     float r = localRadius + float(i) * SMILEY_STEP;
     float localAngle = phase - PITCH * r - SMILEY_PHASE;
+
     // to cartesian coordinates
-    vec2 localPoint = exp(r) * vec2(cos(localAngle), sin(localAngle));
-    smiley = max(smiley, step(sdsmiley((localPoint - vec2(1, 0)) / SMILEY_SCALE), 0.0));
+    vec2 i_pp = exp(r) * vec2(cos(localAngle), sin(localAngle));
+    vec2 p = (i_pp - vec2(1, 0)) / SMILEY_SCALE;
+
+    float d = sdsmiley(p);
+    smiley = max(smiley, step(d, 0.0));
   }
 
   vec3 railColor = 0.5 + 0.5 * cos(vec3(0, 2, 4) - 0.6 * t - radiusLog);
