@@ -36,6 +36,7 @@ import { programs } from './programs';
 // Compiles every shader in the intro.
 // This is where the programs come from in the prod build as well, not just on a dev build HMR.
 
+programs.music = lazyQuadProgram(musicFrag);
 programs.aep3d = lazyQuadProgram(aep3dFrag);
 programs.aepchecker = lazyQuadProgram(aepcheckerFrag);
 programs.boxarray = lazyQuadProgram(boxarrayFrag);
@@ -55,7 +56,6 @@ programs.julia = lazyQuadProgram(juliaFrag);
 programs.lattice = lazyQuadProgram(latticeFrag);
 programs.loxoSmiley = lazyQuadProgram(loxoSmileyFrag);
 programs.morph3d = lazyQuadProgram(morph3dFrag);
-programs.music = lazyQuadProgram(musicFrag);
 programs.noiseaura = lazyQuadProgram(noiseauraFrag);
 programs.nop = lazyQuadProgram(nopFrag);
 programs.plasma = lazyQuadProgram(plasmaFrag);
