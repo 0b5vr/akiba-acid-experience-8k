@@ -46,7 +46,7 @@ export function updateTextureText(text: string): void {
 
   const srcWidth = context.measureText(text).width;
   context.translate(WIDTH / 2, HEIGHT / 2);
-  context.scale(0.8 * WIDTH / srcWidth, 0.9);
+  context.scale(0.8 * WIDTH / srcWidth, 0.8);
   context.fillText(text, 0, 0);
 
   gl.bindTexture(GL_TEXTURE_2D, textureText);
