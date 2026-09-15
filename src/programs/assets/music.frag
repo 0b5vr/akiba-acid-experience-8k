@@ -22,12 +22,6 @@ const float TAU = PI * 2.0;
 const float SWING = 0.54;
 const float TRANSPOSE = 3.0;
 
-#define saturate(x) clamp(x, 0., 1.)
-#define linearstep(a,b,x) saturate(((x)-(a))/((b)-(a)))
-#define clip(x) clamp(x, -1., 1.)
-#define lofi(i,m) (floor((i)/(m))*(m))
-#define tri(p) (1.-4.*abs(fract(p)-0.5))
-
 out vec2 fragColor;
 
 float samplesToTime(int samples) {
@@ -328,8 +322,8 @@ void main() {
     float env = step(0.0, t) * exp2(-400.0 * t);
 
     float wave = tanh(4.0 * (
-      + tri(t * 400.0 - 0.5 * env)
-      + tri(t * 1500.0 - 0.5 * env)
+      + sin(t * 2400.0 - 3.0 * env)
+      + sin(t * 9000.0 - 3.0 * env)
     ));
 
     dest += 0.2 * mix(0.8, 1.0, duck) * env * vec2(wave) * r2d(seq.x);
@@ -443,7 +437,7 @@ void main() {
     int i = int(seqi) % N_NOTES;
     float pitch = 36.0 + TRANSPOSE + float(NOTES[i]);
     float pitch1 = pitch + float(SLIDE[i]);
-    float basefreq = p2f(mix(pitch, pitch1, linearstep(0.0, SLIDE_TIME, t - SLIDE_T0)));
+    float basefreq = p2f(mix(pitch, pitch1, clamp((t - SLIDE_T0) / SLIDE_TIME, 0.0, 1.0)));
     float basephase = glidephase(t - SLIDE_T0, SLIDE_TIME, pitch, pitch1);
   
     vec2 sum = vec2(0.0);
@@ -471,8 +465,8 @@ void main() {
     }
   
     float bias = -0.4;
-    dest += 0.25 * mix(0.8, 1.0, duck) * (clip(4.0 * (sum + bias)) - bias);
+    dest += 0.25 * mix(0.8, 1.0, duck) * (clamp(4.0 * (sum + bias), -1.0, 1.0) - bias);
   }
 
-  fragColor = clip(1.3 * tanh(dest) * smoothstep(152.0, 144.0, bars));
+  fragColor = clamp(1.3 * tanh(dest) * smoothstep(152.0, 144.0, bars), -1.0, 1.0);
 }
