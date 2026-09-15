@@ -219,7 +219,6 @@ void main() {
   if (barIndex >= 32 && barIndex < 88 || barIndex >= 112 && barIndex < 128) { // clap
     vec4 seq = seq16(sampleIndex % BAR_SAMPLES, 0x2001);
     float t = seq.y;
-    float q = seq.w;
 
     float env = mix(
       exp2(-40.0 * t),
