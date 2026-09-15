@@ -25,7 +25,7 @@ float sdsmiley(vec2 p) {
 
 void main() {
   vec2 p = v;
-  p.x = p.x * 16.0 / 9.0;
+  p.x *= 16.0 / 9.0;
 
   float i_d = min(
     abs(length(p) - 0.8) - 0.02,
