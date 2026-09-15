@@ -63,47 +63,12 @@ export function render(): void {
     1,
   );
 
-  // TODO: optimize these uniform names later
-  gl.uniform1f(
-    gl.getUniformLocation(programs.post, 'zoom'),
-    evalSequence(sequences.zoom, beat)!,
-  );
-  gl.uniform1f(
-    gl.getUniformLocation(programs.post, 'shake'),
-    evalSequence(sequences.shake, beat)!,
-  );
-  gl.uniform1f(
-    gl.getUniformLocation(programs.post, 'tile'),
-    evalSequence(sequences.tile, beat)!,
-  );
-  gl.uniform1f(
-    gl.getUniformLocation(programs.post, 'kaleidoscope'),
-    evalSequence(sequences.kaleidoscope, beat)!,
-  );
-  gl.uniform1f(
-    gl.getUniformLocation(programs.post, 'codercolor'),
-    evalSequence(sequences.codercolor, beat)!,
-  );
-  gl.uniform1f(
-    gl.getUniformLocation(programs.post, 'posterize'),
-    evalSequence(sequences.posterize, beat)!,
-  );
-  gl.uniform1f(
-    gl.getUniformLocation(programs.post, 'chougouyoku'),
-    evalSequence(sequences.chougouyoku, beat)!,
-  );
-  gl.uniform1f(
-    gl.getUniformLocation(programs.post, 'white'),
-    evalSequence(sequences.white, beat)!,
-  );
-  gl.uniform1f(
-    gl.getUniformLocation(programs.post, 'feedback'),
-    evalSequence(sequences.feedback, beat)!,
-  );
-  gl.uniform1f(
-    gl.getUniformLocation(programs.post, 'flowInvert'),
-    evalSequence(sequences.flowInvert, beat)!,
-  );
+  (['zoom', 'shake', 'tile', 'kaleidoscope', 'codercolor', 'posterize', 'white', 'feedback', 'flowInvert'] as const).map((key) => (
+    gl.uniform1f(
+      gl.getUniformLocation(programs.post, key),
+      evalSequence(sequences[key], beat)!,
+    )
+  ));
 
   gl.drawArrays(GL_TRIANGLES, 0, 3);
 
