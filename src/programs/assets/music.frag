@@ -157,16 +157,16 @@ void main() {
   float timeBeat = samplesToTime(sampleIndex % BEAT_SAMPLES);
   float bars = timeGlobal / B2T / 4.0;
 
-  int barIndex = sampleIndex / BAR_SAMPLES;
+  int eightBarIndex = sampleIndex / (BAR_SAMPLES * 8);
 
   float duck = smoothstep(0.0, 0.4, timeBeat) * smoothstep(0.0, 0.001, B2T - timeBeat);
 
-  if (barIndex >= 16 && barIndex < 144) { // kick
+  if (eightBarIndex >= 2 && eightBarIndex < 18) { // kick
     float t = timeBeat;
     float q = B2T - t;
   
     float env = smoothstep(0.0, 0.001, q) * exp(-20.0 * max(t - 0.1, 0.0));
-    if (barIndex / 8 == 5 || barIndex / 8 == 13) {
+    if (eightBarIndex == 5 || eightBarIndex == 13) {
       env *= exp(-50.0 * t);
     }
   
@@ -186,7 +186,7 @@ void main() {
     }
   }
 
-  if (barIndex >= 24 && barIndex < 88 || barIndex >= 112 && barIndex < 136) { // hihat
+  if (eightBarIndex >= 3 && eightBarIndex < 11 || eightBarIndex >= 14 && eightBarIndex < 17) { // hihat
     vec4 seq = seq16(sampleIndex % BAR_SAMPLES, 0xffff);
     float t = seq.y;
 
@@ -216,7 +216,7 @@ void main() {
     dest += 0.2 * env * mix(0.5, 1.0, duck) * tanh(2.0 * sum);
   }
 
-  if (barIndex >= 32 && barIndex < 88 || barIndex >= 112 && barIndex < 128) { // clap
+  if (eightBarIndex >= 4 && eightBarIndex < 11 || eightBarIndex >= 14 && eightBarIndex < 16) { // clap
     vec4 seq = seq16(sampleIndex % BAR_SAMPLES, 0x2001);
     float t = seq.y;
 
@@ -233,7 +233,7 @@ void main() {
     dest += 0.2 * mix(0.8, 1.0, duck) * tanh(20.0 * env * wave);
   }
 
-  if (barIndex >= 48 && barIndex < 88 || barIndex >= 96 && barIndex < 128) { // snare909
+  if (eightBarIndex >= 6 && eightBarIndex < 11 || eightBarIndex >= 12 && eightBarIndex < 16) { // snare909
     vec4 seq = seq16(sampleIndex % BAR_SAMPLES, 0x2543);
     float t = seq.t;
     float q = seq.q;
@@ -255,7 +255,7 @@ void main() {
     dest += 0.3 * mix(0.5, 1.0, duck) * tanh(4.0 * env * wave);
   }
 
-  if (barIndex >= 16 && barIndex < 144) { // toms
+  if (eightBarIndex >= 2 && eightBarIndex < 18) { // toms
     vec4 seq = seq16(sampleIndex % BAR_SAMPLES, 0x1252);
     float t = seq.y;
 
@@ -276,7 +276,7 @@ void main() {
     dest += 0.2 * mix(0.8, 1.0, duck) * tanh(2.0 * env * wave);
   }
 
-  if (barIndex >= 16 && barIndex < 144) { // rim
+  if (eightBarIndex >= 2 && eightBarIndex < 18) { // rim
     vec4 seq = seq16(sampleIndex % BAR_SAMPLES, 0xd6d7);
     float t = seq.y;
 
@@ -290,7 +290,7 @@ void main() {
     dest += 0.2 * mix(0.8, 1.0, duck) * env * vec2(wave) * r2d(seq.x);
   }
 
-  if (barIndex >= 48 && barIndex < 80 || barIndex >= 112 && barIndex < 136) { // ride
+  if (eightBarIndex >= 6 && eightBarIndex < 10 || eightBarIndex >= 14 && eightBarIndex < 17) { // ride
     float t = seq16(sampleIndex % BAR_SAMPLES, 0x2222).y;
 
     float env = exp(-2.0 * t);
@@ -312,7 +312,7 @@ void main() {
     dest += 0.15 * mix(0.2, 1.0, duck) * env * tanh(sum);
   }
 
-  if (barIndex >= 16) { // crash
+  if (eightBarIndex >= 2) { // crash
     float t = samplesToTime(sampleIndex % (16 * BAR_SAMPLES));
 
     float env = mix(exp(-t), exp(-10.0 * t), 0.7);
@@ -330,7 +330,7 @@ void main() {
     dest += 0.4 * env * mix(0.5, 1.0, duck) * tanh(0.125 * wave);
   }
 
-  if (barIndex / 8 == 5 || barIndex / 8 == 13) { // snare roll
+  if (eightBarIndex == 5 || eightBarIndex == 13) { // snare roll
     float fade = smoothstep(0.0, 1.0, fract(bars / 8.0));
   
     vec4 seq = seq16(sampleIndex % BAR_SAMPLES, 0xffff);
