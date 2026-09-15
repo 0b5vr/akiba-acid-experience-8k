@@ -49,10 +49,6 @@ vec2 cexp(vec2 z) {
   return exp(z.x) * vec2(cos(z.y), sin(z.y));
 }
 
-mat2 r2d(float t) {
-  return mat2(cos(t), sin(t), -sin(t), cos(t));
-}
-
 vec2 normalizePoint(vec2 z) {
   return cdiv(z - P_MINUS, z - P_PLUS);
 }
@@ -194,27 +190,13 @@ void main() {
 
   vec2 targetFixedPoint = cameraPathParameter >= 0.0 ? P_MINUS : P_PLUS;
   float fixedPointDistance = length(cameraPosition - targetFixedPoint);
-  float centerLock = 1.0 - smoothstep(0.025, 0.1, fixedPointDistance);
-  centerLock *= centerLock;
-  vec2 cameraCenter = mix(cameraPosition, targetFixedPoint, centerLock);
-
-  float fixedMotionTime = 1.5 * motionTime;
-  float lockedRoll = centerLock * (
-    0.16 * sin(1.1 * fixedMotionTime)
-    + 0.045 * sin(2.7 * fixedMotionTime)
-  );
-  cameraBasis *= r2d(lockedRoll);
 
   float targetScale = clamp(0.62 * fixedPointDistance, 0.006, 0.34);
   float zoomPhase = smoothstep(0.25, 0.9, abs(pingPong));
   zoomPhase *= zoomPhase;
   float worldScale = mix(0.34, targetScale, zoomPhase);
-  float lockedBreath = 1.0 + centerLock * (
-    0.075 * sin(0.9 * fixedMotionTime)
-    + 0.025 * sin(2.3 * fixedMotionTime)
-  );
-  worldScale *= lockedBreath;
 
+  vec2 cameraCenter = mix(cameraPosition, targetFixedPoint, zoomPhase);
   vec2 world = cameraCenter + cameraBasis * screen * worldScale;
   vec3 col = background(world);
 
