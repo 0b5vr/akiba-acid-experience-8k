@@ -53,7 +53,7 @@ void main() {
   vec2 p = v;
   p.x = p.x * 16.0 / 9.0;
 
-  int i = int(t * 20.0) % 8;
+  int i = int(t * 20.0) % 7;
 
   if (i == 0) {
     // 7010 point
@@ -112,14 +112,6 @@ void main() {
       i_shapered
     );
   } else if (i == 4) {
-    // japan expwy guide
-    float i_dshape = sdsmileycircle(p * 3.0) / 3.0;
-    float i_dmask = sdbox(p, vec2(0.6, 0.3)) - 0.05;
-
-    float i_shape = clamp(-i_dshape * 540.0, 0.0, 1.0);
-    float i_mask = clamp(-i_dmask * 540.0, 0.0, 1.0);
-    outColor = i_mask * mix(vec4(0.0, 0.66, 0.3, 1.0), vec4(1.0), i_shape);
-  } else if (i == 5) {
     // japan indication
     float drect = sdbox(p, vec2(0.55, 0.55));
 
@@ -132,7 +124,7 @@ void main() {
     float i_shape = clamp(-i_dshape * 540.0, 0.0, 1.0);
     float i_mask = clamp(-i_dmask * 540.0, 0.0, 1.0);
     outColor = i_mask * mix(vec4(0.0, 0.4, 0.7, 1.0), vec4(1.0), i_shape);
-  } else if (i == 6) {
+  } else if (i == 5) {
     // japan regulatory
     float dshape = sdsmileycircle(p * 1.8) / 1.8;
 
@@ -149,7 +141,7 @@ void main() {
       vec4(0.9, 0.1, 0.14, 1.0),
       i_shapered
     );
-  } else if (i == 7) {
+  } else if (i == 6) {
     // japan warning
     float dsmiley = sdsmileycircle(p * 2.0) / 2.0;
     const float SQRT2 = sqrt(2.0);
