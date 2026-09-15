@@ -1,4 +1,4 @@
-import { GL_FRAMEBUFFER, GL_TEXTURE2, GL_TEXTURE_2D, GL_TRIANGLES } from './gl-constants';
+import { GL_FRAMEBUFFER, GL_TEXTURE1, GL_TEXTURE_2D, GL_TRIANGLES } from './gl-constants';
 import { BPM } from './constants';
 import { DUMP_SCENES, ENABLE_SEEKING, INTRO_LENGTH, START_DELAY, STOP_RENDERING_AFTER_END, STOP_RENDERING_BEFORE_START } from './config';
 import { audio } from './audio';
@@ -61,11 +61,11 @@ export function render(): void {
     beat,
   );
 
-  gl.activeTexture(GL_TEXTURE2);
+  gl.activeTexture(GL_TEXTURE1);
   gl.bindTexture(GL_TEXTURE_2D, textureBack);
   gl.uniform1i(
     gl.getUniformLocation(programs.post, 'b'),
-    2,
+    1,
   );
 
   // TODO: optimize these uniform names later

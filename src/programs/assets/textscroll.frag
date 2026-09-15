@@ -5,7 +5,7 @@ precision highp float;
 //]
 
 uniform float t;
-uniform sampler2D g;
+uniform sampler2D f;
 
 in vec2 v;
 
@@ -63,10 +63,10 @@ void main() {
     vec2 uv = vec2(0.1 + 0.8 * lx / TEXTW, 0.5 + 0.82 * (ly - 0.5));
     const vec2 e = vec2(0.003, 0.005);
 
-    float c = texture(g, uv).x;
+    float c = texture(f, uv).x;
     float i_edge = max(
-      max(abs(c - texture(g, uv + e.xy * vec2(1, 0)).x), abs(c - texture(g, uv - e.xy * vec2(1, 0)).x)),
-      max(abs(c - texture(g, uv + e.xy * vec2(0, 1)).x), abs(c - texture(g, uv - e.xy * vec2(0, 1)).x))
+      max(abs(c - texture(f, uv + e.xy * vec2(1, 0)).x), abs(c - texture(f, uv - e.xy * vec2(1, 0)).x)),
+      max(abs(c - texture(f, uv + e.xy * vec2(0, 1)).x), abs(c - texture(f, uv - e.xy * vec2(0, 1)).x))
     );
 
     shape = mix(c, i_edge, mode);
