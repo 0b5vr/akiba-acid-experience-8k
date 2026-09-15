@@ -182,7 +182,7 @@ void main() {
       float tick = env * exp2(-500.0 * t);
       wave += env * tanh(1.5 * sin(TAU * 3.0 * tick));
   
-      dest += 0.6 * env * wave;
+      dest += 0.7 * env * wave;
     }
   }
 
