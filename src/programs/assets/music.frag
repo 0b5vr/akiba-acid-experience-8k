@@ -104,21 +104,6 @@ vec2 ladderLPF(float freq, float cutoff, float reso) {
   );
 }
 
-vec2 shotgun(float t, float spread, float snap, float fm) {
-  vec2 sum = vec2(0.0);
-
-  for (int i = 0; i < 64; i++) {
-    vec3 dice = hash3f(vec3(i, 64, 64));
-
-    vec2 partial = exp2(spread * dice.xy);
-    partial = mix(partial, floor(partial + 0.5), snap);
-
-    sum += sin(TAU * t * partial + fm * sin(TAU * t * partial));
-  }
-
-  return sum / 64.0;
-}
-
 float glidephase(float t, float t1, float p0, float p1) {
   if (p0 == p1 || t1 == 0.0) {
     return t * p2f(p1);
@@ -351,8 +336,18 @@ void main() {
     float t = samplesToTime(sampleIndex % (16 * BAR_SAMPLES));
 
     float env = mix(exp(-t), exp(-10.0 * t), 0.7);
-    vec2 wave = shotgun(3800.0 * t, 2.0, 0.0, 1.0);
-    dest += 0.4 * env * mix(0.5, 1.0, duck) * tanh(8.0 * wave);
+
+    // 64 partials shotgun
+    vec2 wave = vec2(0.0);
+    for (int i = 0; i < 64; i++) {
+      vec2 i_xi = hash3f(vec3(i, 64, 64)).xy;
+      vec2 i_partial = exp2(2.0 * i_xi);
+      vec2 phase = TAU * 3800.0 * t * i_partial;
+      wave += sin(phase + sin(phase));
+    }
+
+    // dest += 0.4 * env * mix(0.5, 1.0, duck) * tanh(8.0 * (wave / 64.0));
+    dest += 0.4 * env * mix(0.5, 1.0, duck) * tanh(0.125 * wave);
   }
 
   if (barIndex / 8 == 5 || barIndex / 8 == 13) { // snare roll
