@@ -5,7 +5,6 @@ precision highp float;
 //]
 
 uniform float t;
-uniform sampler2D f;
 
 in vec2 v;
 
@@ -13,7 +12,7 @@ out vec4 outColor;
 
 const float ASPECT = 16.0 / 9.0;
 const float BPS = 140.0 / 60.0;
-const float NOISE_SCALE = 0.1;
+const float NOISE_SCALE = 0.8;
 
 mat2 r2d(float t) {
   return mat2(cos(t), sin(t), -sin(t), cos(t));
@@ -28,10 +27,6 @@ mat3 orthbas(vec3 z) {
   vec3 up = abs(z.y) < 0.99 ? vec3(0.0, 1.0, 0.0) : vec3(0.0, 0.0, 1.0);
   vec3 x = normalize(cross(up, z));
   return mat3(x, cross(z, x), z);
-}
-
-float fbm(vec2 p) {
-  return 0.5 + 0.5 * texture(f, p).x;
 }
 
 vec3 cyclic(vec3 p, float pers, float lacu) {
@@ -64,23 +59,17 @@ float smokeDensity(vec2 uv) {
   vec2 flow = NOISE_SCALE * p * vec2(2.3, 1.7);
   flow.y -= NOISE_SCALE * t * 2.0 * 0.16;
 
-  vec2 warp = vec2(
-    fbm(
-      flow * 0.55
-      + NOISE_SCALE * vec2(0.025 * t, 0.0)
-    ),
-    fbm(
-      flow * 0.55
-      + NOISE_SCALE * vec2(5.2, 1.3 + 0.02 * t)
-    )
-  ) - 0.5;
+  vec3 i_pwarpx = vec3(flow * 0.55 + NOISE_SCALE * vec2(0.025 * t, 0.0), 0.0);
+  vec3 i_pwarpy = vec3(flow * 0.55 + NOISE_SCALE * vec2(5.2, 1.3 + 0.02 * t), 0.0);
+  vec2 warp = 0.5 * vec2(
+    cyclic(i_pwarpx, 0.5, 2.0).x,
+    cyclic(i_pwarpy, 0.5, 2.0).x
+  );
 
   vec2 warped = flow + 2.6 * NOISE_SCALE * warp;
 
-  float body = fbm(warped);
-  float detail = fbm(
-    2.0 * warped + NOISE_SCALE * vec2(7.3, 3.8)
-  );
+  float body = 0.5 + 0.5 * cyclic(vec3(warped, 0.0), 0.5, 2.0).x;
+  float detail = 0.5 + 0.5 * cyclic(vec3(2.0 * warped + NOISE_SCALE * vec2(7.3, 3.8), 0.0), 0.5, 2.0).x;
 
   float noise = body - 0.12 * (1.0 - detail);
 
