@@ -430,9 +430,7 @@ void main() {
       float phase = basephase * p;
       // phase += TAU * dice.z;
   
-      vec2 wave = vec2(0.0);
-      wave += sin(TAU * phase + filt.y);
-      sum += wave * env * coeff * filt.x;
+      sum += sin(TAU * phase + filt.y) * env * coeff * filt.x;
     }
   
     float bias = -0.4;
