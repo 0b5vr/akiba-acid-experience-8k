@@ -65,10 +65,6 @@ int stepToSamplesSwing(int st) {
   return floorDiv(st, 2) * TWO_STEP_SAMPLES + (floorMod(st, 2) == 0 ? 0 : SWING_STEP_SAMPLES);
 }
 
-float s2tSwing(float st) {
-  return B2T * 0.5 * (floor(st / 2.0) + SWING * mod(st, 2.0));
-}
-
 vec4 seq16(int samples, int seq) {
   const int BAR_SAMPLES = STEP_SAMPLES * 16;
   samples = floorMod(samples, BAR_SAMPLES);
