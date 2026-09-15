@@ -13,8 +13,12 @@ const float PITCH = TWIST / TRANSLATION;
 const float SMILEY_STEP = TRANSLATION * 0.52;
 const float BRIDGE_STEP = SMILEY_STEP / 3.0;
 const float RAIL_OFFSET = 1.85;
-const float SMILEY_SCALE = 0.6378649;
-const float SMILEY_PHASE = 0.5015318;
+const float SMILEY_SCALE = 0.64;
+const float SMILEY_PHASE = 0.5;
+
+vec2 cis(float t) {
+  return vec2(cos(t), sin(t));
+}
 
 float sdsmiley(vec2 p) {
   p.x = abs(p.x);
@@ -33,11 +37,12 @@ float sdsmiley(vec2 p) {
 
 void main() {
   vec2 p = v * vec2(16.0 / 9.0, 1.0);
+  p += 0.5 * cis(t);
   // zoom and rotate in log-polar coordinates
-  float zoom = 0.55 * t;
+  float zoom = 0.52 * fract(3.0 * t);
   // to logarithmic coordinates
-  float radiusLog = log(max(length(p), 1e-6)) - TRANSLATION * zoom;
-  float angle = atan(p.y, p.x) + TWIST * zoom;
+  float radiusLog = log(length(p)) - TRANSLATION * zoom;
+  float angle = atan(p.y, p.x) - 2.0 * t + TWIST * zoom;
   float phase = angle + PITCH * radiusLog;
   float phaseGap = abs(mod(phase + PI, 2.0 * PI) - PI);
 
@@ -69,6 +74,6 @@ void main() {
     smiley = max(smiley, step(d, 0.0));
   }
 
-  vec3 railColor = 0.5 + 0.5 * cos(vec3(0, 2, 4) - 0.6 * t - radiusLog);
+  vec3 railColor = 0.5 + 0.5 * cos(vec3(0, 2, 4) - t - log(length(p)));
   outColor = vec4(mix(railColor * brightness, vec3(1, 1, 0), smiley), 1);
 }
