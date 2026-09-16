@@ -29,7 +29,7 @@ void main() {
   vec2 p = v;
   p.x *= 16.0 / 9.0;
 
-  p.x -= round(p.x);
+  p.x -= clamp(round(p.x), -1.0, 1.0);
 
   float i_d = max(length(p) - 0.4, -sdsmiley(p * 2.0) / 2.0);
 
