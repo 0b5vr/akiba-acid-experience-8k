@@ -19,22 +19,16 @@ float easeOutSharp(float x, float k) {
   return 1.0 - pow(1.0 - x, k);
 }
 
-void union(inout vec4 hit, float distance, float material, float intensity, float hue) {
-  if (distance < hit.x) {
-    hit = vec4(distance, material, intensity, hue);
-  }
-}
-
-float sdBox(vec3 p, vec3 size) {
-  vec3 q = abs(p) - size;
-  return length(max(q, 0.0)) + min(0.0, max(q.x, max(q.y, q.z)));
-}
-
 mat2 r2d(float t) {
   return mat2(cos(t), sin(t), -sin(t), cos(t));
 }
 
-vec4 map4(vec3 pos) {
+float sdbox(vec3 p, vec3 size) {
+  vec3 q = abs(p) - size;
+  return length(max(q, 0.0)) + min(0.0, max(q.x, max(q.y, q.z)));
+}
+
+vec4 map(vec3 pos) {
   float a = 2.0;
   vec3 p = mod(pos, a) - a * 0.5;
   const vec3 offset = vec3(0.3, -0.07, 0);
@@ -47,23 +41,30 @@ vec4 map4(vec3 pos) {
     p.zy *= r2d(mod(beatPhase + pos.z * 0.1, TAU * 0.8) - TAU * 0.4);
   }
 
-  vec4 hit = vec4(1.0);
-  union(hit, sdBox(p, vec3(1.0, 0.1, 0.1)), 1.0, 1.0, 10.0);
-  union(hit, sdBox(p, vec3(0.04, 0.1, 0.11)), 0.0, 1.0, 0.4);
-  union(hit, sdBox(p, vec3(1.0, 0.11, 0.01)), 0.0, clamp(sin(beatTau + TAU * pos.z / 16.0), 0.0, 1.0), 0.0);
-  return hit;
-}
+  // base
+  vec4 hit = vec4(sdbox(p, vec3(1.0, 0.1, 0.1)), 1.0, 1.0, 10.0); // dist, material, intensity, hue
 
-float map(vec3 p) {
-  return map4(p).x;
+  // blue
+  vec4 hit2 = vec4(sdbox(p, vec3(0.04, 0.1, 0.11)), 0.0, 1.0, 0.4);
+  if (hit2.x < hit.x) {
+    hit = hit2;
+  }
+
+  // red
+  hit2 = vec4(sdbox(p, vec3(1.0, 0.11, 0.01)), 0.0, clamp(sin(beatTau + TAU * pos.z / 16.0), 0.0, 1.0), 0.0);
+  if (hit2.x < hit.x) {
+    hit = hit2;
+  }
+
+  return hit;
 }
 
 vec3 nMap(vec3 p) {
   const vec2 d = vec2(0.0, 0.001);
   return normalize(vec3(
-    map(p + d.yxx) - map(p - d.yxx),
-    map(p + d.xyx) - map(p - d.xyx),
-    map(p + d.xxy) - map(p - d.xxy)
+    map(p + d.yxx).x - map(p - d.yxx).x,
+    map(p + d.xyx).x - map(p - d.xyx).x,
+    map(p + d.xxy).x - map(p - d.xxy).x
   ));
 }
 
@@ -78,7 +79,7 @@ vec3 render(vec3 ro, vec3 rd) {
 
   for (int i = 0; i < 100; i++) {
     vec3 p = ro + rd * rayLength;
-    vec4 hit = map4(p);
+    vec4 hit = map(p);
 
     if (hit.y == 1.0) {
       rayLength += hit.x;
