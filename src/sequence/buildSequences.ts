@@ -15,33 +15,37 @@ sequences.scene = [
   [128, () => programs.ifsTunnel],
   [160, () => programs.aepchecker],
   [192, (b) => [
-    programs.chain,
-    programs.aepchecker,
     programs.cubetunnel,
+    programs.aepchecker,
+    programs.ifsTunnel,
     programs.plasma,
   ][(b * 2 | 0) % 4]],
   [256, (b) => [
-    programs.logSmiley,
     programs.funnel,
-    programs.boxTown,
-    programs.swirl,
+    programs.chain,
+    programs.logSmiley,
+    programs.julia,
   ][(b * 2 | 0) % 4]],
   [320, (b) => [
-    programs.lattice,
-    programs.cubetunnel,
+    programs.funnel,
+    programs.swirl,
   ][(b | 0) % 2]],
   [320 + 32, () => programs.foldarc],
   [384, (b) => [
-    programs.funnel,
-    programs.swirl,
-  ][(b | 0) % 2]],
+    programs.cubetunnel,
+    programs.lattice,
+    programs.boxTown,
+    programs.chain,
+  ][(b | 0) % 4]],
   [384 + 32, () => programs.plasma],
   [448, (b) => [
     programs.foldarc,
     programs.julia,
-    programs.logSmiley,
+    programs.funnel,
+    programs.plasma,
+    programs.swirl,
     programs.checkersky,
-  ][(b * 2 | 0) % 4]],
+  ][(b * 2 | 0) % 6]],
   [512, (b) => [
     programs.chain,
     programs.boxTown,
@@ -59,9 +63,9 @@ sequences.overlay = [
   [128, () => programs.aep3d],
   [160, () => programs.smiley7010],
   [192, (b) => [
+    programs.spikeball,
     programs.smiley3d,
-    programs.crab,
-    programs.smiley3d,
+    programs.spikeball,
     programs.text,
   ][(b | 0) % 4]],
   [256, (b) => [
@@ -76,7 +80,7 @@ sequences.overlay = [
   [448, (b) => [
     programs.crab,
     programs.smiley3d,
-    programs.aep3d,
+    programs.crab,
     programs.smiley,
   ][(b | 0) % 4]],
   [512, () => programs.textscroll],
@@ -85,7 +89,7 @@ sequences.overlay = [
 ];
 
 sequences.text = [
-  [0, (b) => [
+  [64, (b) => [
     'AKIBA',
     'EXECUTABLE',
     'PARTY',
@@ -216,7 +220,8 @@ postSequences.push(
     [576 + 24, (b) => 0.4 - 0.4 / 8.0 * b],
   ],
   [ // flowInvert
-    [0, (b) => 0.8 * easeInSharp(b / 64.0, 2.0)],
+    [0, (b) => 0.4 * easeInSharp(b / 32.0, 2.0)],
+    [32, (b) => 0.4 - 0.4 * easeInSharp(b / 32.0, 2.0)],
     [64, () => 0.0],
     [384 + 32 + 16, (b) => 1.0 * easeInSharp(b / 16.0, 2.0)],
     [448, (b) => (b % 1 > 0.5 && (fmix32(fmix32(6) ^ b) % 4) < 1) ? 0.9 : 0],
