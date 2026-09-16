@@ -10,7 +10,6 @@ import { preparePass } from './renderPass';
 const DUMP_SCENE_KEYS = Object.keys(programs).filter(
   (key) => ![
     'music',
-    'nop',
     'post',
   ].includes(key as keyof typeof programs),
 ) as (keyof typeof programs)[];

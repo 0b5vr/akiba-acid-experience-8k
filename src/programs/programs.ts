@@ -19,7 +19,6 @@ export const programs = {} as {
   logSmiley: WebGLProgram;
   morph3d: WebGLProgram;
   music: WebGLProgram;
-  nop: WebGLProgram;
   plasma: WebGLProgram;
   post: WebGLProgram;
   smiley: WebGLProgram;
