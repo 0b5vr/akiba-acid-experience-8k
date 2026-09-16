@@ -1,5 +1,6 @@
-import { fmix32, saturate } from '@0b5vr/experimental';
+import { fmix32 } from '@0b5vr/experimental';
 import { programs } from '../programs/programs';
+import { saturate } from '../utils/saturate';
 import { sequences } from './sequences';
 import { validateSequence } from './validateSequence';
 import { easeInSharp, easeOutSharp } from '../utils/easings';
