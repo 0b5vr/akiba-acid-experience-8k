@@ -52,7 +52,7 @@ sequences.scene = [
 ];
 
 sequences.overlay = [
-  [0, () => programs.text],
+  [0, () => programs.smiley3d],
   [64, () => programs.textscroll],
   [96, () => programs.morph3d],
   [128, () => programs.aep3d],
