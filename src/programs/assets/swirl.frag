@@ -14,7 +14,7 @@ void main() {
   vec2 p = v;
   p.x *= 16.0 / 9.0;
 
-  float wave = length(p) * sin(8.0 * (atan(p.y, p.x) - t + log(length(p))));
+  float wave = length(p) * sin(8.0 * (atan(p.y, p.x) - 1.5 * t + log(length(p))));
 
   float shape = clamp(wave * 10.0, 0.0, 1.0);
   vec3 col = vec3(shape);
