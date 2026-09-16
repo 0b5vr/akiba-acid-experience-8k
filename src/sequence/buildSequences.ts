@@ -111,7 +111,7 @@ sequences.text = [
     'RENARD',
     'SHIVADUKE',
     'SOMA_ARC',
-  ][(b | 0) % 5]],
+  ][(b | 0) % 6]],
 ];
 
 if (import.meta.hot) {
