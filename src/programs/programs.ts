@@ -24,6 +24,7 @@ export const programs = {} as {
   smiley: WebGLProgram;
   smiley3d: WebGLProgram;
   smiley7010: WebGLProgram;
+  spikeball: WebGLProgram;
   swirl: WebGLProgram;
   text: WebGLProgram;
   textscroll: WebGLProgram;
