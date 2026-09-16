@@ -28,7 +28,7 @@ float sdbox(vec3 p, vec3 size) {
   return length(max(q, 0.0)) + min(0.0, max(q.x, max(q.y, q.z)));
 }
 
-vec4 map(vec3 pos) {
+vec2 map(vec3 pos) {
   float a = 2.0;
   vec3 p = mod(pos, a) - a * 0.5;
   const vec3 offset = vec3(0.3, -0.07, 0);
@@ -42,16 +42,16 @@ vec4 map(vec3 pos) {
   }
 
   // base
-  vec4 hit = vec4(sdbox(p, vec3(1.0, 0.1, 0.1)), 1.0, 1.0, 10.0); // dist, material, intensity, hue
+  vec2 hit = vec2(sdbox(p, vec3(1.0, 0.1, 0.1)), 0.0); // dist, material
 
   // blue
-  vec4 hit2 = vec4(sdbox(p, vec3(0.04, 0.1, 0.11)), 0.0, 1.0, 0.4);
+  vec2 hit2 = vec2(sdbox(p, vec3(0.04, 0.1, 0.11)), 1.0);
   if (hit2.x < hit.x) {
     hit = hit2;
   }
 
   // red
-  hit2 = vec4(sdbox(p, vec3(1.0, 0.11, 0.01)), 0.0, clamp(sin(beatTau + TAU * pos.z / 16.0), 0.0, 1.0), 0.0);
+  hit2 = vec2(sdbox(p, vec3(1.0, 0.11, 0.01)), 2.0);
   if (hit2.x < hit.x) {
     hit = hit2;
   }
@@ -68,20 +68,15 @@ vec3 nMap(vec3 p) {
   ));
 }
 
-vec3 palette(float hue) {
-  vec3 color = 0.5 + 0.5 * cos(TAU * (vec3(0.0, 0.33, 0.66) + hue));
-  return mix(color, vec3(1.0), 0.1 * floor(hue));
-}
-
 vec3 render(vec3 ro, vec3 rd) {
   vec3 color = vec3(0.0);
   float rayLength = 0.0;
 
   for (int i = 0; i < 100; i++) {
     vec3 p = ro + rd * rayLength;
-    vec4 hit = map(p);
+    vec2 hit = map(p);
 
-    if (hit.y == 1.0) {
+    if (hit.y == 0.0) {
       rayLength += hit.x;
       if (hit.x < 0.001) {
         vec3 light = normalize(vec3(1.0, 1.0, -1.0));
@@ -93,7 +88,10 @@ vec3 render(vec3 ro, vec3 rd) {
       }
     } else {
       rayLength += 0.5 * abs(hit.x) + 0.01;
-      color += clamp(0.001 * palette(hit.w) * hit.z / abs(hit.x), 0.0, 1.0);
+      vec3 emissive = hit.y == 2.0
+        ? vec3(1.0, 0.2, 0.2) * clamp(sin(beatTau + TAU * p.z / 16.0), 0.0, 1.0)
+        : vec3(0.1, 0.4, 1.0);
+      color += clamp(0.001 * emissive / abs(hit.x), 0.0, 1.0);
     }
   }
 
