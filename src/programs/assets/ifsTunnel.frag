@@ -13,7 +13,7 @@ out vec4 outColor;
 const float TAU = 2.0 * acos(-1.0);
 const float BPM = 140.0;
 
-float beat, beatTau, beatPhase;
+float beatPhase;
 
 float easeOutSharp(float x, float k) {
   return 1.0 - pow(1.0 - x, k);
@@ -68,39 +68,9 @@ vec3 nMap(vec3 p) {
   ));
 }
 
-vec3 render(vec3 ro, vec3 rd) {
-  vec3 color = vec3(0.0);
-  float rayLength = 0.0;
-
-  for (int i = 0; i < 100; i++) {
-    vec3 p = ro + rd * rayLength;
-    vec2 hit = map(p);
-
-    if (hit.y == 0.0) {
-      rayLength += hit.x;
-      if (hit.x < 0.001) {
-        vec3 light = normalize(vec3(1.0, 1.0, -1.0));
-        vec3 n = nMap(p);
-        float diffuse = clamp(dot(n, light), 0.0, 1.0);
-        float specular = pow(clamp(dot(n, normalize(light - rd)), 0.0, 1.0), 10.0);
-        color += 0.1 * diffuse + specular;
-        break;
-      }
-    } else {
-      rayLength += 0.5 * abs(hit.x) + 0.01;
-      vec3 emissive = hit.y == 2.0
-        ? vec3(1.0, 0.2, 0.2) * clamp(sin(beatTau + TAU * p.z / 16.0), 0.0, 1.0)
-        : vec3(0.1, 0.4, 1.0);
-      color += clamp(0.001 * emissive / abs(hit.x), 0.0, 1.0);
-    }
-  }
-
-  return color * exp(-0.1 * rayLength);
-}
-
 void main() {
-  beat = t * BPM / 60.0;
-  beatTau = beat * TAU;
+  float beat = t * BPM / 60.0;
+  float beatTau = beat * TAU;
   beatPhase = floor(beat) + easeOutSharp(fract(beat), 4.0);
 
   vec2 p = v;
@@ -108,5 +78,33 @@ void main() {
 
   vec3 ro = vec3(0.0, 0.0, beat);
   vec3 rd = normalize(vec3(p, 1.0));
-  outColor = vec4(render(ro, rd), 1.0);
+
+  vec3 color = vec3(0.0);
+  float rayLength = 0.0;
+
+  for (int i = 0; i < 100; i++) {
+    vec3 rp = ro + rd * rayLength;
+    vec2 hit = map(rp);
+
+    if (hit.y == 0.0) {
+      rayLength += hit.x;
+      if (hit.x < 0.001) {
+        vec3 light = normalize(vec3(1.0, 1.0, -1.0));
+        vec3 n = nMap(rp);
+        float diffuse = clamp(dot(n, light), 0.0, 1.0);
+        float specular = pow(clamp(dot(n, normalize(light - rd)), 0.0, 1.0), 10.0);
+        color += 0.1 * diffuse + specular;
+        break;
+      }
+    } else {
+      // phantom mode!
+      rayLength += 0.5 * abs(hit.x) + 0.01;
+      vec3 emissive = hit.y == 2.0
+        ? vec3(1.0, 0.2, 0.2) * clamp(sin(beatTau + TAU * rp.z / 16.0), 0.0, 1.0)
+        : vec3(0.1, 0.4, 1.0);
+      color += clamp(0.001 * emissive / abs(hit.x), 0.0, 1.0);
+    }
+  }
+
+  outColor = vec4(color * exp(-0.1 * rayLength), 1.0);
 }
