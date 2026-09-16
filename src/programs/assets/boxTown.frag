@@ -74,7 +74,7 @@ void main() {
   vec2 p = v;
   p.x *= 16.0 / 9.0;
 
-  vec3 ro = vec3(0.0, 7.0, 10.0 + t * 10.0);
+  vec3 ro = vec3(0.0, 7.0, 10.0 + t * 4.0);
   vec3 rd = normalize(vec3(p * r2d(-t), 1.0));
   float rl = 0.0;
   float dist;
