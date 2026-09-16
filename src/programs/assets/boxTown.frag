@@ -22,13 +22,13 @@ vec3 hash3f(vec3 s) {
   return vec3(r) / float(-1u);
 }
 
+mat2 r2d(float t) {
+  return mat2(cos(t), sin(t), -sin(t), cos(t));
+}
+
 float sdbox(vec3 p, vec3 s) {
   vec3 d = abs(p) - s;
   return length(max(d, 0.0)) + min(0.0, max(max(d.x, d.y), d.z));
-}
-
-mat2 r2d(float t) {
-  return mat2(cos(t), sin(t), -sin(t), cos(t));
 }
 
 vec2 gridCenter;
@@ -36,15 +36,8 @@ vec2 gridCenter;
 float gridTraversal(vec2 ro, vec2 rd) {
   gridCenter = floor(ro + rd * 1E-3) + 0.5;
 
-  // A ray parallel to a grid axis never crosses a boundary on that axis.
-  // Avoid division by zero for those rays (including the screen center).
-  vec2 bv = vec2(1E20);
-  if (rd.x != 0.0) {
-    bv.x = -(ro.x - gridCenter.x) / rd.x + abs(0.5 / rd.x);
-  }
-  if (rd.y != 0.0) {
-    bv.y = -(ro.y - gridCenter.y) / rd.y + abs(0.5 / rd.y);
-  }
+  vec2 rdt = sign(rd) * max(abs(rd), 0.01);
+  vec2 bv = -(ro - gridCenter) / rdt + abs(0.5 / rdt);
   return min(bv.x, bv.y);
 }
 
@@ -78,27 +71,24 @@ vec3 nMap(vec3 p) {
 }
 
 void main() {
-  vec2 uv = v;
-  uv.x *= 16.0 / 9.0;
-  vec3 col = vec3(0.0);
+  vec2 p = v;
+  p.x *= 16.0 / 9.0;
 
   vec3 ro = vec3(0.0, 7.0, 10.0 + t * 10.0);
-  vec3 rd = normalize(vec3(uv, 1.0));
-  rd.xy *= r2d(-t);
+  vec3 rd = normalize(vec3(p * r2d(-t), 1.0));
+  float rl = 0.0;
+  float dist;
 
-  vec3 pos = ro;
   for (int i = 0; i < 100; i++) {
-    float limitD = gridTraversal(pos.xz, rd.xz);
-    float d = map(pos);
-    if (d < 0.001) {
-      vec3 normal = nMap(pos);
-      vec3 light = normalize(ro - pos);
-      col = vec3(1.0 - float(i) / 100.0) * dot(normal, light);
-      break;
-    }
-    d = min(limitD, d);
-    pos += rd * d;
+    float limitD = gridTraversal(ro.xz, rd.xz);
+    dist = map(ro);
+    rl += min(limitD, dist);
+    ro += rd * min(limitD, dist);
   }
 
-  outColor = vec4(col, 1.0);
+  outColor = vec4(0, 0, 0, 1);
+  if (dist < 0.01) {
+    vec3 i_n = nMap(ro);
+    outColor = vec4(exp(-0.2 * rl) * vec3(dot(i_n, -rd)), 1.0);
+  }
 }
