@@ -11,4 +11,4 @@ export const HEIGHT = 1080;
 /**
  * The BPM of the music.
  */
-export const BPM = 140;
+export const BPM = 60 / 0.42; // approximately 143

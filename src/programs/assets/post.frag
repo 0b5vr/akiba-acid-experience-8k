@@ -24,7 +24,7 @@ in vec2 v;
 
 out vec4 outColor;
 
-const float BPM = 140.0;
+const float INV_BPS = 0.42;
 const int SAMPLES = 20;
 const float SAMPLES_F = float(SAMPLES);
 
@@ -148,7 +148,7 @@ void main() {
   }
 
   if (p8 > 0.0) {
-    float beat = t * BPM / 60.0;
+    float beat = t / INV_BPS;
     vec2 texUv = v * 0.5 + 0.5;
     vec2 dxy = 1.0 / vec2(textureSize(b, 0));
     vec2 offset = (floor(cyclic(vec3(fract(texUv * 3.0), beat), 1.0, 1.0).xy)) * dxy;

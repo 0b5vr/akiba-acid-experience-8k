@@ -10,8 +10,8 @@ precision highp float;
 const int TEXTURE_WIDTH = 4096;
 const float SAMPLE_RATE = 48000.0;
 
-const float TARGET_BPM = 140.0;
-const int STEP_SAMPLES = int(60.0 / 4.0 / TARGET_BPM * SAMPLE_RATE);
+const float TARGET_INV_BPS = 0.42;
+const int STEP_SAMPLES = int(TARGET_INV_BPS / 4.0 * SAMPLE_RATE);
 const float S2T = float(STEP_SAMPLES) / SAMPLE_RATE;
 const float B2T = float(STEP_SAMPLES * 4) / SAMPLE_RATE;
 

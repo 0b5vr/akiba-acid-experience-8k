@@ -11,7 +11,7 @@ in vec2 v;
 out vec4 outColor;
 
 const float TAU = 2.0 * acos(-1.0);
-const float BPM = 140.0;
+const float INV_BPS = 0.42;
 
 float beatPhase;
 
@@ -69,7 +69,7 @@ vec3 nMap(vec3 p) {
 }
 
 void main() {
-  float beat = t * BPM / 60.0;
+  float beat = t / INV_BPS;
   float beatTau = beat * TAU;
   beatPhase = floor(beat) + easeOutSharp(fract(beat), 4.0);
 

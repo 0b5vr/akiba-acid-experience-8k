@@ -10,6 +10,8 @@ in vec2 v;
 
 out vec4 outColor;
 
+const float INV_BPS = 0.42;
+
 mat2 r2d(float t) {
   return mat2(cos(t), sin(t), -sin(t), cos(t));
 }
@@ -33,7 +35,7 @@ float map(vec3 p) {
   p.yz *= r2d(1.0);
   p.zx *= r2d(1.0);
 
-  float phase = mod(t * 140.0 / 60.0 + 0.2, 4.0);
+  float phase = mod(t / INV_BPS + 0.2, 4.0);
 
   float d = length(p) - 1.0;
   float d0 = d;

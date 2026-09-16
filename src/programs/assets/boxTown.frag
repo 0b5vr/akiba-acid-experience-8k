@@ -11,7 +11,7 @@ in vec2 v;
 
 out vec4 outColor;
 
-const float BPM = 140.0;
+const float INV_BPS = 0.42;
 
 // Ref: https://www.shadertoy.com/view/XlXcW4
 vec3 hash3f(vec3 s) {
@@ -46,7 +46,7 @@ float easeOutSharp(float x, float k) {
 }
 
 float map(vec3 p) {
-  float beat = t * BPM / 60.0;
+  float beat = t / INV_BPS;
 
   p.xz -= gridCenter;
   float offset = mix(

@@ -11,7 +11,7 @@ in vec2 v;
 out vec4 outColor;
 
 const float PI = acos(-1.0);
-const float BPS = 140.0 / 60.0;
+const float INV_BPS = 0.42;
 const float A = 5.0;
 const float T = 0.07;
 
@@ -59,7 +59,7 @@ float map(vec3 p) {
 }
 
 void main() {
-  float b = t * BPS;
+  float b = t / INV_BPS;
 
   vec3 ro = vec3(0.0, 1.8, 3.6) + vec3(1.6, 0.2, 1.2) * cyclic(vec3(0.1 * b), 0.5, 1.0);
   vec3 m = cyclic(vec3(0.125 * b), 0.5, 1.0);

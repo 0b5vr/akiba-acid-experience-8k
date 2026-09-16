@@ -12,7 +12,7 @@ in vec2 v;
 out vec4 outColor;
 
 const float PI = acos(-1.0);
-const float BPS = 140.0 / 60.0;
+const float INV_BPS = 0.42;
 const float ROWS = 3.0;
 const float TEXTW = 2.0; // width of the text cell, in row-height units
 
@@ -36,7 +36,7 @@ float sdsmiley(vec2 p) {
 }
 
 void main() {
-  float b = t * BPS;
+  float b = t / INV_BPS;
 
   vec2 p = v;
   p.x *= 16.0 / 9.0;

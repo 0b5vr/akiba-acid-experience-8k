@@ -4,7 +4,7 @@
  * The intro stops using GPU after the time exceeds this value.
  * If you don't like this behavior, you can set {@link STOP_RENDERING_AFTER_END} to `false`.
  */
-export const INTRO_LENGTH = 264; // 152 * 60 / 140 * 4 ≈ 260.57
+export const INTRO_LENGTH = 256; // 152 * 0.42 * 4 = 255.36
 
 /**
  * Delays the start of the demo.
