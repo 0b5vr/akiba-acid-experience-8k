@@ -53,6 +53,28 @@ mat2 r2d(float t) {
   return mat2(cos(t), sin(t), -sin(t), cos(t));
 }
 
+mat3 orthbas(vec3 z) {
+  z = normalize(z);
+  vec3 up = abs(z.y) < 0.99 ? vec3(0.0, 1.0, 0.0) : vec3(0.0, 0.0, 1.0);
+  vec3 x = normalize(cross(up, z));
+  return mat3(x, cross(z, x), z);
+}
+
+vec3 cyclic(vec3 p, float pers, float lacu) {
+  vec4 sum = vec4(0);
+  mat3 rot = orthbas(vec3(2, -3, 1));
+
+  for (int i = 0; i < 5; i++) {
+    p *= rot;
+    p += sin(p.zxy);
+    sum += vec4(cross(cos(p), sin(p.yzx)), 1);
+    sum /= pers;
+    p *= lacu;
+  }
+
+  return sum.xyz / sum.w;
+}
+
 int samplesToStepSwing(int samples) {
   const int TWO_STEP_SAMPLES = STEP_SAMPLES * 2;
   const int SWING_STEP_SAMPLES = int(float(TWO_STEP_SAMPLES) * SWING);
@@ -122,28 +144,6 @@ float glidephase(float t, float t1, float p0, float p1) {
   );
 }
 
-mat3 orthBas(vec3 z) {
-  z = normalize(z);
-  vec3 x = normalize(cross(vec3(0, 1, 0), z));
-  vec3 y = cross(z, x);
-  return mat3(x, y, z);
-}
-
-vec3 cyclic(vec3 p, float pers, float lacu) {
-  vec4 sum = vec4(0);
-  mat3 rot = orthBas(vec3(2, -3, 1));
-
-  for (int i = 0; i < 5; i++) {
-    p *= rot;
-    p += sin(p.zxy);
-    sum += vec4(cross(cos(p), sin(p.yzx)), 1);
-    sum /= pers;
-    p *= lacu;
-  }
-
-  return sum.xyz / sum.w;
-}
-
 void main() {
   // Sample index calculated from pixel coordinates
   int sampleIndex = int(gl_FragCoord.x) + int(gl_FragCoord.y) * TEXTURE_WIDTH;
@@ -157,7 +157,7 @@ void main() {
   float timeBeat = samplesToTime(sampleIndex % BEAT_SAMPLES);
   float bars = timeGlobal / B2T / 4.0;
 
-  int eightBarIndex = sampleIndex / (BAR_SAMPLES * 8);
+  int eightBarIndex = sampleIndex / BAR_SAMPLES / 8;
 
   float duck = smoothstep(0.0, 0.4, timeBeat) * smoothstep(0.0, 0.001, B2T - timeBeat);
 
@@ -191,12 +191,12 @@ void main() {
     float t = seq.y;
 
     float envseq[] = float[](
-      0.0, 0.0, 0.0, 0.0,
-      0.0, 0.0, 0.0, 1.0,
-      0.0, 1.0, 0.0, 0.0,
-      0.0, 0.3, 0.5, 1.0
+      8.0, 8.0, 8.0, 8.0,
+      8.0, 8.0, 8.0, 5.0,
+      8.0, 5.0, 8.0, 8.0,
+      8.0, 7.0, 6.0, 5.0
     );
-    float kenv = exp2(mix(7.5, 5.0, envseq[int(seq.s)]));
+    float kenv = exp2(envseq[int(seq.s)]);
     float env = exp2(-kenv * t);
 
     vec2 sum = vec2(0.0);
@@ -367,8 +367,8 @@ void main() {
 
   { // acid
     const int N_NOTES = 5;
-    const int NOTES[N_NOTES] = int[](0, 12, 18, 3, 9);
-    const int SLIDE[N_NOTES] = int[](0, -12, 0, 12, -12);
+    const float NOTES[N_NOTES] = float[](0.0, 12.0, 18.0, 3.0, 9.0);
+    const float SLIDE[N_NOTES] = float[](0.0, -12.0, 0.0, 12.0, -12.0);
     float SLIDE_T0 = 0.8 * S2T;
     float SLIDE_TIME = 0.6 * S2T;
 
@@ -406,8 +406,8 @@ void main() {
     float cfreq = exp2(cutoff);
   
     int i = int(seqi) % N_NOTES;
-    float pitch = 36.0 + TRANSPOSE + float(NOTES[i]);
-    float pitch1 = pitch + float(SLIDE[i]);
+    float pitch = 36.0 + TRANSPOSE + NOTES[i];
+    float pitch1 = pitch + SLIDE[i];
     float basefreq = p2f(mix(pitch, pitch1, clamp((t - SLIDE_T0) / SLIDE_TIME, 0.0, 1.0)));
     float basephase = glidephase(t - SLIDE_T0, SLIDE_TIME, pitch, pitch1);
   
