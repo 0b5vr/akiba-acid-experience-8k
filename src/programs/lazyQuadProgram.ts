@@ -57,7 +57,7 @@ export function lazyQuadProgram(frag: string): WebGLProgram {
 
   gl.linkProgram(program);
 
-  gl.deleteShader(fragmentShader);
+  // gl.deleteShader(fragmentShader);
 
   if (LOG_SHADER_ERRORS) {
     if (!gl.getProgramParameter(program!, GL_LINK_STATUS)) {
