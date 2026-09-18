@@ -39,7 +39,7 @@ export default defineConfig(({ mode }) => {
         batch: true,
         batchShuffleSeed: 26,
         minifierOptions: {
-          noRenamingList: ['main', 'v', 't', 'b', 'p0', 'p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7', 'p8'],
+          noRenamingList: ['main', 'v', 't', 'b', 'p0', 'p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7', 'p8', 'p9'],
           aggressiveInlining: true,
           noSequence: true,
         },

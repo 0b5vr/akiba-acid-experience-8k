@@ -19,6 +19,7 @@ uniform float p5; // posterize
 uniform float p6; // black / white
 uniform float p7; // feedback
 uniform float p8; // flowInvert
+uniform float p9; // lumikey
 
 in vec2 v;
 
@@ -163,6 +164,18 @@ void main() {
     }
     color *= 0.8;
     sum = mix(sum, color, p8);
+  }
+
+  // lumikey feedback
+  {
+    vec2 feedbackUv = v;
+    feedbackUv.x *= 16.0 / 9.0;
+    feedbackUv *= 1.2 * r2d(0.1 * sin(t));
+    feedbackUv.x /= 16.0 / 9.0;
+    float i_mask = step(abs(feedbackUv.x), 1.0) * step(abs(feedbackUv.y), 1.0);
+    vec3 i_tex = i_mask * texture(b, 0.5 + 0.5 * feedbackUv).xyz;
+    vec3 i_cooked = smoothstep(0.3, 0.7, i_tex);
+    sum = mix(sum, mix(i_cooked, sum, step(0.3, dot(sum, LUMA))), p9);
   }
 
   outColor = vec4(sum, 1.0);
