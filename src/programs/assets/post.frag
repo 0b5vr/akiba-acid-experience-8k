@@ -45,11 +45,6 @@ mat2 r2d(float t) {
   return mat2(cos(t), sin(t), -sin(t), cos(t));
 }
 
-vec3 calctint(float t) {
-  return 3.0 * smoothstep(1.0, 0.0, abs(3.0 * t - vec3(1.0, 1.5, 2.0)));
-}
-
-// Same cyclic noise as noiseaura.frag.
 mat3 orthbas(vec3 z) {
   z = normalize(z);
   vec3 up = abs(z.y) < 0.99 ? vec3(0.0, 1.0, 0.0) : vec3(0.0, 0.0, 1.0);
@@ -70,6 +65,10 @@ vec3 cyclic(vec3 p, float pers, float lacu) {
   }
 
   return sum.xyz / sum.w;
+}
+
+vec3 calctint(float t) {
+  return 3.0 * smoothstep(1.0, 0.0, abs(3.0 * t - vec3(1.0, 1.5, 2.0)));
 }
 
 void main() {
@@ -97,7 +96,7 @@ void main() {
     vec2 pt = p * (1.0 - p0 * phase);
 
     vec2 uvt = pt;
-    uvt.x *= 9.0 / 16.0;
+    uvt.x /= 16.0 / 9.0;
     uvt = uvt * 0.5 + 0.5;
 
     float shake = p1 * exp(-10.0 * fract(t / INV_BPS));
@@ -131,9 +130,9 @@ void main() {
   sum = mix(sum, vec3(1.0), max(p6, 0.0));
 
   // ビデオフィードバックンゴ
-  if (p7 > 0.0) {
+  {
     const mat3 ycc2rgb = mat3(1.0,1.0,1.0,0.0,-0.344,1.773,1.403,-0.714,0.0);
-    const mat3 rgb2ycc = mat3(0.299,-0.168936,0.499413,0.587,-0.330468,-0.418931,0.114,0.499704,-0.081282);
+    const mat3 rgb2ycc = mat3(0.299,-0.169,0.5,0.587,-0.330,-0.419,0.114,0.5,-0.081);
     const float ASPECT = 16.0 / 9.0;
     vec2 su=v;su.x*=ASPECT;
     vec3 back=vec3(0),ycc=vec3(0);
@@ -145,10 +144,11 @@ void main() {
       ycc+=y;
     }
     back=(ycc2rgb*ycc);
-    sum = mix(sum,back*1.0, exp(-1.0 / (30.0 * p7)));
+    sum = mix(sum, back, p7);
   }
 
-  if (p8 > 0.0) {
+  // flowInvert feedback
+  {
     float beat = t / INV_BPS;
     vec2 texUv = v * 0.5 + 0.5;
     vec2 dxy = 1.0 / vec2(textureSize(b, 0));
