@@ -100,7 +100,8 @@ void main() {
     uvt.x *= 9.0 / 16.0;
     uvt = uvt * 0.5 + 0.5;
 
-    uvt.y += 0.1 * p1 * sin(TAU * phase * 3.0 + t);
+    float shake = p1 * exp(-10.0 * fract(t / INV_BPS));
+    uvt.y += shake * sin(TAU * phase * 3.0 + t);
 
     vec3 tex = texture(f, uvt).xyz;
 
