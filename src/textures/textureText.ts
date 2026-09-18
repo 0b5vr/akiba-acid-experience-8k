@@ -1,16 +1,9 @@
 import { GL_RGBA, GL_RGBA8, GL_TEXTURE_2D, GL_UNPACK_FLIP_Y_WEBGL, GL_UNSIGNED_BYTE } from '../gl-constants';
 import { HEIGHT, WIDTH } from '../constants';
 import { gl } from '../gl';
+import { canvasText } from '../ui';
 
-// -- canvas -----------------------------------------------------------------------------------------
-/**
- * An offscreen Canvas2D canvas the text is drawn onto, before it gets uploaded into {@link textureText}.
- */
-const canvas = document.createElement('canvas');
-canvas.width = WIDTH;
-canvas.height = HEIGHT;
-
-const context = canvas.getContext('2d')!;
+const context = canvasText.getContext('2d')!;
 
 // -- texture ------------------------------------------------------------------------------------
 /**
@@ -51,6 +44,6 @@ export function updateTextureText(text: string): void {
 
   gl.bindTexture(GL_TEXTURE_2D, textureText);
   gl.pixelStorei(GL_UNPACK_FLIP_Y_WEBGL, true);
-  gl.texSubImage2D(GL_TEXTURE_2D, 0, 0, 0, WIDTH, HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, canvas);
+  gl.texSubImage2D(GL_TEXTURE_2D, 0, 0, 0, WIDTH, HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, canvasText);
   gl.pixelStorei(GL_UNPACK_FLIP_Y_WEBGL, false);
 }
