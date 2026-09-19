@@ -133,7 +133,7 @@ void main() {
   // ビデオフィードバックンゴ
   {
     const mat3 ycc2rgb = mat3(1.0,1.0,1.0,0.0,-0.344,1.773,1.403,-0.714,0.0);
-    const mat3 rgb2ycc = mat3(0.299,-0.169,0.5,0.587,-0.330,-0.419,0.114,0.5,-0.081);
+    mat3 rgb2ycc = inverse(ycc2rgb);
     const float ASPECT = 16.0 / 9.0;
     vec2 su=v;su.x*=ASPECT;
     vec3 back=vec3(0),ycc=vec3(0);
