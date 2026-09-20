@@ -170,7 +170,8 @@ void main() {
   {
     vec2 feedbackUv = v;
     feedbackUv.x *= 16.0 / 9.0;
-    feedbackUv *= 1.2 * r2d(0.1 * sin(t));
+    float i_rot = cyclic(vec3(4.0 * t), 0.5, 1.0).x * 0.2;
+    feedbackUv *= 1.2 * r2d(i_rot);
     feedbackUv.x /= 16.0 / 9.0;
     float i_mask = step(abs(feedbackUv.x), 1.0) * step(abs(feedbackUv.y), 1.0);
     vec3 i_tex = i_mask * texture(b, 0.5 + 0.5 * feedbackUv).xyz;
