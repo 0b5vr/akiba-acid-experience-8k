@@ -2,7 +2,11 @@
 
 This folder contains a tentative implementation of a JS compressor.
 Like [compeko](https://gist.github.com/0b5vr/09ee96ca2efbe5bf9d64dad7220e923b), this module compresses JS code into a self-extracting HTML file.
-This time, the compressor uses [context mixing](https://en.wikipedia.org/wiki/Context_mixing) and [rANS](https://en.wikipedia.org/wiki/Asymmetric_numeral_systems) to achieve better compression ratios than compeko, at the cost of a more complex implementation.
+This time, it uses [context mixing](https://en.wikipedia.org/wiki/Context_mixing) and [rANS](https://en.wikipedia.org/wiki/Asymmetric_numeral_systems) + compresses the decoder using [Zopfli](https://github.com/google/zopfli).
+
+The compression algorithm is heavily based on [Roadroller](https://github.com/lifthrasiir/roadroller).
+Massive gratitude to Kang Seonghoon.
+See [LICENSE-roadroller.txt](./LICENSE-roadroller.txt) for the license of Roadroller.
 
 ## Prerequisites
 
