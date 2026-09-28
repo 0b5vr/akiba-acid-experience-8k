@@ -34,6 +34,12 @@
 
 -------------------------------------------------------------------------------
 
+  Browser 8KB Intro
+
+  WebGL, Web Audio, Shader Minifier, Zopfli, and a custom compressor
+  heavily based on Roadroller.
+  Shoutouts to Ctrl-Alt-Test, Google, and Kang Seonghoon !!
+
   We checked this intro run on:
     - AMD Ryzen 7 7800X3D
     - NVIDIA GeForce RTX 5070 Ti
