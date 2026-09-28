@@ -1,5 +1,7 @@
 # AKIBA ACID EXPERIENCE 8K
 
+![Screenshot of the intro](./screenshot.jpg)
+
 ```
 
                 a k i b a
