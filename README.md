@@ -31,11 +31,11 @@
 
   We are AKIBA SHADER SQUAD !!!!!!
     - 0b5vr: Code, Graphics, Music
-    - gam0022: Graphics
-    - kinankomoti: Graphics
-    - Renard: Graphics
-    - shivaduke: Graphics
-    - soma_arc: Graphics
+    - gam0022: Code, Graphics
+    - kinankomoti: Code, Graphics
+    - Renard: Code, Graphics
+    - shivaduke: Code, Graphics
+    - soma_arc: Code, Graphics
 
   Browser 8KB Intro
 
