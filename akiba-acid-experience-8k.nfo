@@ -59,6 +59,14 @@
     This production was created with the assistance of AI tools,
     including Claude Code, OpenAI Codex, and GitHub Copilot.
 
+  License:
+    This production is licensed under CC BY-NC 4.0.
+    The source code is available at:
+      https://github.com/0b5vr/akiba-acid-experience-8k
+
+    The compressor is heavily based on Roadroller by Kang Seonghoon,
+    licensed under the MIT license. See the repository for details.
+
 -------------------------------------------------------------------------------
 
   (c) 2026 Akiba Shader Squad
