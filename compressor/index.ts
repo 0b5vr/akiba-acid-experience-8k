@@ -36,6 +36,13 @@ if (positional.length < 2) {
   Deno.exit(1);
 }
 
+// validate -O
+if (!(Number.isInteger(level) && level >= 0 && level <= 2)) {
+  console.error(red(`Optimization level must be within 0..2: ${args.O}`));
+  console.error(USAGE);
+  Deno.exit(1);
+}
+
 // validate --analyze-order
 if (!Object.values(AnalyzeOrder).includes(args['analyze-order'] as AnalyzeOrder)) {
   console.error(red(`Unknown analyze order: ${args['analyze-order']}`));
