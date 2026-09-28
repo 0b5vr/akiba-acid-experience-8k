@@ -99,7 +99,7 @@ async function searchBinary(
  * @param input The input Uint8Array to encode.
  * @param inBits The number of bits per input symbol.
  * @param params The compression parameters to start the search from.
- * @param optimizationLevel The optimization level (0-3). Higher levels take longer but may yield better results.
+ * @param optimizationLevel The optimization level (0-2). Higher levels take longer but may yield better results.
  * @returns The best compression result found, including the parameters and the size of the compressed output.
  */
 export async function optimize(
