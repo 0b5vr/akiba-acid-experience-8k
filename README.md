@@ -79,7 +79,7 @@
 
 - [Run the intro](https://0b5vr.github.io/akiba-acid-experience-8k/)
 - [YouTube](https://www.youtube.com/watch?v=vsKvB0Z0W38)
-- TODO: pouët
+- [pouët](https://www.pouet.net/prod.php?which=107049)
 - [Demozoo](https://demozoo.org/productions/398111/)
 
 ## Development
